@@ -1,0 +1,29 @@
+# CE FICHIER PEUT ÊTRE UTILISÉ POUR LA CRÉATION D'UN CONTENEUR DE BASE DE DONNÉES
+# Pour un environnement de développement les "devcontainers" sont à privilégier
+
+# TODO supprimer l'information sur la version
+# plus besoin de cette ligne depuis quelques temps
+version: '3.9'
+
+services:
+  db:
+    # TODO mettre à jour avec une version réçente de POstgre (de mémoire 17.2)
+    image: postgres:15
+    container_name: choralriff-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: choralriff
+      POSTGRES_DB: choralriffdb
+    ports:
+      - "5432:5432"
+    volumes:
+      # Info : le fait de monter un volume permet de retrouver TOUS les fichiers du conteneur sur la machine hôte
+      # Il n'est pas forcément nécessaire de pousser ça sur Git (ça fait beaucoup de fichier)
+      # ça peut cependant être intéressant pour la production
+      # en attendant, vous pouvez commentez la ligne suivant
+      - postgres_data:/var/lib/postgresql/data
+      - 
+
+volumes:
+  postgres_data:
