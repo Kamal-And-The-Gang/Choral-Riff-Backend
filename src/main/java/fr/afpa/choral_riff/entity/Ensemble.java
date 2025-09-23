@@ -2,7 +2,6 @@ package fr.afpa.choral_riff.entity;
 
 import java.time.LocalDate;
 import java.util.List;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.OneToMany;

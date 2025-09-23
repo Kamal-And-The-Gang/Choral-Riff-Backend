@@ -41,6 +41,4 @@ public class Instrument {
         this.documents = documents;
     }
 
-    // getters et setters
 }
-

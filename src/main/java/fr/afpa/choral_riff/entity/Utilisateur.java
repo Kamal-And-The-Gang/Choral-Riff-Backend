@@ -117,14 +117,7 @@ public class Utilisateur implements UserDetails {
         this.photoProfil = photoProfil;
     }
 
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
+   
     public Set<Morceau> getMorceauxCree() {
         return morceauxCree;
     }
@@ -149,12 +142,6 @@ public class Utilisateur implements UserDetails {
         this.ensembles = ensembles;
     }
 
-    public Set<Pupitre> getPupitres() {
-        return pupitres;
-    }
-
-    public void setPupitres(Set<Pupitre> pupitres) {
-        this.pupitres = pupitres;
-    }
+   
 
 }
