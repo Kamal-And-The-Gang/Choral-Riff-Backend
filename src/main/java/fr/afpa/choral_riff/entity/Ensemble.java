@@ -16,7 +16,7 @@ public class Ensemble {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY) // auto-incrément
     @Column(name = "id_ensemble")
-    private Integer idEnsemble;
+    private Integer id_Ensemble;
 
     @Column(name = "nom", length = 255)
     private String nom;

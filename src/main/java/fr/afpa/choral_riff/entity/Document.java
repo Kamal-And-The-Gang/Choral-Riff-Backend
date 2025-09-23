@@ -1,6 +1,8 @@
 package fr.afpa.choral_riff.entity;
 
 import jakarta.persistence.*;
+import main.java.fr.afpa.choral_riff.entity.Morceau;
+
 import java.time.LocalDate;
 
 @Entity
@@ -90,6 +92,14 @@ public class Document {
 
     public void setUtilisateur(Utilisateur utilisateur) {
         this.utilisateur = utilisateur;
+    }
+
+    public Morceau getMorceau() {
+        return morceau;
+    }
+
+    public void setMorceau(Morceau morceau) {
+        this.morceau = morceau;
     }
 
 }
