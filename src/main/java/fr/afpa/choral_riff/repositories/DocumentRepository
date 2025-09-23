@@ -1,0 +1,7 @@
+package fr.afpa.choral_riff.repositories;
+
+import fr.afpa.choral_riff.entity.Document;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface DocumentRepository extends JpaRepository<Document, Long> {
+}
