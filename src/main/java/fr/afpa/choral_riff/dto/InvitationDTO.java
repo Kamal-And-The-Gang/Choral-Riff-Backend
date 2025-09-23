@@ -16,7 +16,7 @@ public class InvitationDTO {
 
     private String ensembleNom;
 
-    private String statut; // EN_ATTENTE, ACCEPTEE, REFUSEE
+    private String etat;
 
     private LocalDateTime dateEnvoi;
 
@@ -53,12 +53,12 @@ public class InvitationDTO {
         this.ensembleNom = ensembleNom;
     }
 
-    public String getStatut() {
-        return statut;
+    public String getEtat() {
+        return etat;
     }
 
-    public void setStatut(String statut) {
-        this.statut = statut;
+    public void setEtat(String etat) {
+        this.etat = etat;
     }
 
     public LocalDateTime getDateEnvoi() {
