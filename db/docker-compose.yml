@@ -23,7 +23,7 @@ services:
       # ça peut cependant être intéressant pour la production
       # en attendant, vous pouvez commentez la ligne suivant
       - postgres_data:/var/lib/postgresql/data
-      - 
+      
 
 volumes:
   postgres_data:
