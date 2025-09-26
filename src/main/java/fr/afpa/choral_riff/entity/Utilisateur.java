@@ -40,13 +40,13 @@ public class Utilisateur implements UserDetails {
     private Set<Document> documentsAjoutes;
 
     @ManyToMany(mappedBy = "membres")
-    private Set<Ensemble> ensembles;
+    private Set<Ensemble> ensemble;
 
     // -------------------- UserDetails --------------------
 
     // @Override
     // public Collection<? extends GrantedAuthority> getAuthorities() {
-    //     return List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
+    // return List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
     // }
 
     /**
@@ -153,13 +153,11 @@ public class Utilisateur implements UserDetails {
     }
 
     public Set<Ensemble> getEnsembles() {
-        return ensembles;
+        return ensemble;
     }
 
     public void setEnsembles(Set<Ensemble> ensembles) {
-        this.ensembles = ensembles;
+        this.ensemble = ensembles;
     }
-
-    
 
 }

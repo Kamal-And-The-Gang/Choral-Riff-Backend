@@ -19,7 +19,7 @@ public class Instrument {
 
     //26/09
     @ManyToOne
-    @JoinColumn(name = "ensemble_id")
+    @JoinColumn(name = "ensembleId")
     private Ensemble ensemble;
 
     public Long getId() {

@@ -7,20 +7,18 @@ import org.mapstruct.*;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring") // ou "cdi" selon ton projet
+@Mapper(componentModel = "spring")
 public interface InstrumentMapper {
 
-    // Entité → DTO
     InstrumentDto toDto(Instrument instrument);
 
-    // DTO → Entité (documents ignorés ici)
     @Mapping(target = "documents", ignore = true)
+    @Mapping(target = "ensemble", ignore = true)
     Instrument toEntity(InstrumentDto dto);
 
-    // Liste entités → Liste DTOs
     List<InstrumentDto> toDtoList(List<Instrument> instruments);
 
-    // Mise à jour partielle de l'entité depuis un DTO
     @Mapping(target = "documents", ignore = true)
+    @Mapping(target = "ensemble", ignore = true)
     void updateEntityFromDto(InstrumentDto dto, @MappingTarget Instrument entity);
 }
