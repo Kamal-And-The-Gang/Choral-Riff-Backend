@@ -37,6 +37,14 @@ public class MorceauService {
                 .map(morceauMapper::toDto)
                 .collect(Collectors.toList());
     }
+// Récupérer et filtrer les ensembles
+    public List<MorceauDto> getAllByEnsembleId(Long ensembleId) {
+    return morceauRepository.findByEnsembleId(ensembleId)
+            .stream()
+            .map(morceauMapper::toDto)
+            .toList();
+}
+
 
     // Récupérer un morceau par son ID
     public MorceauDto getById(Long id) {
@@ -71,11 +79,11 @@ public class MorceauService {
                 .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID: " + id));
 
         // Mettre à jour les champs simples
-        // Morceau = entité plus complexe, update manuel et sécurisé.
+        // Morceau = entité plus complexe que instrument, update manuel et sécurisé.
         morceau.setTitre(dto.titre());
         morceau.setCompositeur(dto.compositeur());
         morceau.setGenre(dto.genre());
-        morceau.setDescriptif(dto.descriptif());p
+        morceau.setDescriptif(dto.descriptif());
 
         // Mettre à jour les relations
         if (dto.ensembleId() != null) {

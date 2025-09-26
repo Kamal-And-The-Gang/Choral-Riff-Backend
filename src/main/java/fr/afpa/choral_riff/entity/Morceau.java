@@ -1,4 +1,4 @@
-package main.java.fr.afpa.choral_riff.entity;
+package fr.afpa.choral_riff.entity;
 
 import jakarta.persistence.*;
 import java.util.Set;
@@ -21,7 +21,7 @@ public class Morceau {
     private String descriptif;
 
     @ManyToOne
-    @JoinColumn(name = "id_ensemble")
+    @JoinColumn(name = "ensembleId")
     private Ensemble ensemble;
 
     @ManyToOne

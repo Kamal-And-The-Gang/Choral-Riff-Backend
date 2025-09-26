@@ -15,8 +15,8 @@ import jakarta.persistence.Column;
 public class Ensemble {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY) // auto-incrément
-    @Column(name = "id_ensemble")
-    private Integer id_Ensemble;
+    @Column(name = "ensembleId")
+    private Long ensembleId;
 
     @Column(name = "nom", length = 255)
     private String nom;
@@ -40,13 +40,12 @@ public class Ensemble {
         this.dateCreation = dateCreation;
     }
 
-    // Getters et setters
-    public Integer getIdEnsemble() {
-        return idEnsemble;
+    public Long getEnsembleId() {
+        return ensembleId;
     }
 
-    public void setIdEnsemble(Integer idEnsemble) {
-        this.idEnsemble = idEnsemble;
+    public void setEnsembleId(Long ensembleId) {
+        this.ensembleId = ensembleId;
     }
 
     public String getNom() {
@@ -72,4 +71,15 @@ public class Ensemble {
     public void setDateCreation(LocalDate dateCreation) {
         this.dateCreation = dateCreation;
     }
+
+    public List<Invitation> getInvitations() {
+        return invitations;
+    }
+
+    public void setInvitations(List<Invitation> invitations) {
+        this.invitations = invitations;
+    }
+
+    // Getters et setters
+
 }

@@ -1,4 +1,4 @@
-package main.java.fr.afpa.choral_riff.dto;
+package fr.afpa.choral_riff.dto;
 
 import java.util.Set;
 
@@ -10,6 +10,6 @@ public record MorceauDto(
         String descriptif,
         Long ensembleId,
         Long createurId,
-        Set<DocumentDto> documents // les documents sont liés à un morceau
+        Set<DocumentDto> documents //  Active aussi la validation des documents (si tu en mets)
 ) {
 }

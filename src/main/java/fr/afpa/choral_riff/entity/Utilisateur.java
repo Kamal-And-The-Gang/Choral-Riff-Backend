@@ -1,3 +1,15 @@
+package fr.afpa.choral_riff.entity;
+
+import jakarta.persistence.*;
+
+import java.util.Collection;
+
+import java.util.Set;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 @Entity
 @Table(name = "utilisateur")
 public class Utilisateur implements UserDetails {
@@ -32,9 +44,17 @@ public class Utilisateur implements UserDetails {
 
     // -------------------- UserDetails --------------------
 
+    // @Override
+    // public Collection<? extends GrantedAuthority> getAuthorities() {
+    //     return List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
+    // }
+
+    /**
+     * TODO: Compléter la méthode
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
+        throw new UnsupportedOperationException("Unimplemented method 'getAuthorities'");
     }
 
     @Override
@@ -66,7 +86,6 @@ public class Utilisateur implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
 
     // Getters & Setters
     public Long getId() {
@@ -117,7 +136,6 @@ public class Utilisateur implements UserDetails {
         this.photoProfil = photoProfil;
     }
 
-   
     public Set<Morceau> getMorceauxCree() {
         return morceauxCree;
     }
@@ -142,6 +160,6 @@ public class Utilisateur implements UserDetails {
         this.ensembles = ensembles;
     }
 
-   
+    
 
 }

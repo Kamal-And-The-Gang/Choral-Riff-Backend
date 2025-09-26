@@ -1,6 +1,4 @@
-package main.java.fr.afpa.choral_riff.mapper;
-
-
+package fr.afpa.choral_riff.mapper;
 
 import fr.afpa.choral_riff.dto.EnsembleDto;
 import fr.afpa.choral_riff.entity.Ensemble;
@@ -14,11 +12,11 @@ import java.util.List;
 public interface EnsembleMapper {
 
     // Conversion ENTITY -> DTO
-    @Mapping(source = "idEnsemble", target = "id_Ensemble")
+    @Mapping(source = "ensembleId", target = "ensembleId")
     EnsembleDto toDto(Ensemble ensemble);
 
     // Conversion DTO -> ENTITY
-    @Mapping(source = "id_Ensemble", target = "idEnsemble")
+    @Mapping(source = "ensembleId", target = "ensembleId")
     @Mapping(target = "invitations", ignore = true)
     Ensemble toEntity(EnsembleDto dto);
 
@@ -26,7 +24,7 @@ public interface EnsembleMapper {
     List<EnsembleDto> toDtoList(List<Ensemble> ensembles);
 
     // Mise à jour partielle d'une entité
-    @Mapping(source = "id_Ensemble", target = "idEnsemble")
+    @Mapping(source = "ensembleId", target = "ensembleId")
     @Mapping(target = "invitations", ignore = true)
     void updateEntityFromDto(EnsembleDto dto, @MappingTarget Ensemble entity);
 }

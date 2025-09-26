@@ -1,4 +1,4 @@
-package main.java.fr.afpa.choral_riff.entity;
+package fr.afpa.choral_riff.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;

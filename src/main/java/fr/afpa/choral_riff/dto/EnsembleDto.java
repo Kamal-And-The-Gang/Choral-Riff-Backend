@@ -1,10 +1,9 @@
-
-package main.java.fr.afpa.choral_riff.dto;
+package fr.afpa.choral_riff.dto;
 
 import java.time.LocalDate;
 
 public record EnsembleDto(
-    Integer id_Ensemble,
+    Long ensembleId,
     String nom,
     String description,
     LocalDate dateCreation

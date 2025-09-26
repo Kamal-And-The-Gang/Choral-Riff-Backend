@@ -1,4 +1,4 @@
-package main.java.fr.afpa.choral_riff.entity;
+package fr.afpa.choral_riff.entity;
 
 import jakarta.persistence.*;
 import java.util.Set;
@@ -16,6 +16,11 @@ public class Instrument {
 
     @ManyToMany(mappedBy = "instruments")
     private Set<Document> documents;
+
+    //26/09
+    @ManyToOne
+    @JoinColumn(name = "ensemble_id")
+    private Ensemble ensemble;
 
     public Long getId() {
         return id;
@@ -39,6 +44,15 @@ public class Instrument {
 
     public void setDocuments(Set<Document> documents) {
         this.documents = documents;
+    }
+    
+
+    public Ensemble getEnsemble() {
+        return ensemble;
+    }
+
+    public void setEnsemble(Ensemble ensemble) {
+        this.ensemble = ensemble;
     }
 
 }

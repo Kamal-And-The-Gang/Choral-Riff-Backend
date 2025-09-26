@@ -1,10 +1,15 @@
-package main.java.fr.afpa.choral_riff.mapper;
+package fr.afpa.choral_riff.mapper;
+
+import fr.afpa.choral_riff.dto.MorceauDto;
+import fr.afpa.choral_riff.entity.Morceau;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { DocumentMapper.class })
 public interface MorceauMapper {
 
-    @Mapping(source = "ensemble.idEnsemble", target = "ensembleId")
+    @Mapping(source = "ensemble.ensembleId", target = "ensembleId")
     @Mapping(source = "createur.id", target = "createurId")
     MorceauDto toDto(Morceau morceau);
 

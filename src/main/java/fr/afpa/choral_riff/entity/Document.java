@@ -1,7 +1,6 @@
 package fr.afpa.choral_riff.entity;
 
 import jakarta.persistence.*;
-import main.java.fr.afpa.choral_riff.entity.Morceau;
 
 import java.time.LocalDate;
 
@@ -30,18 +29,23 @@ public class Document {
     @JoinColumn(name = "id_utilisateur", nullable = false)
     private Utilisateur utilisateur;
 
+    @ManyToOne
+    @JoinColumn(name = "id_morceau", nullable = false)
+    private Morceau morceau;
+
     // Constructeurs
+
     public Document() {
     }
 
     public Document(String type, String format, LocalDate dateAjout, String urlFichier,
-            Utilisateur utilisateur) {
+            Utilisateur utilisateur, Morceau morceau) {
         this.type = type;
         this.format = format;
         this.dateAjout = dateAjout;
         this.urlFichier = urlFichier;
         this.utilisateur = utilisateur;
-
+        this.morceau = morceau;
     }
 
     // Getters et Setters

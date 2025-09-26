@@ -1,7 +1,7 @@
-package main.java.fr.afpa.choral_riff.mapper;
+package fr.afpa.choral_riff.mapper;
 
-import main.java.fr.afpa.choral_riff.dto.InstrumentDto;
-import main.java.fr.afpa.choral_riff.entity.Instrument;
+import fr.afpa.choral_riff.dto.InstrumentDto;
+import fr.afpa.choral_riff.entity.Instrument;
 
 import org.mapstruct.*;
 

@@ -1,4 +1,4 @@
-package main.java.fr.afpa.choral_riff.mapper;
+package fr.afpa.choral_riff.mapper;
 
 import fr.afpa.choral_riff.dto.DocumentDto;
 import fr.afpa.choral_riff.entity.Document;
@@ -26,4 +26,6 @@ public interface DocumentMapper {
     @Mapping(target = "morceau", ignore = true)
     @Mapping(source = "id_document", target = "id")
     void updateEntityFromDto(DocumentDto dto, @MappingTarget Document entity);
+
+     
 }

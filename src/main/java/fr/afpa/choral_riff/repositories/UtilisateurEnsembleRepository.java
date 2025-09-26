@@ -1,4 +1,4 @@
-package fr.afpa.choral_riff.repository;
+package fr.afpa.choral_riff.repositories;
 
 import fr.afpa.choral_riff.entity.UtilisateurEnsemble;
 import org.springframework.data.jpa.repository.JpaRepository;

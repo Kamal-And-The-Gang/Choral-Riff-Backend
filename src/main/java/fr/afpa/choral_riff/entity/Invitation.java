@@ -23,7 +23,7 @@ public class Invitation {
      * Ensemble lié à cette invitation.
      */
     @ManyToOne
-    @JoinColumn(name = "id_ensemble", nullable = false)
+    @JoinColumn(name = "ensembleId", nullable = false)
     private Ensemble ensemble;
 
     /**

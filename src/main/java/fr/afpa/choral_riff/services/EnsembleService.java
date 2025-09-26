@@ -1,6 +1,8 @@
-package main.java.fr.afpa.choral_riff.services;
+package fr.afpa.choral_riff.services;
 
 import fr.afpa.choral_riff.dto.EnsembleDto;
+
+
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.mapper.EnsembleMapper;
 import fr.afpa.choral_riff.repositories.EnsembleRepository;
@@ -16,15 +18,15 @@ import java.util.List;
  * 
  * Créer un nouvel ensemble
  * Récupérer tous les ensembles existants
- *     Récupérer un ensemble par son identifiant
- *     Mettre à jour un ensemble existant
- *     Supprimer un ensemble
+ * Récupérer un ensemble par son identifiant
+ * Mettre à jour un ensemble existant
+ * Supprimer un ensemble
  * 
  *
  * Utilise :
  * 
- *     EnsembleRepository : accès à la base de données
- *     EnsembleMapper : conversion entre Entity et DTO
+ * EnsembleRepository : accès à la base de données
+ * EnsembleMapper : conversion entre Entity et DTO
  * 
  *
  * 
@@ -76,7 +78,7 @@ public class EnsembleService {
      * @return le DTO correspondant
      * @throws EntityNotFoundException si aucun ensemble n’a été trouvé
      */
-    public EnsembleDto getById(Integer id) {
+    public EnsembleDto getById(Long id) {
         Ensemble ensemble = ensembleRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ensemble non trouvé avec l’ID : " + id));
         return ensembleMapper.toDto(ensemble);
@@ -90,9 +92,10 @@ public class EnsembleService {
      * @return le DTO de l’ensemble mis à jour
      * @throws EntityNotFoundException si aucun ensemble avec cet ID n’existe
      */
-    public EnsembleDto update(Integer id, EnsembleDto dto) {
+    public EnsembleDto update(Long id, EnsembleDto dto) {
         Ensemble existing = ensembleRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Impossible de mettre à jour : ID " + id + " introuvable"));
+                .orElseThrow(
+                        () -> new EntityNotFoundException("Impossible de mettre à jour : ID " + id + " introuvable"));
 
         ensembleMapper.updateEntityFromDto(dto, existing);
         Ensemble updated = ensembleRepository.save(existing);
@@ -105,10 +108,17 @@ public class EnsembleService {
      * @param id l’identifiant de l’ensemble à supprimer
      * @throws EntityNotFoundException si aucun ensemble avec cet ID n’existe
      */
-    public void delete(Integer id) {
+    public void delete(Long id) {
         if (!ensembleRepository.existsById(id)) {
             throw new EntityNotFoundException("Impossible de supprimer : ensemble avec ID " + id + " introuvable");
         }
         ensembleRepository.deleteById(id);
     }
+
+
+
+
+
+
+    
 }

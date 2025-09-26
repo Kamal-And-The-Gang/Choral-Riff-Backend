@@ -1,9 +1,9 @@
-package main.java.fr.afpa.choral_riff.entity;
+package fr.afpa.choral_riff.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
-import fr.afpa.choral_riff.entity.Document;
+
 
 @Entity
 @Table(name = "document_instrument", uniqueConstraints = {
