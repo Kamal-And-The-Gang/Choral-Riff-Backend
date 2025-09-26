@@ -17,7 +17,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class DocumentServiceTest {
+public class  d {
 
     private DocumentRepository documentRepository;
     private MorceauRepository morceauRepository;
