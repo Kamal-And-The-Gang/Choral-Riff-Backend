@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
+/**
+ * Représente un document musical (partition, enregistrement, etc.)
+ * associé à un morceau et un utilisateur dans l'application Choral Riff.
+ */
+
 @Entity
 @Table(name = "document")
 public class Document {

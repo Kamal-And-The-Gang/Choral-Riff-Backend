@@ -3,6 +3,12 @@ package fr.afpa.choral_riff.entity;
 import jakarta.persistence.*;
 import java.util.Set;
 
+/**
+ * Représente un instrument musical.
+ * Un instrument a un nom, peut être associé à un ensemble,
+ * et peut être lié à plusieurs documents.
+ */
+
 @Entity
 @Table(name = "instrument")
 public class Instrument {
@@ -17,7 +23,7 @@ public class Instrument {
     @ManyToMany(mappedBy = "instruments")
     private Set<Document> documents;
 
-    //26/09
+    // 26/09
     @ManyToOne
     @JoinColumn(name = "ensembleId")
     private Ensemble ensemble;
@@ -45,7 +51,6 @@ public class Instrument {
     public void setDocuments(Set<Document> documents) {
         this.documents = documents;
     }
-    
 
     public Ensemble getEnsemble() {
         return ensemble;

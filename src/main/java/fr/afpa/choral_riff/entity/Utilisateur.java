@@ -7,8 +7,18 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+// import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+/**
+ * Entité représentant un utilisateur de l'application.
+ * 
+ * Cette classe implémente {@link UserDetails} pour intégrer Spring Security.
+ * Un utilisateur possède un nom, prénom, email unique, mot de passe, photo de
+ * profil,
+ * ainsi que des associations avec les morceaux créés, documents ajoutés et
+ * ensembles.
+ */
 
 @Entity
 @Table(name = "utilisateur")

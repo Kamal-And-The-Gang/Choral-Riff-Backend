@@ -3,6 +3,13 @@ package fr.afpa.choral_riff.entity;
 import jakarta.persistence.*;
 import java.util.Set;
 
+/**
+ * Représente un morceau musical.
+ * Un morceau possède un titre, un compositeur, un genre, une description,
+ * appartient à un ensemble, a un créateur ou utilisateur, et peut être associé
+ * à plusieurs documents.
+ */
+
 @Entity
 @Table(name = "morceau")
 public class Morceau {

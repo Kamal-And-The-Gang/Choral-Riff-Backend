@@ -2,7 +2,6 @@ package fr.afpa.choral_riff.services;
 
 import fr.afpa.choral_riff.dto.EnsembleDto;
 
-
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.mapper.EnsembleMapper;
 import fr.afpa.choral_riff.repositories.EnsembleRepository;
@@ -115,10 +114,4 @@ public class EnsembleService {
         ensembleRepository.deleteById(id);
     }
 
-
-
-
-
-
-    
 }

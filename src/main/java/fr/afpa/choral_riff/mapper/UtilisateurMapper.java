@@ -12,12 +12,21 @@ public interface UtilisateurMapper {
     // Mapping entité -> DTO
     UtilisateurDto toDto(Utilisateur utilisateur);
 
+    /**
+     * Convertit un DTO UtilisateurDto en entité Utilisateur.
+     * Certains champs et associations complexes sont ignorés pour éviter
+     * les problèmes de récursivité ou de données incomplètes.
+     * motDePasse et authorities sont également ignorés pour éviter d'écraser des
+     * données sensibles ou spécifiques à Spring Security.
+     */
+
     // Mapping DTO -> entité
     @Mapping(target = "morceauxCree", ignore = true)
     @Mapping(target = "documentsAjoutes", ignore = true)
     @Mapping(target = "ensembles", ignore = true)
     @Mapping(target = "motDePasse", ignore = true)
-    @Mapping(target = "authorities", ignore = true) // On utilise Spring Security, la classe Utilisateur implémente une interface spécifique à la sécurité : UserDetails.
+    @Mapping(target = "authorities", ignore = true) // On utilise Spring Security, la classe Utilisateur implémente une
+                                                    // interface spécifique à la sécurité : UserDetails.
     Utilisateur toEntity(UtilisateurDto dto);
 
     // Pour les listes
@@ -25,7 +34,6 @@ public interface UtilisateurMapper {
 
     List<Utilisateur> toEntityList(List<UtilisateurDto> dtos);
 
-    // Mise à jour partielle
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "morceauxCree", ignore = true)
     @Mapping(target = "documentsAjoutes", ignore = true)

@@ -15,18 +15,19 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface DocumentRepository extends JpaRepository<Document, Long> {
 
-   /**
-     * Récupère la liste des documents ajoutés par un utilisateur donné.
-     *
-     * @param utilisateur L'utilisateur dont on veut connaître les documents.
-     * @return Une liste de documents ajoutés par cet utilisateur.
-     */
-    List<Document> findByUtilisateur(Utilisateur utilisateur);
-/**
-     * Récupère tous les documents associés à un morceau donné.
-     *
-     * @param morceau Le morceau pour lequel on veut les documents.
-     * @return Une liste de documents liés à ce morceau.
-     */
-    List<Document> findByMorceau(Morceau morceau);
+  /**
+   * Récupère la liste des documents ajoutés par un utilisateur donné.
+   *
+   * @param utilisateur L'utilisateur dont on veut connaître les documents.
+   * @return Une liste de documents ajoutés par cet utilisateur.
+   */
+  List<Document> findByUtilisateur(Utilisateur utilisateur);
+
+  /**
+   * Récupère tous les documents associés à un morceau donné.
+   *
+   * @param morceau Le morceau pour lequel on veut les documents.
+   * @return Une liste de documents liés à ce morceau.
+   */
+  List<Document> findByMorceau(Morceau morceau);
 }

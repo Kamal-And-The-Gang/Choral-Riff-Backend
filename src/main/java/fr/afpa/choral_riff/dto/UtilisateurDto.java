@@ -1,5 +1,10 @@
 package fr.afpa.choral_riff.dto;
 
+/**
+ * DTO (Data Transfer Object) représentant un utilisateur.
+ *
+ */
+
 public class UtilisateurDto {
 
     private Long id;

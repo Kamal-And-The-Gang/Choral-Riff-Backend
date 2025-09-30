@@ -3,7 +3,11 @@ package fr.afpa.choral_riff.entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
-
+/**
+ * Représente l'association entre un Document et un Instrument.
+ * Cette entité modélise la relation ManyToMany entre Document et Instrument
+ * avec une date d'ajout pour cette association.
+ */
 
 @Entity
 @Table(name = "document_instrument", uniqueConstraints = {

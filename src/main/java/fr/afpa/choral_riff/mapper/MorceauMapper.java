@@ -5,9 +5,12 @@ import fr.afpa.choral_riff.entity.Morceau;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-
 @Mapper(componentModel = "spring", uses = { DocumentMapper.class })
 public interface MorceauMapper {
+    /**
+     * Convertit une entité Morceau en MorceauDto.
+     * Les IDs des relations Ensemble et Createur sont extraits.
+     */
 
     @Mapping(source = "ensemble.ensembleId", target = "ensembleId")
     @Mapping(source = "createur.id", target = "createurId")

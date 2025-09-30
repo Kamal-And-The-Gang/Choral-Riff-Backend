@@ -22,9 +22,9 @@ public class MorceauService {
     private final MorceauMapper morceauMapper;
 
     public MorceauService(MorceauRepository morceauRepository,
-                          EnsembleRepository ensembleRepository,
-                          UtilisateurRepository utilisateurRepository,
-                          MorceauMapper morceauMapper) {
+            EnsembleRepository ensembleRepository,
+            UtilisateurRepository utilisateurRepository,
+            MorceauMapper morceauMapper) {
         this.morceauRepository = morceauRepository;
         this.ensembleRepository = ensembleRepository;
         this.utilisateurRepository = utilisateurRepository;
@@ -37,14 +37,14 @@ public class MorceauService {
                 .map(morceauMapper::toDto)
                 .collect(Collectors.toList());
     }
-// Récupérer et filtrer les ensembles
-    public List<MorceauDto> getAllByEnsembleId(Long ensembleId) {
-    return morceauRepository.findByEnsembleId(ensembleId)
-            .stream()
-            .map(morceauMapper::toDto)
-            .toList();
-}
 
+    // Récupérer et filtrer les ensembles
+    public List<MorceauDto> getAllByEnsembleId(Long ensembleId) {
+        return morceauRepository.findByEnsembleId(ensembleId)
+                .stream()
+                .map(morceauMapper::toDto)
+                .toList();
+    }
 
     // Récupérer un morceau par son ID
     public MorceauDto getById(Long id) {

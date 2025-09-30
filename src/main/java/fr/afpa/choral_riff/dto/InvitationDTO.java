@@ -4,6 +4,12 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
+/**
+ * DTO (Data Transfer Object) représentant une invitation envoyée à un
+ * utilisateur
+ * pour rejoindre un ensemble musical.
+ */
+
 public class InvitationDTO {
 
     private Long id;

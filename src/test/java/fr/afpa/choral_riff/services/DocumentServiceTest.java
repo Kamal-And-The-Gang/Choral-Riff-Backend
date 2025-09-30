@@ -17,7 +17,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class  DocumentServiceTest {
+public class DocumentServiceTest {
 
     private DocumentRepository documentRepository;
     private MorceauRepository morceauRepository;
@@ -36,53 +36,48 @@ public class  DocumentServiceTest {
                 documentRepository,
                 morceauRepository,
                 utilisateurRepository,
-                documentMapper
-        );
+                documentMapper);
     }
 
     @Test
-public void testGetAll() {
-    // Préparation des données mockées
-    Document doc = new Document();
-    doc.setId(1L);
-    doc.setType("Partition");
-    doc.setFormat("PDF");
-    doc.setDateAjout(LocalDate.now());
-    doc.setUrlFichier("fichier.pdf");
+    public void testGetAll() {
+        // Préparation des données mockées
+        Document doc = new Document();
+        doc.setId(1L);
+        doc.setType("Partition");
+        doc.setFormat("PDF");
+        doc.setDateAjout(LocalDate.now());
+        doc.setUrlFichier("fichier.pdf");
 
-    Utilisateur user = new Utilisateur();
-    user.setId(10L);
-    doc.setUtilisateur(user);
+        Utilisateur user = new Utilisateur();
+        user.setId(10L);
+        doc.setUtilisateur(user);
 
-    Morceau morceau = new Morceau();
-    morceau.setId(20L);
-    doc.setMorceau(morceau);
+        Morceau morceau = new Morceau();
+        morceau.setId(20L);
+        doc.setMorceau(morceau);
 
-    DocumentDto dto = new DocumentDto(
-        1L,
-        "Partition",
-        "PDF",
-        doc.getDateAjout(),
-        "fichier.pdf",
-        10L,
-        20L
-    );
+        DocumentDto dto = new DocumentDto(
+                1L,
+                "Partition",
+                "PDF",
+                doc.getDateAjout(),
+                "fichier.pdf",
+                10L,
+                20L);
 
-    // Configuration des mocks
-    when(documentRepository.findAll()).thenReturn(List.of(doc));
-    when(documentMapper.toDto(doc)).thenReturn(dto);
+        // Configuration des mocks
+        when(documentRepository.findAll()).thenReturn(List.of(doc));
+        when(documentMapper.toDto(doc)).thenReturn(dto);
 
-    // Appel de la méthode à tester
-    List<DocumentDto> result = documentService.getAll();
+        // Appel de la méthode à tester
+        List<DocumentDto> result = documentService.getAll();
 
-    // Vérifications
-    assertEquals(1, result.size());
-    assertEquals("Partition", result.get(0).type());
-    assertEquals(10L, result.get(0).utilisateurId());
-    assertEquals(20L, result.get(0).morceauId());
-}
-
-
-    // Autres tests adaptés de la même façon...
+        // Vérifications
+        assertEquals(1, result.size());
+        assertEquals("Partition", result.get(0).type());
+        assertEquals(10L, result.get(0).utilisateurId());
+        assertEquals(20L, result.get(0).morceauId());
+    }
 
 }

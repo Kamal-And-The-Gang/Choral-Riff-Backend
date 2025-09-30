@@ -7,7 +7,6 @@ import fr.afpa.choral_riff.mapper.InstrumentMapper;
 import fr.afpa.choral_riff.repositories.EnsembleRepository;
 import fr.afpa.choral_riff.repositories.InstrumentRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,8 +18,8 @@ public class InstrumentService {
     private final InstrumentMapper instrumentMapper;
 
     public InstrumentService(InstrumentRepository instrumentRepository,
-                             EnsembleRepository ensembleRepository,
-                             InstrumentMapper instrumentMapper) {
+            EnsembleRepository ensembleRepository,
+            InstrumentMapper instrumentMapper) {
         this.instrumentRepository = instrumentRepository;
         this.ensembleRepository = ensembleRepository;
         this.instrumentMapper = instrumentMapper;

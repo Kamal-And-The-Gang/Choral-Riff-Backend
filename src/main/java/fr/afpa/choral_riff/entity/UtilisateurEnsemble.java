@@ -3,11 +3,21 @@ package fr.afpa.choral_riff.entity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
+/**
+ * Entité représentant la relation entre un {@link Utilisateur} et un
+ * {@link Ensemble}.
+ * 
+ * Cette entité modélise l'appartenance d'un utilisateur à un ensemble avec un
+ * rôle spécifique
+ * (exemple : ADMIN, MEMBRE, Modérateur) ainsi que la date d'adhésion à cet
+ * ensemble.
+ * 
+ * (une personne ne peut avoir qu'un seul rôle par ensemble).
+ */
+
 @Entity
-@Table(
-    name = "utilisateur_ensemble",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"utilisateur_id", "ensemble_id"})
-)
+@Table(name = "utilisateur_ensemble", uniqueConstraints = @UniqueConstraint(columnNames = { "utilisateur_id",
+        "ensemble_id" }))
 public class UtilisateurEnsemble {
 
     @Id
@@ -28,9 +38,11 @@ public class UtilisateurEnsemble {
     @Column(nullable = false)
     private LocalDate dateAdhesion;
 
-    public UtilisateurEnsemble() {}
+    public UtilisateurEnsemble() {
+    }
 
-    public UtilisateurEnsemble(Utilisateur utilisateur, Ensemble ensemble, String roleDansEnsemble, LocalDate dateAdhesion) {
+    public UtilisateurEnsemble(Utilisateur utilisateur, Ensemble ensemble, String roleDansEnsemble,
+            LocalDate dateAdhesion) {
         this.utilisateur = utilisateur;
         this.ensemble = ensemble;
         this.roleDansEnsemble = roleDansEnsemble;

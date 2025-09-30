@@ -10,6 +10,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 
+/**
+ * Représente un ensemble musical.
+ * Un ensemble possède un nom, une description, une date de création,
+ * et une liste d'invitations associées.
+ */
+
 @Entity
 @Table(name = "ensemble")
 public class Ensemble {
