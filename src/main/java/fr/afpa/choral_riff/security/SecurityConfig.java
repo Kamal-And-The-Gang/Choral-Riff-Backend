@@ -1,7 +1,7 @@
-package fr.ecommerce.security;
+package fr.afpa.choral_riff.security;
 
-import fr.ecommerce.repositories.UserRepository;
-import fr.ecommerce.services.UserDetailsServiceImpl;
+import fr.afpa.choral_riff.repositories.UtilisateurRepository;
+import fr.afpa.choral_riff.services.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

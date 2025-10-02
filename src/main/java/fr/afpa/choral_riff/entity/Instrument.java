@@ -20,8 +20,8 @@ public class Instrument {
     @Column(nullable = false)
     private String nom;
 
-    @ManyToMany(mappedBy = "instruments")
-    private Set<Document> documents;
+   @OneToMany(mappedBy = "instrument", cascade = CascadeType.ALL, orphanRemoval = true)
+private Set<DocumentInstrument> documentInstruments;
 
     // 26/09
     @ManyToOne
@@ -44,13 +44,6 @@ public class Instrument {
         this.nom = nom;
     }
 
-    public Set<Document> getDocuments() {
-        return documents;
-    }
-
-    public void setDocuments(Set<Document> documents) {
-        this.documents = documents;
-    }
 
     public Ensemble getEnsemble() {
         return ensemble;
@@ -58,6 +51,14 @@ public class Instrument {
 
     public void setEnsemble(Ensemble ensemble) {
         this.ensemble = ensemble;
+    }
+
+    public Set<DocumentInstrument> getDocumentInstruments() {
+        return documentInstruments;
+    }
+
+    public void setDocumentInstruments(Set<DocumentInstrument> documentInstruments) {
+        this.documentInstruments = documentInstruments;
     }
 
 }

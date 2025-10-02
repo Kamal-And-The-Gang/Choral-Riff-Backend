@@ -35,7 +35,7 @@ class EnsembleServiceTest {
 
         // Exemple d'entité et DTO
         ensembleEntity = new Ensemble();
-        ensembleEntity.setEnsembleId(1L);
+        ensembleEntity.setId(1L);
         ensembleEntity.setNom("Ensemble Test");
 
         //DTO avec record(pas de setters)

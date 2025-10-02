@@ -1,12 +1,16 @@
 package fr.afpa.choral_riff.entity;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 
@@ -20,9 +24,10 @@ import jakarta.persistence.Column;
 @Table(name = "ensemble")
 public class Ensemble {
 
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // auto-incrément
-    @Column(name = "ensembleId")
-    private Long ensembleId;
+    @Column(name = "id")
+    private Long id;
 
     @Column(name = "nom", length = 255)
     private String nom;
@@ -36,9 +41,12 @@ public class Ensemble {
     @OneToMany(mappedBy = "ensemble", cascade = CascadeType.ALL)
     private List<Invitation> invitations;
 
+    @OneToMany(mappedBy = "ensemble", cascade = CascadeType.ALL, orphanRemoval = true)
+private Set<UtilisateurEnsemble> utilisateurEnsembles = new HashSet<>();
+
     // Constructeurs
-    public Ensemble() {
-    }
+public Ensemble() {
+}
 
     public Ensemble(String nom, String description, LocalDate dateCreation) {
         this.nom = nom;
@@ -46,14 +54,13 @@ public class Ensemble {
         this.dateCreation = dateCreation;
     }
 
-    public Long getEnsembleId() {
-        return ensembleId;
+    public Long getId() {
+        return id;
     }
 
-    public void setEnsembleId(Long ensembleId) {
-        this.ensembleId = ensembleId;
+    public void setId(Long id) {
+        this.id = id;
     }
-
     public String getNom() {
         return nom;
     }
@@ -85,7 +92,12 @@ public class Ensemble {
     public void setInvitations(List<Invitation> invitations) {
         this.invitations = invitations;
     }
-
     // Getters et setters
+    public Set<UtilisateurEnsemble> getUtilisateurEnsembles() {
+        return utilisateurEnsembles;
+    }
+    public void setUtilisateurEnsembles(Set<UtilisateurEnsemble> utilisateurEnsembles) {
+        this.utilisateurEnsembles = utilisateurEnsembles;
+    }
 
 }

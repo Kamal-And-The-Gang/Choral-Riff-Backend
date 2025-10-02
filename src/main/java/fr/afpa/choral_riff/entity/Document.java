@@ -3,6 +3,7 @@ package fr.afpa.choral_riff.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 /**
  * Représente un document musical (partition, enregistrement, etc.)
@@ -37,6 +38,9 @@ public class Document {
     @ManyToOne
     @JoinColumn(name = "id_morceau", nullable = false)
     private Morceau morceau;
+
+    @OneToMany(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
+private Set<DocumentInstrument> documentInstruments;
 
     // Constructeurs
 
@@ -110,5 +114,15 @@ public class Document {
     public void setMorceau(Morceau morceau) {
         this.morceau = morceau;
     }
+
+    public Set<DocumentInstrument> getDocumentInstruments() {
+        return documentInstruments;
+    }
+
+    public void setDocumentInstruments(Set<DocumentInstrument> documentInstruments) {
+        this.documentInstruments = documentInstruments;
+    }
+
+    
 
 }

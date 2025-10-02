@@ -15,7 +15,7 @@ import java.time.LocalDate;
  */
 
 public record EnsembleDto(
-        Long ensembleId,
+        Long id,
         String nom,
         String description,
         LocalDate dateCreation) {

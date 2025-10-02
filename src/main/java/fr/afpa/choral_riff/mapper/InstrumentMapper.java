@@ -13,22 +13,14 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface InstrumentMapper {
-    /**
-     * 
-     * @param instrument entité à convertir
-     * @return le DTO correspondant
-     */
-
-    @Mapping(target = "ensembleId", source = "ensemble.ensembleId")
+    @Mapping(target = "ensembleId", source = "ensemble.id")
     InstrumentDto toDto(Instrument instrument);
 
-    @Mapping(target = "documents", ignore = true)
     @Mapping(target = "ensemble", source = "dto.ensembleId", qualifiedByName = "convertIdToEnsemble")
     Instrument toEntity(InstrumentDto dto);
 
     List<InstrumentDto> toDtoList(List<Instrument> instruments);
 
-    @Mapping(target = "documents", ignore = true)
     @Mapping(target = "ensemble", source = "dto.ensembleId", qualifiedByName = "convertIdToEnsemble")
     void updateEntityFromDto(InstrumentDto dto, @MappingTarget Instrument entity);
 
@@ -38,7 +30,7 @@ public interface InstrumentMapper {
             return null;
         }
         Ensemble ensemble = new Ensemble();
-        ensemble.setEnsembleId(id);
+        ensemble.setId(id);
         return ensemble;
     }
 }

@@ -101,7 +101,7 @@ class MorceauServiceTest {
         savedEntity.setId(10L);
 
         Ensemble ensemble = new Ensemble();
-        ensemble.setEnsembleId(5L);
+        ensemble.setId(5L);
 
         Utilisateur createur = new Utilisateur();
         createur.setId(7L);
@@ -135,7 +135,7 @@ class MorceauServiceTest {
         morceauEntity.setId(id);
 
         Ensemble ensemble = new Ensemble();
-        ensemble.setEnsembleId(5L);
+        ensemble.setId(5L);
 
         Utilisateur createur = new Utilisateur();
         createur.setId(7L);

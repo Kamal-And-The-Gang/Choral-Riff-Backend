@@ -3,7 +3,7 @@ package fr.afpa.choral_riff.entity;
 import jakarta.persistence.*;
 
 import java.util.Collection;
-
+import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -46,11 +46,13 @@ public class Utilisateur implements UserDetails {
     @OneToMany(mappedBy = "createur")
     private Set<Morceau> morceauxCree;
 
-    @OneToMany(mappedBy = "utilisateurAjout")
-    private Set<Document> documentsAjoutes;
+    @OneToMany(mappedBy = "utilisateur")
+private Set<Document> documentsAjoutes;
 
-    @ManyToMany(mappedBy = "membres")
-    private Set<Ensemble> ensemble;
+
+   @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
+private Set<UtilisateurEnsemble> utilisateurEnsembles = new HashSet<>();
+
 
     // -------------------- UserDetails --------------------
 
@@ -161,13 +163,11 @@ public class Utilisateur implements UserDetails {
     public void setDocumentsAjoutes(Set<Document> documentsAjoutes) {
         this.documentsAjoutes = documentsAjoutes;
     }
-
-    public Set<Ensemble> getEnsembles() {
-        return ensemble;
+    public Set<UtilisateurEnsemble> getUtilisateurEnsembles() {
+        return utilisateurEnsembles;
     }
-
-    public void setEnsembles(Set<Ensemble> ensembles) {
-        this.ensemble = ensembles;
+    public void setUtilisateurEnsembles(Set<UtilisateurEnsemble> utilisateurEnsembles) {
+        this.utilisateurEnsembles = utilisateurEnsembles;
     }
 
 }

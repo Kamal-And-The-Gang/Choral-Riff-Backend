@@ -7,12 +7,13 @@ import fr.afpa.choral_riff.entity.Utilisateur;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 /**
  * Interface de gestion des accès à la table "Document"
  * Hérite de JpaRepository pour bénéficier des méthodes CRUD de base.
  */
-
+@Repository
 public interface DocumentRepository extends JpaRepository<Document, Long> {
 
   /**
