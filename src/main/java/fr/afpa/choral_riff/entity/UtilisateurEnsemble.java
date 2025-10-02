@@ -32,8 +32,12 @@ public class UtilisateurEnsemble {
     @JoinColumn(name = "ensemble_id", nullable = false)
     private Ensemble ensemble;
 
+    // @Column(nullable = false)
+    // private String roleDansEnsemble; 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String roleDansEnsemble; // ex: "ADMIN", "MEMBRE", "CHEF"
+    private Role roleDansEnsemble;// utilise l'enum rôle
+
 
     @Column(nullable = false)
     private LocalDate dateAdhesion;
@@ -41,7 +45,7 @@ public class UtilisateurEnsemble {
     public UtilisateurEnsemble() {
     }
 
-    public UtilisateurEnsemble(Utilisateur utilisateur, Ensemble ensemble, String roleDansEnsemble,
+    public UtilisateurEnsemble(Utilisateur utilisateur, Ensemble ensemble, Role roleDansEnsemble,
             LocalDate dateAdhesion) {
         this.utilisateur = utilisateur;
         this.ensemble = ensemble;
@@ -74,11 +78,11 @@ public class UtilisateurEnsemble {
         this.ensemble = ensemble;
     }
 
-    public String getRoleDansEnsemble() {
+    public Role getRoleDansEnsemble() {
         return roleDansEnsemble;
     }
 
-    public void setRoleDansEnsemble(String roleDansEnsemble) {
+    public void setRoleDansEnsemble(Role roleDansEnsemble) {
         this.roleDansEnsemble = roleDansEnsemble;
     }
 

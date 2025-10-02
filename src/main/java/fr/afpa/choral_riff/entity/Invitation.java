@@ -15,9 +15,13 @@ public class Invitation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String etat;
+    @Enumerated(EnumType.STRING)
+    private StatutInvitation etat;
 
     private LocalDate dateEnvoi;
+
+    @Column(unique = true, nullable = false)
+    private String token; // Token unique d'invitation
 
     /**
      * Ensemble lié à cette invitation.
@@ -30,17 +34,22 @@ public class Invitation {
      * Utilisateur à qui l'invitation est envoyée.
      */
     @ManyToOne
-    @JoinColumn(name = "id_utilisateur", nullable = false)
-    private Utilisateur utilisateur;
+    @JoinColumn(name = "id_utilisateur")
+    private Utilisateur utilisateur;// nullable
+
+    @Column(name = "email_invite", nullable = false)
+    private String emailInvite;
 
     // ====== Constructeur vide par défault ======
 
     public Invitation() {
     }
 
-    public Invitation(String etat, LocalDate dateEnvoi, Ensemble ensemble, Utilisateur utilisateur) {
+    public Invitation(StatutInvitation etat, LocalDate dateEnvoi, String token, Ensemble ensemble,
+            Utilisateur utilisateur) {
         this.etat = etat;
         this.dateEnvoi = dateEnvoi;
+        this.token = token;
         this.ensemble = ensemble;
         this.utilisateur = utilisateur;
     }
@@ -53,11 +62,11 @@ public class Invitation {
         this.id = id;
     }
 
-    public String getEtat() {
+    public StatutInvitation getEtat() {
         return etat;
     }
 
-    public void setEtat(String etat) {
+    public void setEtat(StatutInvitation etat) {
         this.etat = etat;
     }
 
@@ -67,6 +76,14 @@ public class Invitation {
 
     public void setDateEnvoi(LocalDate dateEnvoi) {
         this.dateEnvoi = dateEnvoi;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public Ensemble getEnsemble() {
@@ -84,4 +101,13 @@ public class Invitation {
     public void setUtilisateur(Utilisateur utilisateur) {
         this.utilisateur = utilisateur;
     }
+
+    public String getEmailInvite() {
+        return emailInvite;
+    }
+
+    public void setEmailInvite(String emailInvite) {
+        this.emailInvite = emailInvite;
+    }
+
 }

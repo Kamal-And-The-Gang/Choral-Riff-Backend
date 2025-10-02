@@ -86,6 +86,4 @@ public class Ensemble {
         this.invitations = invitations;
     }
 
-    // Getters et setters
-
 }

@@ -2,6 +2,7 @@ package fr.afpa.choral_riff.mapper;
 
 import fr.afpa.choral_riff.dto.InvitationDTO;
 import fr.afpa.choral_riff.entity.Invitation;
+
 import org.mapstruct.*;
 
 import java.util.List;
@@ -19,6 +20,8 @@ public interface InvitationMapper {
     @Mapping(target = "ensemble", ignore = true)
     @Mapping(target = "utilisateur", ignore = true)
     @Mapping(target = "id", ignore = true)
+   @Mapping(target = "etat", expression = "java(fr.afpa.choral_riff.entity.StatutInvitation.valueOf(dto.getEtat()))")
+
     Invitation toEntity(InvitationDTO dto);
 
     // ===== Liste Entity -> DTO =====
@@ -28,5 +31,6 @@ public interface InvitationMapper {
     @Mapping(target = "ensemble", ignore = true)
     @Mapping(target = "utilisateur", ignore = true)
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "etat", expression = "java(fr.afpa.choral_riff.entity.StatutInvitation.valueOf(dto.getEtat()))")
     void updateEntityFromDto(InvitationDTO dto, @MappingTarget Invitation entity);
 }

@@ -1,23 +1,22 @@
 package fr.afpa.choral_riff.entity;
 
 import jakarta.persistence.*;
-
 import java.util.Collection;
-
 import java.util.Set;
-
+import java.util.stream.Collectors;
 import org.springframework.security.core.GrantedAuthority;
-// import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 /**
- * Entité représentant un utilisateur de l'application.
- * 
- * Cette classe implémente {@link UserDetails} pour intégrer Spring Security.
- * Un utilisateur possède un nom, prénom, email unique, mot de passe, photo de
- * profil,
- * ainsi que des associations avec les morceaux créés, documents ajoutés et
- * ensembles.
+ * Entité représentant un utilisateur de l'application Choral Riff.
+ *
+ * Stocke les informations relatives aux
+ * utilisateurs de la plateforme : identité, connexion, et associations aux
+ * morceaux, documents et ensembles.
+ *
+ * Elle implémente l'interface {@link UserDetails} afin de s'intégrer avec
+ * Spring Security pour la gestion de l'authentification et des autorisations.
  */
 
 @Entity
@@ -45,12 +44,22 @@ public class Utilisateur implements UserDetails {
     // Associations
     @OneToMany(mappedBy = "createur")
     private Set<Morceau> morceauxCree;
-
+    /**
+     * Ensemble des documents ajoutés par l'utilisateur.
+     */
     @OneToMany(mappedBy = "utilisateurAjout")
     private Set<Document> documentsAjoutes;
-
+    /**
+     * Ensembles musicaux auxquels l'utilisateur appartient.
+     */
     @ManyToMany(mappedBy = "membres")
     private Set<Ensemble> ensemble;
+
+    /**
+     * Rôles liés de l'utilisateur dans des ensembles.
+     */
+    @OneToMany(mappedBy = "utilisateur")
+    private Set<UtilisateurEnsemble> utilisateurEnsembles;
 
     // -------------------- UserDetails --------------------
 
@@ -59,13 +68,17 @@ public class Utilisateur implements UserDetails {
     // return List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
     // }
 
-    /**
-     * TODO: Compléter la méthode
-     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        throw new UnsupportedOperationException("Unimplemented method 'getAuthorities'");
+        return utilisateurEnsembles.stream()
+                .map(ue -> new SimpleGrantedAuthority("ROLE_" + ue.getRoleDansEnsemble().name().toUpperCase()))
+                .collect(Collectors.toSet());
     }
+    // @Override
+    // public Collection<? extends GrantedAuthority> getAuthorities() {
+    // throw new UnsupportedOperationException("Unimplemented method
+    // 'getAuthorities'");
+    // }
 
     @Override
     public String getPassword() {
@@ -168,6 +181,14 @@ public class Utilisateur implements UserDetails {
 
     public void setEnsembles(Set<Ensemble> ensembles) {
         this.ensemble = ensembles;
+    }
+
+    public Set<UtilisateurEnsemble> getUtilisateurEnsembles() {
+        return utilisateurEnsembles;
+    }
+
+    public void setUtilisateurEnsembles(Set<UtilisateurEnsemble> utilisateurEnsembles) {
+        this.utilisateurEnsembles = utilisateurEnsembles;
     }
 
 }

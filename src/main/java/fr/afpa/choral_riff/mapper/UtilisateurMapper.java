@@ -10,6 +10,7 @@ import java.util.List;
 public interface UtilisateurMapper {
 
     // Mapping entité -> DTO
+    @Mapping(target = "utilisateurEnsembles", ignore = true)  // Ajouté ici
     UtilisateurDto toDto(Utilisateur utilisateur);
 
     /**
@@ -24,6 +25,7 @@ public interface UtilisateurMapper {
     @Mapping(target = "morceauxCree", ignore = true)
     @Mapping(target = "documentsAjoutes", ignore = true)
     @Mapping(target = "ensembles", ignore = true)
+    @Mapping(target = "utilisateurEnsembles", ignore = true)  // Ajouté ici
     @Mapping(target = "motDePasse", ignore = true)
     @Mapping(target = "authorities", ignore = true) // On utilise Spring Security, la classe Utilisateur implémente une
                                                     // interface spécifique à la sécurité : UserDetails.
@@ -38,6 +40,8 @@ public interface UtilisateurMapper {
     @Mapping(target = "morceauxCree", ignore = true)
     @Mapping(target = "documentsAjoutes", ignore = true)
     @Mapping(target = "ensembles", ignore = true)
+    @Mapping(target = "utilisateurEnsembles", ignore = true)  // Ajouté ici
     @Mapping(target = "motDePasse", ignore = true)
+    @Mapping(target = "authorities", ignore = true)
     void updateEntityFromDto(UtilisateurDto dto, @MappingTarget Utilisateur entity);
 }
