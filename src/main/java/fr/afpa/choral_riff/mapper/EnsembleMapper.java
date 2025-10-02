@@ -11,20 +11,19 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface EnsembleMapper {
 
-    // Conversion ENTITY -> DTO
-    @Mapping(source = "ensembleId", target = "ensembleId")
+    // ENTITY -> DTO
+    @Mapping(source = "id", target = "id")
     EnsembleDto toDto(Ensemble ensemble);
 
-    // Conversion DTO -> ENTITY
-    @Mapping(source = "ensembleId", target = "ensembleId")
+    // DTO -> ENTITY
+    @Mapping(source = "id", target = "id")
     @Mapping(target = "invitations", ignore = true)
     Ensemble toEntity(EnsembleDto dto);
 
-    // Liste
     List<EnsembleDto> toDtoList(List<Ensemble> ensembles);
 
-    // Mise à jour partielle d'une entité
-    @Mapping(source = "ensembleId", target = "ensembleId")
+    // Update partiel
+    @Mapping(source = "id", target = "id")
     @Mapping(target = "invitations", ignore = true)
     void updateEntityFromDto(EnsembleDto dto, @MappingTarget Ensemble entity);
 }

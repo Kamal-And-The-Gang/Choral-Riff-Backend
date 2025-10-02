@@ -10,37 +10,24 @@ import java.util.List;
 public interface UtilisateurMapper {
 
     // Mapping entité -> DTO
-    @Mapping(target = "utilisateurEnsembles", ignore = true)  // Ajouté ici
     UtilisateurDto toDto(Utilisateur utilisateur);
-
-    /**
-     * Convertit un DTO UtilisateurDto en entité Utilisateur.
-     * Certains champs et associations complexes sont ignorés pour éviter
-     * les problèmes de récursivité ou de données incomplètes.
-     * motDePasse et authorities sont également ignorés pour éviter d'écraser des
-     * données sensibles ou spécifiques à Spring Security.
-     */
 
     // Mapping DTO -> entité
     @Mapping(target = "morceauxCree", ignore = true)
     @Mapping(target = "documentsAjoutes", ignore = true)
-    @Mapping(target = "ensembles", ignore = true)
-    @Mapping(target = "utilisateurEnsembles", ignore = true)  // Ajouté ici
+    @Mapping(target = "utilisateurEnsembles", ignore = true) // <--- changé ici
     @Mapping(target = "motDePasse", ignore = true)
-    @Mapping(target = "authorities", ignore = true) // On utilise Spring Security, la classe Utilisateur implémente une
-                                                    // interface spécifique à la sécurité : UserDetails.
+    @Mapping(target = "authorities", ignore = true)
     Utilisateur toEntity(UtilisateurDto dto);
 
     // Pour les listes
     List<UtilisateurDto> toDtoList(List<Utilisateur> utilisateurs);
-
     List<Utilisateur> toEntityList(List<UtilisateurDto> dtos);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "morceauxCree", ignore = true)
     @Mapping(target = "documentsAjoutes", ignore = true)
-    @Mapping(target = "ensembles", ignore = true)
-    @Mapping(target = "utilisateurEnsembles", ignore = true)  // Ajouté ici
+    @Mapping(target = "utilisateurEnsembles", ignore = true) // <--- changé ici aussi
     @Mapping(target = "motDePasse", ignore = true)
     @Mapping(target = "authorities", ignore = true)
     void updateEntityFromDto(UtilisateurDto dto, @MappingTarget Utilisateur entity);

@@ -79,7 +79,7 @@ public class InstrumentServiceTest {
     public void testCreate_WithEnsemble() {
         InstrumentDto dto = new InstrumentDto(null, "Violoncelle", null);
         Ensemble ensemble = new Ensemble();
-        ensemble.setEnsembleId(5L);
+        ensemble.setId(5L);
 
         Instrument instrumentEntity = new Instrument();
         Instrument savedInstrument = new Instrument();
@@ -109,7 +109,7 @@ public class InstrumentServiceTest {
     public void testUpdate_WithEnsemble() {
         InstrumentDto dto = new InstrumentDto(null, "Flûte traversière", null);
         Ensemble ensemble = new Ensemble();
-        ensemble.setEnsembleId(7L);
+        ensemble.setId(7L);
 
         Instrument existingInstrument = new Instrument();
         existingInstrument.setId(20L);

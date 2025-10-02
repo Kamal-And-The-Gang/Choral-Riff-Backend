@@ -2,6 +2,7 @@ package fr.afpa.choral_riff.entity;
 
 import jakarta.persistence.*;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.security.core.GrantedAuthority;
@@ -44,22 +45,13 @@ public class Utilisateur implements UserDetails {
     // Associations
     @OneToMany(mappedBy = "createur")
     private Set<Morceau> morceauxCree;
-    /**
-     * Ensemble des documents ajoutés par l'utilisateur.
-     */
-    @OneToMany(mappedBy = "utilisateurAjout")
-    private Set<Document> documentsAjoutes;
-    /**
-     * Ensembles musicaux auxquels l'utilisateur appartient.
-     */
-    @ManyToMany(mappedBy = "membres")
-    private Set<Ensemble> ensemble;
 
-    /**
-     * Rôles liés de l'utilisateur dans des ensembles.
-     */
     @OneToMany(mappedBy = "utilisateur")
-    private Set<UtilisateurEnsemble> utilisateurEnsembles;
+private Set<Document> documentsAjoutes;
+
+
+   @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
+private Set<UtilisateurEnsemble> utilisateurEnsembles = new HashSet<>();
 
     // -------------------- UserDetails --------------------
 
@@ -174,15 +166,7 @@ public class Utilisateur implements UserDetails {
     public void setDocumentsAjoutes(Set<Document> documentsAjoutes) {
         this.documentsAjoutes = documentsAjoutes;
     }
-
-    public Set<Ensemble> getEnsembles() {
-        return ensemble;
-    }
-
-    public void setEnsembles(Set<Ensemble> ensembles) {
-        this.ensemble = ensembles;
-    }
-
+   
     public Set<UtilisateurEnsemble> getUtilisateurEnsembles() {
         return utilisateurEnsembles;
     }

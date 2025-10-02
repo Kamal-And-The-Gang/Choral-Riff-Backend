@@ -53,7 +53,7 @@ public class InvitationServiceTest {
 
         // Mock ensemble existant
         Ensemble ensemble = new Ensemble();
-        ensemble.setEnsembleId(1L);
+        ensemble.setId(1L);
         when(ensembleRepository.findById(1L)).thenReturn(Optional.of(ensemble));
 
         // Mock save d'invitation : retourne l'invitation avec un ID
@@ -69,7 +69,7 @@ public class InvitationServiceTest {
             InvitationDTO invitationDTO = new InvitationDTO();
             invitationDTO.setId(inv.getId());
             invitationDTO.setEmailInvite(inv.getEmailInvite());
-            invitationDTO.setEnsembleId(inv.getEnsemble().getEnsembleId());
+            invitationDTO.setEnsembleId(inv.getEnsemble().getId());
             return invitationDTO;
         });
 
