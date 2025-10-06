@@ -3,7 +3,7 @@ package fr.afpa.choral_riff.services;
 import fr.afpa.choral_riff.dto.InvitationDTO;
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Invitation;
-import fr.afpa.choral_riff.entity.StatutInvitation;
+import fr.afpa.choral_riff.entity.StatusInvitation;
 import fr.afpa.choral_riff.entity.Utilisateur;
 import fr.afpa.choral_riff.mapper.InvitationMapper;
 import fr.afpa.choral_riff.repositories.EnsembleRepository;
@@ -22,15 +22,18 @@ public class InvitationService {
     private final InvitationMapper invitationMapper;
     private final EnsembleRepository ensembleRepository;
     private final UtilisateurRepository utilisateurRepository;
+    private final MailService mailService;
 
     public InvitationService(InvitationRepository invitationRepository,
             InvitationMapper invitationMapper,
             EnsembleRepository ensembleRepository,
-            UtilisateurRepository utilisateurRepository) {
+            UtilisateurRepository utilisateurRepository,
+            MailService mailService) {
         this.invitationRepository = invitationRepository;
         this.invitationMapper = invitationMapper;
         this.ensembleRepository = ensembleRepository;
         this.utilisateurRepository = utilisateurRepository;
+        this.mailService = mailService;
     }
 
     // === Récupérer toutes les invitations pour un ensemble ===
@@ -57,11 +60,14 @@ public class InvitationService {
         utilisateurOpt.ifPresent(invitation::setUtilisateur);
 
         // Initialiser le statut et autres champs
-        invitation.setEtat(StatutInvitation.EN_ATTENTE);
+        invitation.setEtat(StatusInvitation.EN_ATTENTE);
         invitation.setToken(UUID.randomUUID().toString());
 
         // Sauvegarder l'invitation
         Invitation saved = invitationRepository.save(invitation);
+
+        // envoi de l'email
+        mailService.sendInvitationEmail(saved.getEmailInvite(), saved.getToken());
 
         return invitationMapper.toDto(saved);
     }
@@ -71,7 +77,7 @@ public class InvitationService {
         Invitation invitation = invitationRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Invitation non trouvée avec ce token."));
 
-        invitation.setEtat(StatutInvitation.ACCEPTEE);
+        invitation.setEtat(StatusInvitation.ACCEPTEE);
         return invitationMapper.toDto(invitationRepository.save(invitation));
     }
 
@@ -80,7 +86,7 @@ public class InvitationService {
         Invitation invitation = invitationRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Invitation non trouvée avec ce token."));
 
-        invitation.setEtat(StatutInvitation.REFUSEE);
+        invitation.setEtat(StatusInvitation.REFUSEE);
         return invitationMapper.toDto(invitationRepository.save(invitation));
     }
 

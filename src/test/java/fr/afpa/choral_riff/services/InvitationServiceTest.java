@@ -3,7 +3,7 @@ package fr.afpa.choral_riff.services;
 import fr.afpa.choral_riff.dto.InvitationDTO;
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Invitation;
-import fr.afpa.choral_riff.entity.StatutInvitation;
+import fr.afpa.choral_riff.entity.StatusInvitation;
 import fr.afpa.choral_riff.entity.Utilisateur;
 import fr.afpa.choral_riff.mapper.InvitationMapper;
 import fr.afpa.choral_riff.repositories.EnsembleRepository;
@@ -38,7 +38,7 @@ public class InvitationServiceTest {
                 invitationRepository,
                 invitationMapper,
                 ensembleRepository,
-                utilisateurRepository);
+                utilisateurRepository, null);
     }
 
     @Test
@@ -87,13 +87,13 @@ public class InvitationServiceTest {
     public void testAcceptInvitation_Success() {
         String token = "token123";
         Invitation invitation = new Invitation();
-        invitation.setEtat(StatutInvitation.EN_ATTENTE);
+        invitation.setEtat(StatusInvitation.EN_ATTENTE);
 
         Invitation updated = new Invitation();
-        updated.setEtat(StatutInvitation.ACCEPTEE);
+        updated.setEtat(StatusInvitation.ACCEPTEE);
 
         InvitationDTO dto = new InvitationDTO();
-        dto.setEtat(StatutInvitation.ACCEPTEE.name());
+        dto.setEtat(StatusInvitation.ACCEPTEE.name());
 
         when(invitationRepository.findByToken(token)).thenReturn(Optional.of(invitation));
         when(invitationRepository.save(invitation)).thenReturn(updated);
@@ -107,13 +107,13 @@ public class InvitationServiceTest {
     public void testRefuseInvitation_Success() {
         String token = "tokenRefuse";
         Invitation invitation = new Invitation();
-        invitation.setEtat(StatutInvitation.EN_ATTENTE);
+        invitation.setEtat(StatusInvitation.EN_ATTENTE);
 
         Invitation updated = new Invitation();
-        updated.setEtat(StatutInvitation.REFUSEE);
+        updated.setEtat(StatusInvitation.REFUSEE);
 
         InvitationDTO dto = new InvitationDTO();
-        dto.setEtat(StatutInvitation.REFUSEE.name());
+        dto.setEtat(StatusInvitation.REFUSEE.name());
 
         when(invitationRepository.findByToken(token)).thenReturn(Optional.of(invitation));
         when(invitationRepository.save(invitation)).thenReturn(updated);

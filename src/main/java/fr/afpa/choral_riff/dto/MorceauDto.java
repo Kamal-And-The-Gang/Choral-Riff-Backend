@@ -26,6 +26,6 @@ public record MorceauDto(
                 String descriptif,
                 Long ensembleId,
                 Long createurId,
-                Set<DocumentDto> documents // Active aussi la validation des documents (si tu en mets)
+                Set<DocumentDto> documents // Active aussi la validation des documents 
 ) {
 }

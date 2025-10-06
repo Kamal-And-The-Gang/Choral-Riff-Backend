@@ -9,33 +9,25 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface DocumentMapper {
 
-    /**
-     * Convertit une entité Document en DTO DocumentDto.
-     * Les IDs des relations sont extraits.
-     */
-
     // ENTITY → DTO
     @Mapping(source = "utilisateur.id", target = "utilisateurId")
     @Mapping(source = "morceau.id", target = "morceauId")
     @Mapping(source = "id", target = "id_document")
+    @Mapping(target = "documentInstruments", ignore = true)  // <-- important ici
     DocumentDto toDto(Document document);
 
-    /**
-     * Convertit un DTO DocumentDto en entité Document.
-     * Relations complexes ignorées (à gérer manuellement).
-     */
+    // DTO → ENTITY
     @Mapping(target = "utilisateur", ignore = true)
     @Mapping(target = "morceau", ignore = true)
     @Mapping(source = "id_document", target = "id")
+    @Mapping(target = "documentInstruments", ignore = true)  // optionnel ici si tu ne veux pas gérer ça
     Document toEntity(DocumentDto dto);
 
-    /**
-     * Met à jour une entité Document existante à partir d'un DTO.
-     * Relations complexes ignorées.
-     */
+    // Mise à jour ENTITY depuis DTO
     @Mapping(target = "utilisateur", ignore = true)
     @Mapping(target = "morceau", ignore = true)
     @Mapping(source = "id_document", target = "id")
+    @Mapping(target = "documentInstruments", ignore = true)
     void updateEntityFromDto(DocumentDto dto, @MappingTarget Document entity);
 
 }

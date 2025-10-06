@@ -4,6 +4,8 @@ import fr.afpa.choral_riff.dto.UtilisateurDto;
 import fr.afpa.choral_riff.entity.Utilisateur;
 import fr.afpa.choral_riff.mapper.UtilisateurMapper;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,10 +16,13 @@ public class UtilisateurService {
 
     private final UtilisateurRepository utilisateurRepository;
     private final UtilisateurMapper utilisateurMapper;
+    private final PasswordEncoder passwordEncoder; // <-- Ajouté
 
-    public UtilisateurService(UtilisateurRepository utilisateurRepository, UtilisateurMapper utilisateurMapper) {
+    public UtilisateurService(UtilisateurRepository utilisateurRepository, UtilisateurMapper utilisateurMapper,
+            PasswordEncoder passwordEncoder) {
         this.utilisateurRepository = utilisateurRepository;
         this.utilisateurMapper = utilisateurMapper;
+        this.passwordEncoder = passwordEncoder; // <-- Ajouté
     }
 
     public UtilisateurDto getById(Long id) {
@@ -35,6 +40,9 @@ public class UtilisateurService {
         Utilisateur entity = utilisateurMapper.toEntity(dto);
         // ici tu peux gérer motDePasse si besoin, ex : encoder le mot de passe avant
         // save
+
+        // Encoder le mot de passe AVANT sauvegarde
+        entity.setMotDePasse(passwordEncoder.encode(entity.getMotDePasse()));
         Utilisateur saved = utilisateurRepository.save(entity);
         return utilisateurMapper.toDto(saved);
     }

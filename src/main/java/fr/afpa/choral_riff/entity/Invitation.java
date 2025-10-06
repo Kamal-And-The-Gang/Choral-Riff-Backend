@@ -16,7 +16,7 @@ public class Invitation {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private StatutInvitation etat;
+    private StatusInvitation etat;
 
     private LocalDate dateEnvoi;
 
@@ -45,7 +45,7 @@ public class Invitation {
     public Invitation() {
     }
 
-    public Invitation(StatutInvitation etat, LocalDate dateEnvoi, String token, Ensemble ensemble,
+    public Invitation(StatusInvitation etat, LocalDate dateEnvoi, String token, Ensemble ensemble,
             Utilisateur utilisateur) {
         this.etat = etat;
         this.dateEnvoi = dateEnvoi;
@@ -62,11 +62,11 @@ public class Invitation {
         this.id = id;
     }
 
-    public StatutInvitation getEtat() {
+    public StatusInvitation getEtat() {
         return etat;
     }
 
-    public void setEtat(StatutInvitation etat) {
+    public void setEtat(StatusInvitation etat) {
         this.etat = etat;
     }
 

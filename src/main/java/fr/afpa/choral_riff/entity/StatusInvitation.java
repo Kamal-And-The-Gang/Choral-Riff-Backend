@@ -1,6 +1,6 @@
 package fr.afpa.choral_riff.entity;
 
-public enum StatutInvitation {
+public enum StatusInvitation {
     EN_ATTENTE,
     ACCEPTEE,
     REFUSEE

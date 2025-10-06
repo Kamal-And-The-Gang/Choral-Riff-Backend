@@ -11,7 +11,8 @@ import java.util.List;
 public interface InvitationMapper {
 
     // ===== Entity -> DTO =====
-    @Mapping(source = "ensemble.ensembleId", target = "ensembleId")
+    @Mapping(source = "ensemble.id", target = "ensembleId")
+
     @Mapping(source = "ensemble.nom", target = "ensembleNom")
     @Mapping(source = "utilisateur.email", target = "emailInvite") // on ne mappe que l'email
     InvitationDTO toDto(Invitation invitation);
@@ -20,7 +21,7 @@ public interface InvitationMapper {
     @Mapping(target = "ensemble", ignore = true)
     @Mapping(target = "utilisateur", ignore = true)
     @Mapping(target = "id", ignore = true)
-   @Mapping(target = "etat", expression = "java(fr.afpa.choral_riff.entity.StatutInvitation.valueOf(dto.getEtat()))")
+    @Mapping(target = "etat", expression = "java(fr.afpa.choral_riff.entity.StatusInvitation.valueOf(dto.getEtat()))")
 
     Invitation toEntity(InvitationDTO dto);
 
@@ -31,6 +32,6 @@ public interface InvitationMapper {
     @Mapping(target = "ensemble", ignore = true)
     @Mapping(target = "utilisateur", ignore = true)
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "etat", expression = "java(fr.afpa.choral_riff.entity.StatutInvitation.valueOf(dto.getEtat()))")
+    @Mapping(target = "etat", expression = "java(fr.afpa.choral_riff.entity.StatusInvitation.valueOf(dto.getEtat()))")
     void updateEntityFromDto(InvitationDTO dto, @MappingTarget Invitation entity);
 }

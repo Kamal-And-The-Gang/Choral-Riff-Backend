@@ -12,7 +12,8 @@ public interface MorceauMapper {
      * Les IDs des relations Ensemble et Createur sont extraits.
      */
 
-    @Mapping(source = "ensemble.ensembleId", target = "ensembleId")
+    @Mapping(source = "ensemble.id", target = "ensembleId")
+
     @Mapping(source = "createur.id", target = "createurId")
     MorceauDto toDto(Morceau morceau);
 
