@@ -13,7 +13,6 @@ public interface MorceauMapper {
      */
 
     @Mapping(source = "ensemble.id", target = "ensembleId")
-
     @Mapping(source = "createur.id", target = "createurId")
     MorceauDto toDto(Morceau morceau);
 

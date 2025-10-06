@@ -19,7 +19,7 @@ import java.util.stream.Stream;
  * The type User details service.
  */
 @Service
-public class UserDetailsServiceImpl implements UserDetailsServiceImpl {
+public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UtilisateurRepository utilisateurRepository;
 

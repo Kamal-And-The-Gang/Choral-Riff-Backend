@@ -1,5 +1,6 @@
 package fr.afpa.choral_riff.mapper;
 
+import fr.afpa.choral_riff.dto.RegisterDto;
 import fr.afpa.choral_riff.dto.UtilisateurDto;
 import fr.afpa.choral_riff.entity.Utilisateur;
 import org.mapstruct.*;
@@ -21,7 +22,10 @@ public interface UtilisateurMapper {
     Utilisateur toEntity(UtilisateurDto dto);
 
     // Pour les listes
+    Utilisateur fromRegisterDto(RegisterDto dto);
+
     List<UtilisateurDto> toDtoList(List<Utilisateur> utilisateurs);
+
     List<Utilisateur> toEntityList(List<UtilisateurDto> dtos);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

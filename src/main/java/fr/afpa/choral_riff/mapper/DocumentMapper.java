@@ -13,7 +13,7 @@ public interface DocumentMapper {
     @Mapping(source = "utilisateur.id", target = "utilisateurId")
     @Mapping(source = "morceau.id", target = "morceauId")
     @Mapping(source = "id", target = "id_document")
-    @Mapping(target = "documentInstruments", ignore = true)  // <-- important ici
+    // @Mapping(target = "documentInstruments", ignore = true)  // <-- important ici
     DocumentDto toDto(Document document);
 
     // DTO → ENTITY
