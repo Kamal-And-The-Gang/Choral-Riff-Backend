@@ -10,7 +10,7 @@ import java.util.List;
 public interface InvitationMapper {
 
     // ===== Entity -> DTO =====
-    @Mapping(source = "ensemble.ensembleId", target = "ensembleId")
+    @Mapping(source = "ensemble.id", target = "id")
     @Mapping(source = "ensemble.nom", target = "ensembleNom")
     @Mapping(source = "utilisateur.email", target = "emailInvite") // on ne mappe que l'email
     InvitationDTO toDto(Invitation invitation);

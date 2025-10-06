@@ -1,7 +1,11 @@
 package fr.afpa.choral_riff.controllers;
 
 import fr.afpa.choral_riff.dto.LoginDTO;
+import fr.afpa.choral_riff.dto.RegisterDto;
+import fr.afpa.choral_riff.dto.UtilisateurDto;
 import fr.afpa.choral_riff.services.LoginService;
+import fr.afpa.choral_riff.services.UtilisateurService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +19,11 @@ import java.util.Map;
 public class AuthController {
 
     private final LoginService loginService;
+    private final UtilisateurService utilisateurService;
 
-    public AuthController(LoginService loginService) {
+    public AuthController(LoginService loginService, UtilisateurService utilisateurService) {
         this.loginService = loginService;
+        this.utilisateurService = utilisateurService;
     }
 
     /**
@@ -30,6 +36,12 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> login(@RequestBody LoginDTO loginDTO) {
         Map<String, String> tokens = loginService.login(loginDTO);
         return ResponseEntity.ok(tokens);
+    }
+
+     @PostMapping("/register")
+    public ResponseEntity<UtilisateurDto> register(@RequestBody RegisterDto dto) {
+        UtilisateurDto created = utilisateurService.register(dto);
+        return ResponseEntity.ok(created);
     }
 }
 
