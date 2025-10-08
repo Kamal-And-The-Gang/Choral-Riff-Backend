@@ -3,12 +3,10 @@ package fr.afpa.choral_riff.services;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.NoSuchElementException;
-
 import fr.afpa.choral_riff.dto.UtilisateurDto;
 import fr.afpa.choral_riff.entity.Utilisateur;
 import fr.afpa.choral_riff.mapper.UtilisateurMapper;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
-// import fr.afpa.choral_riff.services.UtilisateurService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -38,7 +36,6 @@ public class UtilisateurServiceTest {
         utilisateur.setNom("Dupont");
         utilisateur.setPrenom("Jean");
         utilisateur.setEmail("dupont@example.com");
-
         utilisateurDto = new UtilisateurDto(1L, "Dupont", "Jean", "dupont@example.com", null);
     }
 

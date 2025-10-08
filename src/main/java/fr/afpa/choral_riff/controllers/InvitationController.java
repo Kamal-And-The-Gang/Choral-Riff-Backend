@@ -2,6 +2,7 @@ package fr.afpa.choral_riff.controllers;
 
 import fr.afpa.choral_riff.dto.InvitationDTO;
 import fr.afpa.choral_riff.services.InvitationService;
+import fr.afpa.choral_riff.services.MailService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +14,30 @@ import java.util.List;
 public class InvitationController {
 
     private final InvitationService invitationService;
+    private final MailService mailService;
 
-    public InvitationController(InvitationService invitationService) {
+    public InvitationController(InvitationService invitationService, MailService mailService) {
         this.invitationService = invitationService;
+        this.mailService = mailService;
+    }
+
+    /**
+     * Créer une invitation et envoyer un email automatiquement.
+     */
+    @PostMapping
+    public ResponseEntity<InvitationDTO> create(@RequestBody InvitationDTO invitationDTO) {
+        System.out.println(" Création d'une invitation pour : " + invitationDTO.getEmailInvite());
+
+        InvitationDTO created = invitationService.create(invitationDTO);
+
+        try {
+            mailService.sendInvitationEmail(created.getEmailInvite(), created.getToken());
+            System.out.println(" Email envoyé à " + created.getEmailInvite());
+        } catch (Exception e) {
+            System.err.println(" Erreur lors de l'envoi de l'email : " + e.getMessage());
+        }
+
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     /**
@@ -25,15 +47,6 @@ public class InvitationController {
     public ResponseEntity<List<InvitationDTO>> getByEnsemble(@PathVariable Long ensembleId) {
         List<InvitationDTO> invitations = invitationService.getAllByEnsembleId(ensembleId);
         return ResponseEntity.ok(invitations);
-    }
-
-    /**
-     * Créer une invitation.
-     */
-    @PostMapping
-    public ResponseEntity<InvitationDTO> create(@RequestBody InvitationDTO invitationDTO) {
-        InvitationDTO created = invitationService.create(invitationDTO);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     /**
@@ -55,7 +68,7 @@ public class InvitationController {
     }
 
     /**
-     * Supprimer une invitation (par son ID).
+     * Supprimer une invitation par son ID.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
@@ -64,7 +77,7 @@ public class InvitationController {
     }
 
     /**
-     * Récupérer une invitation via son token (utile par exemple pour le front en réception de lien email).
+     * Récupérer une invitation via son token.
      */
     @GetMapping("/token/{token}")
     public ResponseEntity<InvitationDTO> getByToken(@PathVariable String token) {
@@ -72,5 +85,3 @@ public class InvitationController {
         return ResponseEntity.ok(dto);
     }
 }
-
-

@@ -38,8 +38,8 @@ class EnsembleServiceTest {
         ensembleEntity.setId(1L);
         ensembleEntity.setNom("Ensemble Test");
 
-        //DTO avec record(pas de setters)
-        ensembleDto=new EnsembleDto(1L, "Ensemble Test", null, null);
+        // DTO avec record(pas de setters)
+        ensembleDto = new EnsembleDto(1L, "Ensemble Test", null, null);
     }
 
     @Test
@@ -92,7 +92,7 @@ class EnsembleServiceTest {
         when(ensembleRepository.findById(1L)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-            () -> ensembleService.getById(1L));
+                () -> ensembleService.getById(1L));
 
         assertEquals("Ensemble non trouvé avec l’ID : 1", exception.getMessage());
 
@@ -126,7 +126,7 @@ class EnsembleServiceTest {
         when(ensembleRepository.findById(1L)).thenReturn(Optional.empty());
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-            () -> ensembleService.update(1L, ensembleDto));
+                () -> ensembleService.update(1L, ensembleDto));
 
         assertEquals("Impossible de mettre à jour : ID 1 introuvable", exception.getMessage());
 
@@ -150,7 +150,7 @@ class EnsembleServiceTest {
         when(ensembleRepository.existsById(1L)).thenReturn(false);
 
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-            () -> ensembleService.delete(1L));
+                () -> ensembleService.delete(1L));
 
         assertEquals("Impossible de supprimer : ensemble avec ID 1 introuvable", exception.getMessage());
 
@@ -158,4 +158,3 @@ class EnsembleServiceTest {
         verify(ensembleRepository, never()).deleteById(anyLong());
     }
 }
-

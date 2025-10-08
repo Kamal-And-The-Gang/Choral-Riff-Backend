@@ -3,7 +3,6 @@ package fr.afpa.choral_riff.services;
 import fr.afpa.choral_riff.dto.RegisterDto;
 import fr.afpa.choral_riff.dto.UtilisateurDto;
 import fr.afpa.choral_riff.entity.Utilisateur;
-
 import fr.afpa.choral_riff.mapper.UtilisateurMapper;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
