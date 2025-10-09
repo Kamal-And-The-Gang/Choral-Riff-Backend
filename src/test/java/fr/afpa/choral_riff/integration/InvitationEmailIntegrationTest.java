@@ -59,7 +59,7 @@ public class InvitationEmailIntegrationTest {
                 .content(objectMapper.writeValueAsString(dto)))
             .andExpect(status().isCreated());
 
-        // Vérifie que l’email a bien été "envoyé"
+        // Est-ce- que l’email a bien été "envoyé"=> Vérification
         verify(mailService, times(1)).sendInvitationEmail(eq("invite@example.com"), anyString());
     }
 }

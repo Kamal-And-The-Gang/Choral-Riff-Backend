@@ -88,6 +88,6 @@ public class InvitationServiceTest {
         verify(invitationRepository).save(argThat(inv -> inv.getEnsemble().equals(ensemble)));
     }
 
-    // ... le reste de tes tests inchangés
+ 
 
 }

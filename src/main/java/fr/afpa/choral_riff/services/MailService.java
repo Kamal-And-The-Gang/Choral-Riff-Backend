@@ -24,7 +24,7 @@ public class MailService {
         message.setTo(to);
         message.setSubject(subject);
         message.setText(text);
-        message.setFrom("98aa7e002@smtp-brevo.com"); // Assure-toi que c'est bien celui dans application.properties
+        message.setFrom("98aa7e002@smtp-brevo.com"); //Aussi dans application.properties
 
         mailSender.send(message);
     }
