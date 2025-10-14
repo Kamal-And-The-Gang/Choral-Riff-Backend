@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+
 public class DocumentService {
 
     private final DocumentRepository documentRepository;
@@ -31,6 +32,9 @@ public class DocumentService {
         this.documentMapper = documentMapper;
     }
 
+    /** 
+     * @return List<DocumentDto>
+     */
     // Tous les documents
     public List<DocumentDto> getAll() {
         return documentRepository.findAll().stream()
@@ -38,6 +42,10 @@ public class DocumentService {
                 .collect(Collectors.toList());
     }
 
+    /** 
+     * @param id
+     * @return DocumentDto
+     */
     // Un document par ID
     public DocumentDto getById(Long id) {
         Document document = documentRepository.findById(id)
@@ -45,6 +53,10 @@ public class DocumentService {
         return documentMapper.toDto(document);
     }
 
+    /** 
+     * @param morceauId
+     * @return List<DocumentDto>
+     */
     public List<DocumentDto> getDocumentsByMorceauId(Long morceauId) {
         Morceau morceau = morceauRepository.findById(morceauId)
                 .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID : " + morceauId));
@@ -56,6 +68,10 @@ public class DocumentService {
                 .collect(Collectors.toList());
     }
 
+    /** 
+     * @param utilisateurId
+     * @return List<DocumentDto>
+     */
     public List<DocumentDto> getDocumentsByUtilisateurId(Long utilisateurId) {
         Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID : " + utilisateurId));
@@ -67,6 +83,10 @@ public class DocumentService {
                 .collect(Collectors.toList());
     }
 
+    /** 
+     * @param ensembleId
+     * @return List<DocumentDto>
+     */
     public List<DocumentDto> getDocumentsByEnsembleId(Long ensembleId) {
         // Récupérer tous les morceaux liés à l'ensemble
         List<Morceau> morceaux = morceauRepository.findByEnsembleId(ensembleId);

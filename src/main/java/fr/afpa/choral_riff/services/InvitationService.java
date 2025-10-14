@@ -1,10 +1,15 @@
 package fr.afpa.choral_riff.services;
 
+import fr.afpa.choral_riff.dto.CreateInvitationDTO;
+
+import jakarta.persistence.EntityNotFoundException;
+
 import fr.afpa.choral_riff.dto.InvitationDTO;
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Invitation;
 import fr.afpa.choral_riff.entity.StatusInvitation;
 import fr.afpa.choral_riff.entity.Utilisateur;
+import fr.afpa.choral_riff.mapper.CreateInvitationMapper;
 import fr.afpa.choral_riff.mapper.InvitationMapper;
 import fr.afpa.choral_riff.repositories.EnsembleRepository;
 import fr.afpa.choral_riff.repositories.InvitationRepository;
@@ -23,17 +28,22 @@ public class InvitationService {
     private final EnsembleRepository ensembleRepository;
     private final UtilisateurRepository utilisateurRepository;
     private final MailService mailService;
+    private final CreateInvitationMapper createInvitationMapper;
+
 
     public InvitationService(InvitationRepository invitationRepository,
             InvitationMapper invitationMapper,
             EnsembleRepository ensembleRepository,
             UtilisateurRepository utilisateurRepository,
-            MailService mailService) {
+            MailService mailService,
+             CreateInvitationMapper createInvitationMapper
+              ) {
         this.invitationRepository = invitationRepository;
         this.invitationMapper = invitationMapper;
         this.ensembleRepository = ensembleRepository;
         this.utilisateurRepository = utilisateurRepository;
         this.mailService = mailService;
+        this.createInvitationMapper = createInvitationMapper;
     }
 
     // === Récupérer toutes les invitations pour un ensemble ===
@@ -43,34 +53,61 @@ public class InvitationService {
                 .collect(Collectors.toList());
     }
 
-    // === Créer une invitation ===
-    public InvitationDTO create(InvitationDTO dto) {
-        // Chercher l'utilisateur par email
-        Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findByEmail(dto.getEmailInvite());
-
-        // Chercher l'ensemble par id
-        Ensemble ensemble = ensembleRepository.findById(dto.getEnsembleId())
-                .orElseThrow(() -> new RuntimeException("Ensemble non trouvé"));
-
-        Invitation invitation = new Invitation();
-        invitation.setEmailInvite(dto.getEmailInvite());
-        invitation.setEnsemble(ensemble);
-
-        // Si utilisateur trouvé, on le rattache, sinon on laisse null
-        utilisateurOpt.ifPresent(invitation::setUtilisateur);
-
-        // Initialiser le statut et autres champs
-        invitation.setEtat(StatusInvitation.EN_ATTENTE);
-        invitation.setToken(UUID.randomUUID().toString());
-
-        // Sauvegarder l'invitation
-        Invitation saved = invitationRepository.save(invitation);
-
-        // envoi de l'email
-        mailService.sendInvitationEmail(saved.getEmailInvite(), saved.getToken());
-
-        return invitationMapper.toDto(saved);
+public InvitationDTO creerInvitation(CreateInvitationDTO dto) {
+    // Vérifie si une invitation existe déjà pour cet email et ensemble
+    if (invitationRepository.existsByEmailInviteAndEnsembleId(dto.getEmailInvite(), dto.getEnsembleId())) {
+        throw new IllegalArgumentException("Une invitation existe déjà pour cet email.");
     }
+
+    // Récupère l'ensemble
+    Ensemble ensemble = ensembleRepository.findById(dto.getEnsembleId())
+        .orElseThrow(() -> new EntityNotFoundException("Ensemble introuvable"));
+
+    // Crée l'invitation simple
+    Invitation invitation = new Invitation();
+    invitation.setEmailInvite(dto.getEmailInvite());
+    invitation.setEnsemble(ensemble);
+
+    // Sauvegarde
+    invitationRepository.save(invitation);
+
+    // Convertit et renvoie le DTO
+    return invitationMapper.toDto(invitation);
+}
+
+
+
+
+
+
+
+
+    
+
+  public InvitationDTO createSimple(CreateInvitationDTO dto) {
+    // Vérifie s'il existe déjà une invitation pour cet email
+    if (invitationRepository.existsByEmailInvite(dto.getEmailInvite())) {
+        throw new IllegalArgumentException("Une invitation existe déjà pour cet email.");
+    }
+
+    // Cherche l'ensemble par ID
+    Ensemble ensemble = ensembleRepository.findById(dto.getEnsembleId())
+            .orElseThrow(() -> new RuntimeException("Ensemble non trouvé"));
+
+    // Crée une nouvelle invitation à partir du DTO
+    Invitation invitation = createInvitationMapper.toEntity(dto);
+
+    // Associe l'ensemble à l'invitation
+    invitation.setEnsemble(ensemble);
+
+    // Sauvegarde l'invitation en base
+    Invitation saved = invitationRepository.save(invitation);
+
+    // Retourne le DTO résultat
+    return invitationMapper.toDto(saved);
+}
+
+
 
     // === Accepter une invitation via token ===
     public InvitationDTO accept(String token) {

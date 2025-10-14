@@ -20,8 +20,8 @@ public class Instrument {
     @Column(nullable = false)
     private String nom;
 
-   @OneToMany(mappedBy = "instrument", cascade = CascadeType.ALL, orphanRemoval = true)
-private Set<DocumentInstrument> documentInstruments;
+    @OneToMany(mappedBy = "instrument", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<DocumentInstrument> documentInstruments;
 
     // 26/09
     @ManyToOne
@@ -43,7 +43,6 @@ private Set<DocumentInstrument> documentInstruments;
     public void setNom(String nom) {
         this.nom = nom;
     }
-
 
     public Ensemble getEnsemble() {
         return ensemble;

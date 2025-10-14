@@ -20,7 +20,7 @@ public class Invitation {
 
     private LocalDate dateEnvoi;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = true)
     private String token; // Token unique d'invitation
 
     /**

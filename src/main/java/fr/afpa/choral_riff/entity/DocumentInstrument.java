@@ -13,6 +13,8 @@ import java.time.LocalDate;
 @Table(name = "document_instrument", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "document_id", "instrument_id" })
 })
+
+
 public class DocumentInstrument {
 
     @Id
@@ -39,31 +41,52 @@ public class DocumentInstrument {
         this.dateAjout = dateAjout;
     }
 
+    /** 
+     * @return Long
+     */
     // --- Getters / Setters ---
     public Long getId() {
         return id;
     }
 
+    /** 
+     * @return Document
+     */
     public Document getDocument() {
         return document;
     }
 
+    /** 
+     * @param document
+     */
     public void setDocument(Document document) {
         this.document = document;
     }
 
+    /** 
+     * @return Instrument
+     */
     public Instrument getInstrument() {
         return instrument;
     }
 
+    /** 
+     * @param instrument
+     */
     public void setInstrument(Instrument instrument) {
         this.instrument = instrument;
     }
 
+    /** 
+     * @return LocalDate
+     */
     public LocalDate getDateAjout() {
         return dateAjout;
     }
 
+    /** 
+     * @param dateAjout
+     */
     public void setDateAjout(LocalDate dateAjout) {
         this.dateAjout = dateAjout;
     }

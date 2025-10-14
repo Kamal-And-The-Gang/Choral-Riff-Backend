@@ -1,10 +1,10 @@
 package fr.afpa.choral_riff.services;
 
+import fr.afpa.choral_riff.dto.CreateInvitationDTO;
 import fr.afpa.choral_riff.dto.InvitationDTO;
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Invitation;
-import fr.afpa.choral_riff.entity.StatusInvitation;
-import fr.afpa.choral_riff.entity.Utilisateur;
+import fr.afpa.choral_riff.mapper.CreateInvitationMapper;
 import fr.afpa.choral_riff.mapper.InvitationMapper;
 import fr.afpa.choral_riff.repositories.EnsembleRepository;
 import fr.afpa.choral_riff.repositories.InvitationRepository;
@@ -12,7 +12,7 @@ import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,6 +25,7 @@ public class InvitationServiceTest {
     private InvitationMapper invitationMapper;
     private EnsembleRepository ensembleRepository;
     private UtilisateurRepository utilisateurRepository;
+    private CreateInvitationMapper createInvitationMapper;
     private InvitationService invitationService;
     private MailService mailServiceMock;
 
@@ -34,22 +35,24 @@ public class InvitationServiceTest {
         invitationMapper = mock(InvitationMapper.class);
         ensembleRepository = mock(EnsembleRepository.class);
         utilisateurRepository = mock(UtilisateurRepository.class);
-        mailServiceMock = mock(MailService.class);  // Correction : ajout du point-virgule
+        createInvitationMapper = mock(CreateInvitationMapper.class);
+        mailServiceMock = mock(MailService.class);
 
         invitationService = new InvitationService(
                 invitationRepository,
                 invitationMapper,
                 ensembleRepository,
                 utilisateurRepository,
-                mailServiceMock);  // Correction : injection du mock ici
+                mailServiceMock,
+                createInvitationMapper);
 
-        doNothing().when(mailServiceMock).sendInvitationEmail(anyString(), anyString()); // mock du mail service
+        doNothing().when(mailServiceMock).sendInvitationEmail(anyString(), anyString());
     }
 
     @Test
-    public void testCreateInvitation_UserNotFound() {
+    public void testCreerInvitation_UserNotFound() {
         // Prépare le DTO avec un email qui n'existe pas
-        InvitationDTO dto = new InvitationDTO();
+        CreateInvitationDTO dto = new CreateInvitationDTO();
         dto.setEmailInvite("missing@example.com");
         dto.setEnsembleId(1L);
 
@@ -61,14 +64,23 @@ public class InvitationServiceTest {
         ensemble.setId(1L);
         when(ensembleRepository.findById(1L)).thenReturn(Optional.of(ensemble));
 
+        // Mock conversion DTO -> entity
+        when(createInvitationMapper.toEntity(any(CreateInvitationDTO.class))).thenAnswer(invocation -> {
+            CreateInvitationDTO argDto = invocation.getArgument(0);
+            Invitation invitation = new Invitation();
+            invitation.setEmailInvite(argDto.getEmailInvite());
+            return invitation;
+        });
+
         // Mock save d'invitation : retourne l'invitation avec un ID
         when(invitationRepository.save(any(Invitation.class))).thenAnswer(invocation -> {
             Invitation inv = invocation.getArgument(0);
             inv.setId(1L);
+            inv.setEnsemble(ensemble);
             return inv;
         });
 
-        // Mock conversion vers DTO : retourne un DTO avec l'id 1L
+        // Mock conversion entity -> DTO
         when(invitationMapper.toDto(any(Invitation.class))).thenAnswer(invocation -> {
             Invitation inv = invocation.getArgument(0);
             InvitationDTO invitationDTO = new InvitationDTO();
@@ -79,7 +91,7 @@ public class InvitationServiceTest {
         });
 
         // Appel de la méthode testée
-        InvitationDTO result = invitationService.create(dto);
+        InvitationDTO result = invitationService.creerInvitation(dto);
 
         // Vérifications
         assertNotNull(result, "Le DTO retourné ne doit pas être null");
@@ -87,7 +99,4 @@ public class InvitationServiceTest {
         verify(invitationRepository).save(argThat(inv -> inv.getUtilisateur() == null));
         verify(invitationRepository).save(argThat(inv -> inv.getEnsemble().equals(ensemble)));
     }
-
- 
-
 }
