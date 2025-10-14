@@ -5,7 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * DTO utilisé pour recevoir les données nécessaires à la création d'une invitation.
+ * DTO utilisé pour recevoir les données nécessaires à la création d'une
+ * invitation.
  */
 public class CreateInvitationDTO {
 

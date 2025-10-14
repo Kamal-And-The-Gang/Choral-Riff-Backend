@@ -18,11 +18,11 @@ import java.time.LocalDate;
  */
 
 public record DocumentDto(
-        Long id_document,
-        String type,
-        String format,
-        LocalDate dateAjout,
-        String urlFichier,
-        Long utilisateurId,
-        Long morceauId) {
+                Long id_document,
+                String type,
+                String format,
+                LocalDate dateAjout,
+                String urlFichier,
+                Long utilisateurId,
+                Long morceauId) {
 }
