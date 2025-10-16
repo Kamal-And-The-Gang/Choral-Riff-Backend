@@ -52,6 +52,18 @@ public class MorceauController {
         return ResponseEntity.ok(morceauService.create(dto));
     }
 
+    @GetMapping("/last")
+    public ResponseEntity<MorceauDto> getLastMorceau() {
+        MorceauDto lastMorceau = morceauService.findLastAddedMorceau();
+
+        if (lastMorceau != null) {
+            return ResponseEntity.ok(lastMorceau);
+        } else {
+            // Si aucun morceau n'est trouvé, renvoyer 404
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     /**
      * Mettre à jour un morceau existant
      */
