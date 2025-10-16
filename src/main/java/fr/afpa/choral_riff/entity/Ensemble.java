@@ -14,6 +14,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 /**
  * Représente un ensemble musical.
  * Un ensemble possède un nom, une description, une date de création,
@@ -35,6 +37,7 @@ public class Ensemble {
     @Column(name = "description", length = 100)
     private String description;
 
+    @CreationTimestamp
     @Column(name = "date_creation")
     private LocalDate dateCreation;
 
@@ -51,7 +54,6 @@ public Ensemble() {
     public Ensemble(String nom, String description, LocalDate dateCreation) {
         this.nom = nom;
         this.description = description;
-        this.dateCreation = dateCreation;
     }
 
     public Long getId() {
