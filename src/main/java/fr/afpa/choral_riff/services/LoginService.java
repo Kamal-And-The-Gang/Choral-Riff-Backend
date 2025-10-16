@@ -57,4 +57,11 @@ public class LoginService {
 
         return response;
     }
+
+    public Map<String, String> logout(String refreshTokenId) {
+    Map<String, String> response = new HashMap<>();
+    response.put("message", "Déconnexion réussie");
+    return response;
+}
+
 }
