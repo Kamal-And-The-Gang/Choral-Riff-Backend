@@ -11,6 +11,7 @@ import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,7 +22,13 @@ public class DocumentService {
         private final MorceauRepository morceauRepository;
         private final UtilisateurRepository utilisateurRepository;
         private final DocumentMapper documentMapper;
-
+/**
+ * 
+ * @param documentRepository
+ * @param morceauRepository
+ * @param utilisateurRepository
+ * @param documentMapper
+ */
         public DocumentService(DocumentRepository documentRepository,
                         MorceauRepository morceauRepository,
                         UtilisateurRepository utilisateurRepository,
@@ -30,6 +37,25 @@ public class DocumentService {
                 this.morceauRepository = morceauRepository;
                 this.utilisateurRepository = utilisateurRepository;
                 this.documentMapper = documentMapper;
+        }
+
+        public DocumentDto create(DocumentDto dto) {
+                Document entity = documentMapper.toEntity(dto);
+
+                // Récupérer et associer l'utilisateur
+                Utilisateur utilisateur = utilisateurRepository.findById(dto.utilisateurId())
+                                .orElseThrow(() -> new NoSuchElementException(
+                                                "Utilisateur non trouvé avec id " + dto.utilisateurId()));
+                entity.setUtilisateur(utilisateur);
+
+                // Récupérer et associer le morceau
+                Morceau morceau = morceauRepository.findById(dto.morceauId())
+                                .orElseThrow(() -> new NoSuchElementException(
+                                                "Morceau non trouvé avec id " + dto.morceauId()));
+                entity.setMorceau(morceau);
+
+                Document saved = documentRepository.save(entity);
+                return documentMapper.toDto(saved);
         }
 
         /**

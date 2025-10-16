@@ -25,19 +25,20 @@ public class InvitationController {
         this.mailService = mailService;
     }
 
-   
-
     @PostMapping
     // ("/invitations")
     public ResponseEntity<InvitationDTO> creerInvitation(
             @Valid @RequestBody CreateInvitationDTO createInvitationDTO) {
 
-                //  LOGS POUR DÉBOGAGE
-    System.out.println(">>> Reçu dans creerInvitation <<<");
-    System.out.println("Email reçu : " + createInvitationDTO.getEmailInvite());
-    System.out.println("EnsembleId reçu : " + createInvitationDTO.getEnsembleId());
+        // LOGS POUR DÉBOGAGE
+        System.out.println(">>> Reçu dans creerInvitation <<<");
+        System.out.println("Email reçu : " + createInvitationDTO.getEmailInvite());
+        System.out.println("EnsembleId reçu : " + createInvitationDTO.getEnsembleId());
 
         InvitationDTO created = invitationService.creerInvitation(createInvitationDTO);
+        // Envoi du mail avec le token et l'email récupéré
+        mailService.sendInvitationEmail(created.getEmailInvite(), null);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 

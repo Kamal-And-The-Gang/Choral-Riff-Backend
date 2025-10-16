@@ -14,7 +14,6 @@ import fr.afpa.choral_riff.mapper.InvitationMapper;
 import fr.afpa.choral_riff.repositories.EnsembleRepository;
 import fr.afpa.choral_riff.repositories.InvitationRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
@@ -68,8 +67,15 @@ public InvitationDTO creerInvitation(CreateInvitationDTO dto) {
     invitation.setEmailInvite(dto.getEmailInvite());
     invitation.setEnsemble(ensemble);
 
+    // Générer et assigner un token
+    String token = UUID.randomUUID().toString();
+    invitation.setToken(token);
+
     // Sauvegarde
     invitationRepository.save(invitation);
+
+     // Envoyer le mail avec le token
+    mailService.sendInvitationEmail(invitation.getEmailInvite(), null);
 
     // Convertit et renvoie le DTO
     return invitationMapper.toDto(invitation);
