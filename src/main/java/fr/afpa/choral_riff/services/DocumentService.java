@@ -17,87 +17,88 @@ import java.util.stream.Collectors;
 
 public class DocumentService {
 
-    private final DocumentRepository documentRepository;
-    private final MorceauRepository morceauRepository;
-    private final UtilisateurRepository utilisateurRepository;
-    private final DocumentMapper documentMapper;
+        private final DocumentRepository documentRepository;
+        private final MorceauRepository morceauRepository;
+        private final UtilisateurRepository utilisateurRepository;
+        private final DocumentMapper documentMapper;
 
-    public DocumentService(DocumentRepository documentRepository,
-            MorceauRepository morceauRepository,
-            UtilisateurRepository utilisateurRepository,
-            DocumentMapper documentMapper) {
-        this.documentRepository = documentRepository;
-        this.morceauRepository = morceauRepository;
-        this.utilisateurRepository = utilisateurRepository;
-        this.documentMapper = documentMapper;
-    }
+        public DocumentService(DocumentRepository documentRepository,
+                        MorceauRepository morceauRepository,
+                        UtilisateurRepository utilisateurRepository,
+                        DocumentMapper documentMapper) {
+                this.documentRepository = documentRepository;
+                this.morceauRepository = morceauRepository;
+                this.utilisateurRepository = utilisateurRepository;
+                this.documentMapper = documentMapper;
+        }
 
-    /** 
-     * @return List<DocumentDto>
-     */
-    // Tous les documents
-    public List<DocumentDto> getAll() {
-        return documentRepository.findAll().stream()
-                .map(documentMapper::toDto)
-                .collect(Collectors.toList());
-    }
+        /**
+         * @return List<DocumentDto>
+         */
+        // Tous les documents
+        public List<DocumentDto> getAll() {
+                return documentRepository.findAll().stream()
+                                .map(documentMapper::toDto)
+                                .collect(Collectors.toList());
+        }
 
-    /** 
-     * @param id
-     * @return DocumentDto
-     */
-    // Un document par ID
-    public DocumentDto getById(Long id) {
-        Document document = documentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Document non trouvé avec l'ID : " + id));
-        return documentMapper.toDto(document);
-    }
+        /**
+         * @param id
+         * @return DocumentDto
+         */
+        // Un document par ID
+        public DocumentDto getById(Long id) {
+                Document document = documentRepository.findById(id)
+                                .orElseThrow(() -> new RuntimeException("Document non trouvé avec l'ID : " + id));
+                return documentMapper.toDto(document);
+        }
 
-    /** 
-     * @param morceauId
-     * @return List<DocumentDto>
-     */
-    public List<DocumentDto> getDocumentsByMorceauId(Long morceauId) {
-        Morceau morceau = morceauRepository.findById(morceauId)
-                .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID : " + morceauId));
+        /**
+         * @param morceauId
+         * @return List<DocumentDto>
+         */
+        public List<DocumentDto> getDocumentsByMorceauId(Long morceauId) {
+                Morceau morceau = morceauRepository.findById(morceauId)
+                                .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID : " + morceauId));
 
-        List<Document> documents = documentRepository.findByMorceau(morceau);
+                List<Document> documents = documentRepository.findByMorceau(morceau);
 
-        return documents.stream()
-                .map(documentMapper::toDto)
-                .collect(Collectors.toList());
-    }
+                return documents.stream()
+                                .map(documentMapper::toDto)
+                                .collect(Collectors.toList());
+        }
 
-    /** 
-     * @param utilisateurId
-     * @return List<DocumentDto>
-     */
-    public List<DocumentDto> getDocumentsByUtilisateurId(Long utilisateurId) {
-        Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID : " + utilisateurId));
+        /**
+         * @param utilisateurId
+         * @return List<DocumentDto>
+         */
+        public List<DocumentDto> getDocumentsByUtilisateurId(Long utilisateurId) {
+                Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+                                .orElseThrow(() -> new RuntimeException(
+                                                "Utilisateur non trouvé avec l'ID : " + utilisateurId));
 
-        List<Document> documents = documentRepository.findByUtilisateur(utilisateur);
+                List<Document> documents = documentRepository.findByUtilisateur(utilisateur);
 
-        return documents.stream()
-                .map(documentMapper::toDto)
-                .collect(Collectors.toList());
-    }
+                return documents.stream()
+                                .map(documentMapper::toDto)
+                                .collect(Collectors.toList());
+        }
 
-    /** 
-     * @param ensembleId
-     * @return List<DocumentDto>
-     */
-    public List<DocumentDto> getDocumentsByEnsembleId(Long ensembleId) {
-        // Récupérer tous les morceaux liés à l'ensemble
-        List<Morceau> morceaux = morceauRepository.findByEnsembleId(ensembleId);
+        /**
+         * @param ensembleId
+         * @return List<DocumentDto>
+         */
+        public List<DocumentDto> getDocumentsByEnsembleId(Long ensembleId) {
+                // Récupérer tous les morceaux liés à l'ensemble
+                List<Morceau> morceaux = morceauRepository.findByEnsembleId(ensembleId);
 
-        List<Document> documents = morceaux.stream()
-                .flatMap(morceau -> documentRepository.findByMorceau(morceau).stream())
-                .collect(Collectors.toList());
+                List<Document> documents = morceaux.stream()
+                                .flatMap(morceau -> documentRepository.findByMorceau(morceau).stream())
+                                .collect(Collectors.toList());
 
-        return documents.stream()
-                .map(documentMapper::toDto)
-                .collect(Collectors.toList());
-    }
+                return documents.stream()
+                                .map(documentMapper::toDto)
+                                .collect(Collectors.toList());
+        }
 
 }

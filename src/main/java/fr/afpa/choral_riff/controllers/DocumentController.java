@@ -17,6 +17,13 @@ public class DocumentController {
         this.documentService = documentService;
     }
 
+    // POST /api/documents
+    @PostMapping
+    public ResponseEntity<DocumentDto> createDocument(@RequestBody DocumentDto documentDto) {
+        DocumentDto created = documentService.create(documentDto);
+        return ResponseEntity.ok(created);
+    }
+
     // GET /api/documents : tous les documents
     @GetMapping
     public ResponseEntity<List<DocumentDto>> getAllDocuments() {

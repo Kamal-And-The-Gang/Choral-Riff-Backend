@@ -19,13 +19,13 @@ import java.util.Set;
  */
 
 public record MorceauDto(
-                Long id,
-                String titre,
-                String compositeur,
-                String genre,
-                String descriptif,
-                Long ensembleId,
-                Long createurId,
-                Set<DocumentDto> documents // Active aussi la validation des documents 
+        Long id,
+        String titre,
+        String compositeur,
+        String genre,
+        String descriptif,
+        Long ensembleId,
+        Long createurId,
+        Set<DocumentDto> documents // Active aussi la validation des documents
 ) {
 }
