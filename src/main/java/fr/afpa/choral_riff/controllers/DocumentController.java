@@ -8,7 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+/**
+ * 
+ */
 @RequestMapping("/api/documents")
+
 public class DocumentController {
 
     private final DocumentService documentService;
@@ -16,7 +20,21 @@ public class DocumentController {
     public DocumentController(DocumentService documentService) {
         this.documentService = documentService;
     }
-
+/**
+ * 
+ * @param documentDto
+ * @return
+ */
+    // POST /api/documents
+    @PostMapping
+    public ResponseEntity<DocumentDto> createDocument(@RequestBody DocumentDto documentDto) {
+        DocumentDto created = documentService.create(documentDto);
+        return ResponseEntity.ok(created);
+    }
+/**
+ * 
+ * @return
+ */
     // GET /api/documents : tous les documents
     @GetMapping
     public ResponseEntity<List<DocumentDto>> getAllDocuments() {

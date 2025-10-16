@@ -43,5 +43,12 @@ public class AuthController {
         UtilisateurDto created = utilisateurService.register(dto);
         return ResponseEntity.ok(created);
     }
+
+    @PostMapping("/logout")
+public ResponseEntity<Map<String, String>> logout() {
+    Map<String, String> result = loginService.logout(null);
+    return ResponseEntity.ok(result);
+}
+
 }
 

@@ -41,8 +41,7 @@ public class LoginService {
     public Map<String, String> login(LoginDTO loginDTO) {
         // Authentification via Spring Security
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword())
-        );
+                new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword()));
 
         UserDetails user = (UserDetails) authentication.getPrincipal();
 
@@ -58,4 +57,11 @@ public class LoginService {
 
         return response;
     }
+
+    public Map<String, String> logout(String refreshTokenId) {
+    Map<String, String> response = new HashMap<>();
+    response.put("message", "Déconnexion réussie");
+    return response;
+}
+
 }
