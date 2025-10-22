@@ -75,7 +75,7 @@ public InvitationDTO creerInvitation(CreateInvitationDTO dto) {
     invitationRepository.save(invitation);
 
      // Envoyer le mail avec le token
-    mailService.sendInvitationEmail(invitation.getEmailInvite(), null);
+    // mailService.sendInvitationEmail(invitation.getEmailInvite(), null);
 
     // Convertit et renvoie le DTO
     return invitationMapper.toDto(invitation);

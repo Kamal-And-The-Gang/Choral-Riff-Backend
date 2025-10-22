@@ -35,31 +35,26 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // Active le CORS avec la config ci-dessous
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            // Désactive CSRF (car REST API sans session)
-            .csrf(csrf -> csrf.disable())
-            // Autorise tout pour le moment (tu pourras restreindre plus tard)
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .anyRequest().permitAll()
-            )
-            
-            // (Optionnel) politique de sécurité de contenu
-           .headers(headers -> headers
-    .contentSecurityPolicy(csp -> csp
-        .policyDirectives(
-            "default-src 'self' http://localhost:5173; " +
-            "script-src 'self' http://localhost:5173; " +
-            "connect-src 'self' http://localhost:8080 http://localhost:5173; " +
-            "img-src 'self' data: blob: http://localhost:5173; " +
-            "style-src 'self' 'unsafe-inline' http://localhost:5173;"
-        )
-    )
-)
+                // Active le CORS avec la config ci-dessous
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // Désactive CSRF (car REST API sans session)
+                .csrf(csrf -> csrf.disable())
+                // Autorise tout pour le moment (tu pourras restreindre plus tard)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .anyRequest().permitAll())
 
-            // Ajoute le filtre JWT si tu l’utilises
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                // (Optionnel) politique de sécurité de contenu
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives(
+                                        "default-src 'self' http://localhost:5173; " +
+                                        "script-src 'self' http://localhost:5173; " +
+                                        "connect-src 'self' http://localhost:8080 http://localhost:5173; " +
+                                        "img-src 'self' data: blob: http://localhost:5173; " +
+                                        "style-src 'self' 'unsafe-inline' http://localhost:5173;")))
+                // Ajoute le filtre JWT si tu l’utilises
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -81,9 +76,8 @@ public class SecurityConfig {
 
         // Origines autorisées
         config.setAllowedOrigins(List.of(
-            frontendUrl,                     
-            "https://choral-riff.com"        
-        ));
+                frontendUrl,
+                "https://choral-riff.com"));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));

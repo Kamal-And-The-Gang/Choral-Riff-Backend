@@ -30,11 +30,11 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         // Exclure les endpoints publics (exemple : `/auth/**` et `/api/users/**`)
-String requestPath = request.getServletPath();
-if (requestPath.startsWith("/api/auth") || requestPath.startsWith("/api/utilisateurs")) {
-    chain.doFilter(request, response);
-    return;
-}
+        String requestPath = request.getServletPath();
+        if (requestPath.startsWith("/api/auth") || requestPath.startsWith("/api/utilisateurs")) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         // Récupère l'en-tête Authorization
         String authHeader = request.getHeader("Authorization");
@@ -56,7 +56,8 @@ if (requestPath.startsWith("/api/auth") || requestPath.startsWith("/api/utilisat
             System.out.println("Extracted Username: " + username);
         }
 
-        // Vérifie si le username n'est pas déjà authentifié dans le contexte de sécurité
+        // Vérifie si le username n'est pas déjà authentifié dans le contexte de
+        // sécurité
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // Charge les informations de l'utilisateur
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -64,8 +65,8 @@ if (requestPath.startsWith("/api/auth") || requestPath.startsWith("/api/utilisat
             // Valide le token
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 // Crée un objet d'authentification valide
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 // Définit le contexte de sécurité pour cette requête

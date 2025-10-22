@@ -102,11 +102,11 @@ public class MorceauService {
         return morceauMapper.toDto(updated);
     }
 
-    public MorceauDto findLastAddedMorceau() {
-        return morceauRepository.findTopByOrderByMorceauIdDesc()
-                .map(morceauMapper::toDto)
-                .orElse(null); // Retourne null ou un Optional vide si aucun morceau n'existe
-    }
+    // public MorceauDto findLastAddedMorceau() {
+    // return morceauRepository.findTopByOrderByIdDesc()
+    // .map(morceauMapper::toDto)
+    // .orElse(null); // Retourne null ou un Optional vide si aucun morceau n'existe
+    // }
 
     // Supprimer un morceau par son ID
     public void delete(Long id) {

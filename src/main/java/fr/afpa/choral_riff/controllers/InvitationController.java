@@ -4,7 +4,7 @@ import fr.afpa.choral_riff.dto.InvitationDTO;
 import fr.afpa.choral_riff.services.InvitationService;
 import fr.afpa.choral_riff.services.MailService;
 import fr.afpa.choral_riff.dto.CreateInvitationDTO;
-
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/invitations")
@@ -25,21 +26,20 @@ public class InvitationController {
         this.mailService = mailService;
     }
 
+    
     @PostMapping
-    // ("/invitations")
-    public ResponseEntity<InvitationDTO> creerInvitation(
-            @Valid @RequestBody CreateInvitationDTO createInvitationDTO) {
-
-        // LOGS POUR DÉBOGAGE
-        System.out.println(">>> Reçu dans creerInvitation <<<");
-        System.out.println("Email reçu : " + createInvitationDTO.getEmailInvite());
-        System.out.println("EnsembleId reçu : " + createInvitationDTO.getEnsembleId());
-
-        InvitationDTO created = invitationService.creerInvitation(createInvitationDTO);
-        // Envoi du mail avec le token et l'email récupéré
-        mailService.sendInvitationEmail(created.getEmailInvite(), null);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public ResponseEntity<?> creerInvitation(@Valid @RequestBody CreateInvitationDTO createInvitationDTO) {
+        try {
+            InvitationDTO created = invitationService.creerInvitation(createInvitationDTO);
+            // mailService.sendInvitationEmail(created.getEmailInvite(), null);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalArgumentException e) {
+            // Gestion de l'erreur "invitation déjà existante"
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (EntityNotFoundException e) {
+            // Gestion de l'erreur "ensemble introuvable"
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
     }
 
     /**
