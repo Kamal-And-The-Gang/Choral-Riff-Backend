@@ -64,6 +64,11 @@ public class UtilisateurService {
         return utilisateurMapper.toDto(updated);
     }
 
+    public Utilisateur getByEmail(String email) {
+    return utilisateurRepository.findByEmail(email)
+        .orElseThrow(() -> new NoSuchElementException("Utilisateur non trouvé avec email : " + email));
+}
+
     public void delete(Long id) {
         if (!utilisateurRepository.existsById(id)) {
             throw new NoSuchElementException("Utilisateur non trouvé avec id " + id);

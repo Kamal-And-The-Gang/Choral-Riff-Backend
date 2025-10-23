@@ -2,6 +2,7 @@ package fr.afpa.choral_riff.services;
 
 import fr.afpa.choral_riff.security.JwtService;
 import fr.afpa.choral_riff.dto.LoginDTO;
+import fr.afpa.choral_riff.entity.Utilisateur;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -43,11 +44,11 @@ public class LoginService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword()));
 
-        UserDetails user = (UserDetails) authentication.getPrincipal();
+        Utilisateur user = (Utilisateur) authentication.getPrincipal();
 
         // Génération du refresh token avec un ID unique
         String refreshTokenId = jwtService.generateRefreshTokenId();
-        String accessToken = jwtService.generateToken(user);
+        String accessToken = jwtService.generateToken(user, user);
         String refreshToken = jwtService.generateRefreshToken(user, refreshTokenId);
 
         // Retourner les 2 tokens dans un JSON-like map

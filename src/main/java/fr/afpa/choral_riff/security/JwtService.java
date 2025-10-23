@@ -8,6 +8,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import fr.afpa.choral_riff.entity.Utilisateur;
+import fr.afpa.choral_riff.services.UserDetailsServiceImpl;
+import fr.afpa.choral_riff.services.UtilisateurService;
+
 import javax.crypto.SecretKey;
 import java.time.Duration;
 import java.util.Date;
@@ -19,14 +23,17 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
+    
     private final String secretKey;
     private final long jwtExpiration;
     private final long jwtRefreshExpiration;
 
     public JwtService(
+            
             @Value("${security.jwt.secret-key}") String secretKey,
             @Value("${security.jwt.expiration-time-in-seconds}") long jwtExpiration,
             @Value("${security.jwt.refresh-expiration-time-in-seconds:604800}") long jwtRefreshExpiration) {
+        
         this.secretKey = secretKey;
         this.jwtExpiration = jwtExpiration;
         this.jwtRefreshExpiration = jwtRefreshExpiration; // Par défaut 7 jours si non spécifié
@@ -41,13 +48,20 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
-    }
+public String generateToken(UserDetails userDetails, Utilisateur utilisateur) {
+    Map<String, Object> extraClaims = new HashMap<>();
 
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return buildToken(extraClaims, userDetails, jwtExpiration);
-    }
+    
+    // Ajout des infos dans le token
+    extraClaims.put("prenom", utilisateur.getPrenom());
+    extraClaims.put("nom", utilisateur.getNom());
+    extraClaims.put("email", utilisateur.getEmail());
+
+    // Génération du JWT
+    return buildToken(extraClaims, userDetails, jwtExpiration);
+}
+
+
 
     /**
      * Génère un refresh token avec un ID unique
