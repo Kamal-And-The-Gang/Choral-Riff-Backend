@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -47,11 +48,10 @@ public class Utilisateur implements UserDetails {
     private Set<Morceau> morceauxCree;
 
     @OneToMany(mappedBy = "utilisateur")
-private Set<Document> documentsAjoutes;
+    private Set<Document> documentsAjoutes;
 
-
-   @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
-private Set<UtilisateurEnsemble> utilisateurEnsembles = new HashSet<>();
+    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UtilisateurEnsemble> utilisateurEnsembles = new HashSet<>();
 
     // -------------------- UserDetails --------------------
 
@@ -166,7 +166,7 @@ private Set<UtilisateurEnsemble> utilisateurEnsembles = new HashSet<>();
     public void setDocumentsAjoutes(Set<Document> documentsAjoutes) {
         this.documentsAjoutes = documentsAjoutes;
     }
-   
+
     public Set<UtilisateurEnsemble> getUtilisateurEnsembles() {
         return utilisateurEnsembles;
     }

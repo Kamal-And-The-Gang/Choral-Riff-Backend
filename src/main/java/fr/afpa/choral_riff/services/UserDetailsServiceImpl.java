@@ -33,15 +33,17 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec email : " + email));
 
-    // Récupérer les rôles liés à chaque ensemble
-      Set<GrantedAuthority> authorities = utilisateur.getUtilisateurEnsembles().stream()
-    .map(ue -> new SimpleGrantedAuthority("ROLE_" + ue.getRoleDansEnsemble().name()))
-    .collect(Collectors.toSet());
+        // Récupérer les rôles liés à chaque ensemble
+        //Set<GrantedAuthority> authorities = utilisateur.getUtilisateurEnsembles().stream()
+               // .map(ue -> new SimpleGrantedAuthority("ROLE_" + ue.getRoleDansEnsemble().name()))
+                //.collect(Collectors.toSet());
+                //((UserDetails)utilisateur).
 
-    // Construire et retourner un UserDetails Spring Security
-        return new org.springframework.security.core.userdetails.User(
-                utilisateur.getEmail(),
-                utilisateur.getMotDePasse(),
-                authorities);
+        // Construire et retourner un UserDetails Spring Security
+        // return new org.springframework.security.core.userdetails.User(
+        //         utilisateur.getEmail(),
+        //         utilisateur.getMotDePasse(),
+        //         authorities);
+        return utilisateur;
     }
 }

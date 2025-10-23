@@ -1,0 +1,52 @@
+# Ce fichier de configuration Yaml est librement inspiré de la ressource suivante
+# https://qaautomation.expert/2023/06/26/how-to-run-springboot-tests-with-github-actions/
+name: Compilation et test d'une application Web API Springboot
+ 
+# Déclaration des actions après lesquelles les "jobs" vont se déclencher
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+ 
+jobs:
+  build:
+    environment: K-andTheGang
+    runs-on: ubuntu-latest
+
+    services:
+     # Configuration d'un conteneur PostgreSQL permettant d'effectuer les tests automatisé
+     # --> similaire à une configuration "docker-compose"
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: B@nLgU4qz*9?D~3n83
+          POSTGRES_DB: account
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    
+    steps:
+      # Récupération du code, utilisation de l'action "checkout"
+      - uses: actions/checkout@v3
+      # paramétrage d'une JDK 21
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+# Etape de vérification Sonarqube à décomenter au besoin
+      # - name: Sonarqube Scan
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #   run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=afpa-learning_tests-continuous-integration
+        # run: mvn -B verify sonar:sonar -Dsonar.projectKey=afpa-learning_tests-continuous-integration -Dsonar.organization=afpa-learning -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
+    # - name: Build with Maven cloud
+    #   run:  mvn -B verify sonar:sonar -Dsonar.projectKey=afpa-learning_tests-continuous-integration -Dsonar.organization=afpa-learning -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
+    #   env:
+    #     # GIT_HUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
+    #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
