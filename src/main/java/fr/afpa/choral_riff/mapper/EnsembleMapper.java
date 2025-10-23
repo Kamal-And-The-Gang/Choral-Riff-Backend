@@ -23,7 +23,7 @@ public interface EnsembleMapper {
     List<EnsembleDto> toDtoList(List<Ensemble> ensembles);
 
     // Update partiel
-    @Mapping(source = "id", target = "id")
+    // @Mapping(source = "id", target = "id")
     @Mapping(target = "invitations", ignore = true)
     void updateEntityFromDto(EnsembleDto dto, @MappingTarget Ensemble entity);
 }

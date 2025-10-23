@@ -26,7 +26,7 @@ public class InvitationDTO {
 
     private LocalDateTime dateEnvoi;
 
-     private String token;
+    private String token;
 
     // --- Getters & Setters ---
     public Long getId() {
@@ -76,7 +76,8 @@ public class InvitationDTO {
     public void setDateEnvoi(LocalDateTime dateEnvoi) {
         this.dateEnvoi = dateEnvoi;
     }
-     public String getToken() {
+
+    public String getToken() {
         return token;
     }
 
