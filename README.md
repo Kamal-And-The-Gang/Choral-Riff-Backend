@@ -13,8 +13,3 @@ Il expose des API REST pour créer, lire, mettre à jour et supprimer des ensemb
 - H2 / MySQL (configurable dans `application.properties`)
 - Maven
 
-## Installation
-1. Cloner le dépôt :
-```bash
-git clone <URL_DU_REPO_BACKEND>
-cd backend
