@@ -39,6 +39,9 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+        name: Compilation et tests
+        run: mvn clean verify
+
 # Etape de vérification Sonarqube à décomenter au besoin
       # - name: Sonarqube Scan
       #   env:
