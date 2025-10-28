@@ -48,7 +48,7 @@ public class LoginService {
 
         // Génération du refresh token avec un ID unique
         String refreshTokenId = jwtService.generateRefreshTokenId();
-        String accessToken = jwtService.generateToken(user, user);
+        String accessToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user, refreshTokenId);
 
         // Retourner les 2 tokens dans un JSON-like map
