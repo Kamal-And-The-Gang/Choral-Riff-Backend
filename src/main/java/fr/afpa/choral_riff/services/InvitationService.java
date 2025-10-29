@@ -76,19 +76,13 @@ public InvitationDTO creerInvitation(CreateInvitationDTO dto) {
 
      // Envoyer le mail avec le token
     // mailService.sendInvitationEmail(invitation.getEmailInvite(), null);
+    mailService.sendInvitationEmail(invitation.getEmailInvite(), invitation.getToken());
+
 
     // Convertit et renvoie le DTO
     return invitationMapper.toDto(invitation);
 }
 
-
-
-
-
-
-
-
-    
 
   public InvitationDTO createSimple(CreateInvitationDTO dto) {
     // Vérifie s'il existe déjà une invitation pour cet email

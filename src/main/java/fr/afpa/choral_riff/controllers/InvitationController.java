@@ -26,18 +26,34 @@ public class InvitationController {
         this.mailService = mailService;
     }
 
-    
+    // @PostMapping
+    // public ResponseEntity<?> creerInvitation(@Valid @RequestBody
+    // CreateInvitationDTO createInvitationDTO) {
+    // try {
+    // InvitationDTO created =
+    // invitationService.creerInvitation(createInvitationDTO);
+    // mailService.sendInvitationEmail(created.getEmailInvite(), null);
+    // return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    // } catch (IllegalArgumentException e) {
+    // // Gestion de l'erreur "invitation déjà existante"
+    // return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+    // } catch (EntityNotFoundException e) {
+    // // Gestion de l'erreur "ensemble introuvable"
+    // return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error",
+    // e.getMessage()));
+    // }
+    // }
+
     @PostMapping
     public ResponseEntity<?> creerInvitation(@Valid @RequestBody CreateInvitationDTO createInvitationDTO) {
         try {
             InvitationDTO created = invitationService.creerInvitation(createInvitationDTO);
-            // mailService.sendInvitationEmail(created.getEmailInvite(), null);
+            // Utiliser le token réel de l'invitation
+            mailService.sendInvitationEmail(created.getEmailInvite(), created.getToken());
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {
-            // Gestion de l'erreur "invitation déjà existante"
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (EntityNotFoundException e) {
-            // Gestion de l'erreur "ensemble introuvable"
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         }
     }

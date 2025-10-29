@@ -25,7 +25,6 @@ import org.hibernate.annotations.CreationTimestamp;
 @Entity
 @Table(name = "ensemble")
 public class Ensemble {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // auto-incrément
     @Column(name = "id")
@@ -45,11 +44,11 @@ public class Ensemble {
     private List<Invitation> invitations;
 
     @OneToMany(mappedBy = "ensemble", cascade = CascadeType.ALL, orphanRemoval = true)
-private Set<UtilisateurEnsemble> utilisateurEnsembles = new HashSet<>();
+    private Set<UtilisateurEnsemble> utilisateurEnsembles = new HashSet<>();
 
     // Constructeurs
-public Ensemble() {
-}
+    public Ensemble() {
+    }
 
     public Ensemble(String nom, String description, LocalDate dateCreation) {
         this.nom = nom;
@@ -63,6 +62,7 @@ public Ensemble() {
     public void setId(Long id) {
         this.id = id;
     }
+
     public String getNom() {
         return nom;
     }
@@ -94,10 +94,12 @@ public Ensemble() {
     public void setInvitations(List<Invitation> invitations) {
         this.invitations = invitations;
     }
+
     // Getters et setters
     public Set<UtilisateurEnsemble> getUtilisateurEnsembles() {
         return utilisateurEnsembles;
     }
+
     public void setUtilisateurEnsembles(Set<UtilisateurEnsemble> utilisateurEnsembles) {
         this.utilisateurEnsembles = utilisateurEnsembles;
     }

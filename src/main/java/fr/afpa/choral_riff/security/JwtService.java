@@ -9,9 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import fr.afpa.choral_riff.entity.Utilisateur;
-import fr.afpa.choral_riff.services.UserDetailsServiceImpl;
-import fr.afpa.choral_riff.services.UtilisateurService;
-
 import javax.crypto.SecretKey;
 import java.time.Duration;
 import java.util.Date;

@@ -4,7 +4,6 @@ import fr.afpa.choral_riff.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -49,10 +48,10 @@ public class SecurityConfig {
                         .contentSecurityPolicy(csp -> csp
                                 .policyDirectives(
                                         "default-src 'self' http://localhost:5173; " +
-                                        "script-src 'self' http://localhost:5173; " +
-                                        "connect-src 'self' http://localhost:8080 http://localhost:5173; " +
-                                        "img-src 'self' data: blob: http://localhost:5173; " +
-                                        "style-src 'self' 'unsafe-inline' http://localhost:5173;")))
+                                                "script-src 'self' http://localhost:5173; " +
+                                                "connect-src 'self' http://localhost:8080 http://localhost:5173; " +
+                                                "img-src 'self' data: blob: http://localhost:5173; " +
+                                                "style-src 'self' 'unsafe-inline' http://localhost:5173;")))
                 // Ajoute le filtre JWT si tu l’utilises
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

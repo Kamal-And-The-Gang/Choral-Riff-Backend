@@ -1,11 +1,13 @@
 package fr.afpa.choral_riff.entity;
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -54,23 +56,12 @@ public class Utilisateur implements UserDetails {
     private Set<UtilisateurEnsemble> utilisateurEnsembles = new HashSet<>();
 
     // -------------------- UserDetails --------------------
-
-    // @Override
-    // public Collection<? extends GrantedAuthority> getAuthorities() {
-    // return List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
-    // }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return utilisateurEnsembles.stream()
-                .map(ue -> new SimpleGrantedAuthority("ROLE_" + ue.getRoleDansEnsemble().name().toUpperCase()))
-                .collect(Collectors.toSet());
+        List<SimpleGrantedAuthority> listAuthorities = new ArrayList<>();
+        listAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        return listAuthorities;
     }
-    // @Override
-    // public Collection<? extends GrantedAuthority> getAuthorities() {
-    // throw new UnsupportedOperationException("Unimplemented method
-    // 'getAuthorities'");
-    // }
 
     @Override
     public String getPassword() {
