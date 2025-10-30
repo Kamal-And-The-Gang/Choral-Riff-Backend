@@ -17,12 +17,12 @@ jobs:
     services:
      # Configuration d'un conteneur PostgreSQL permettant d'effectuer les tests automatisé
      # --> similaire à une configuration "docker-compose"
-      postgres:
-        image: postgres:15
+      postgresdb:
+        image: postgres:17.2
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: B@nLgU4qz*9?D~3n83
-          POSTGRES_DB: account
+          POSTGRES_DB: choralriffdb
         ports:
           - 5432:5432
         # needed because the postgres container does not provide a healthcheck
