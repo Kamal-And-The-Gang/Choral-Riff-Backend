@@ -27,7 +27,7 @@ public class Morceau {
 
     private String descriptif;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "ensembleId")
     private Ensemble ensemble;
 
