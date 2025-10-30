@@ -17,7 +17,7 @@ jobs:
     services:
      # Configuration d'un conteneur PostgreSQL permettant d'effectuer les tests automatisé
      # --> similaire à une configuration "docker-compose"
-      postgres:
+      postgresdb:
         image: postgres:15
         env:
           POSTGRES_USER: postgres
