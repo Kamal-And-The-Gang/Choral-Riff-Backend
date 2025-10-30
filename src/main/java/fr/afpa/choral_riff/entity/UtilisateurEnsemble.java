@@ -45,8 +45,10 @@ public class UtilisateurEnsemble {
     public UtilisateurEnsemble() {
     }
 
-    public UtilisateurEnsemble(Utilisateur utilisateur, Ensemble ensemble, Role roleDansEnsemble,
-            LocalDate dateAdhesion) {
+    public UtilisateurEnsemble(Utilisateur utilisateur,
+                                Ensemble ensemble,
+                                Role roleDansEnsemble,
+                                LocalDate dateAdhesion) {
         this.utilisateur = utilisateur;
         this.ensemble = ensemble;
         this.roleDansEnsemble = roleDansEnsemble;

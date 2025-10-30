@@ -18,6 +18,14 @@ public class EnsembleController {
         this.ensembleService = ensembleService;
     }
 
+    // 28/10/2025
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<EnsembleDto>> getEnsemblesByUser(@PathVariable Long userId) {
+        List<EnsembleDto> ensembles = ensembleService.getAllForUser(userId);
+        return ResponseEntity.ok(ensembles);
+    }
+
     // Récupérer tous les ensembles
     @GetMapping
     public ResponseEntity<List<EnsembleDto>> getAllEnsembles() {
@@ -36,8 +44,8 @@ public class EnsembleController {
 
     // Créer un nouvel ensemble
     @PostMapping
-    public ResponseEntity<EnsembleDto> createEnsemble(@RequestBody EnsembleDto dto) {
-        EnsembleDto created = ensembleService.create(dto);
+    public ResponseEntity<EnsembleDto> createEnsemble(@RequestBody EnsembleDto dto, @RequestParam Long userId) {
+        EnsembleDto created = ensembleService.create(dto, userId);
         return ResponseEntity.ok(created);
     }
 
@@ -62,4 +70,3 @@ public class EnsembleController {
         }
     }
 }
-

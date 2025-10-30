@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 class EnsembleServiceTest {
@@ -51,7 +52,7 @@ class EnsembleServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("Ensemble Test", result.get(0).nom());
+        assertEquals("Ensemble Test", result.get(0).getNom());
 
         verify(ensembleRepository, times(1)).findAll();
         verify(ensembleMapper, times(1)).toDto(ensembleEntity);
@@ -59,14 +60,16 @@ class EnsembleServiceTest {
 
     @Test
     void testCreate() {
+        Long userId = 42L; // exemple d'utilisateur
+
         when(ensembleMapper.toEntity(ensembleDto)).thenReturn(ensembleEntity);
         when(ensembleRepository.save(ensembleEntity)).thenReturn(ensembleEntity);
         when(ensembleMapper.toDto(ensembleEntity)).thenReturn(ensembleDto);
 
-        EnsembleDto result = ensembleService.create(ensembleDto);
+        EnsembleDto result = ensembleService.create(ensembleDto, userId);
 
         assertNotNull(result);
-        assertEquals(ensembleDto.nom(), result.nom());
+        assertEquals(ensembleDto.getNom(), result.getNom());
 
         verify(ensembleMapper).toEntity(ensembleDto);
         verify(ensembleRepository).save(ensembleEntity);
@@ -81,7 +84,7 @@ class EnsembleServiceTest {
         EnsembleDto result = ensembleService.getById(1L);
 
         assertNotNull(result);
-        assertEquals("Ensemble Test", result.nom());
+        assertEquals("Ensemble Test", result.getNom());
 
         verify(ensembleRepository).findById(1L);
         verify(ensembleMapper).toDto(ensembleEntity);
@@ -113,7 +116,7 @@ class EnsembleServiceTest {
         EnsembleDto updated = ensembleService.update(1L, ensembleDto);
 
         assertNotNull(updated);
-        assertEquals("Ensemble Test", updated.nom());
+        assertEquals("Ensemble Test", updated.getNom());
 
         verify(ensembleRepository).findById(1L);
         verify(ensembleMapper).updateEntityFromDto(ensembleDto, ensembleEntity);

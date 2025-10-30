@@ -9,9 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import fr.afpa.choral_riff.entity.Utilisateur;
-import fr.afpa.choral_riff.services.UserDetailsServiceImpl;
-import fr.afpa.choral_riff.services.UtilisateurService;
-
 import javax.crypto.SecretKey;
 import java.time.Duration;
 import java.util.Date;
@@ -23,17 +20,16 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    
     private final String secretKey;
     private final long jwtExpiration;
     private final long jwtRefreshExpiration;
 
     public JwtService(
-            
+
             @Value("${security.jwt.secret-key}") String secretKey,
             @Value("${security.jwt.expiration-time-in-seconds}") long jwtExpiration,
             @Value("${security.jwt.refresh-expiration-time-in-seconds:604800}") long jwtRefreshExpiration) {
-        
+
         this.secretKey = secretKey;
         this.jwtExpiration = jwtExpiration;
         this.jwtRefreshExpiration = jwtRefreshExpiration; // Par défaut 7 jours si non spécifié
@@ -48,26 +44,36 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-public String generateToken(UserDetails userDetails, Utilisateur utilisateur) {
-    Map<String, Object> extraClaims = new HashMap<>();
+    /**
+     * Génère un JWT à partir d'un objet de la classe "Utilisateur"
+     * 
+     * Le JWT contient les informations suivantes :
+     * - id
+     * - prenom
+     * - nom
+     * - email
+     * 
+     * @param utilisateur
+     * @return
+     */
+    public String generateToken(Utilisateur utilisateur) {
+        Map<String, Object> extraClaims = new HashMap<>();
 
-    
-    // Ajout des infos dans le token
-    extraClaims.put("prenom", utilisateur.getPrenom());
-    extraClaims.put("nom", utilisateur.getNom());
-    extraClaims.put("email", utilisateur.getEmail());
+        // Ajout des infos dans le token
+        extraClaims.put("id", utilisateur.getId());
+        extraClaims.put("prenom", utilisateur.getPrenom());
+        extraClaims.put("nom", utilisateur.getNom());
+        extraClaims.put("email", utilisateur.getEmail());
 
-    // Génération du JWT
-    return buildToken(extraClaims, userDetails, jwtExpiration);
-}
-
-
+        // Génération du JWT
+        return buildToken(extraClaims, utilisateur, jwtExpiration);
+    }
 
     /**
      * Génère un refresh token avec un ID unique
      *
      * @param userDetails détails de l'utilisateur
-     * @param tokenId identifiant unique du token
+     * @param tokenId     identifiant unique du token
      * @return refresh token
      */
     public String generateRefreshToken(UserDetails userDetails, String tokenId) {
@@ -150,18 +156,16 @@ public String generateToken(UserDetails userDetails, Utilisateur utilisateur) {
     }
 
     private Claims extractAllClaims(String token) {
-    return Jwts
-            .parser()
-            .verifyWith(getSignInKey())
-            .build()
-            .parseSignedClaims(token)
-            .getPayload();
-}
+        return Jwts
+                .parser()
+                .verifyWith(getSignInKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
 
     private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }
-
-
