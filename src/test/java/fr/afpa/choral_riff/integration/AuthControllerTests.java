@@ -3,27 +3,65 @@ package fr.afpa.choral_riff.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.afpa.choral_riff.dto.LoginDTO;
 import fr.afpa.choral_riff.dto.RegisterDto;
+import fr.afpa.choral_riff.entity.Utilisateur;
+import fr.afpa.choral_riff.repositories.UtilisateurRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.context.WebApplicationContext;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+import java.util.Optional;
 
+@SpringBootTest
+@TestInstance(Lifecycle.PER_CLASS)
+@EnableTransactionManagement
 class AuthControllerTests {
 
     @Autowired
     private WebApplicationContext context;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UtilisateurRepository userRepository;
+
     private MockMvc mockMvc;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @BeforeAll
+    void setupDatabase() {
+
+        Utilisateur user = new Utilisateur();
+        user.setEmail("newuser@example.com");
+        user.setPrenom("Bob");
+        user.setNom("Bub");
+        user.setMotDePasse(passwordEncoder.encode("password"));
+
+        userRepository.save(user);
+    }
 
     // ObjectMapper : convertit les objets Java (DTO) en JSON (utilisé pour envoyer
     // le @RequestBody)
@@ -33,6 +71,7 @@ class AuthControllerTests {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
 
+    @Transactional
     @Test
     // Création d’un objet de connexion avec un email et mot de passe.
     void login_should_return_tokens() throws Exception {
