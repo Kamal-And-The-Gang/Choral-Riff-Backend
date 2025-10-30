@@ -21,8 +21,8 @@
 		}
 	},
 	"forwardPorts": [
-		"postgresdb:5432"
-		// "javadev:8080"
+		"postgresdb:5432",
+		"javadev:8080"
 	]
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
