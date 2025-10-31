@@ -15,5 +15,6 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
 
     @Query("SELECT u FROM Utilisateur u LEFT JOIN FETCH u.utilisateurEnsembles ue LEFT JOIN FETCH ue.ensemble WHERE u.email = :email")
     Optional<Utilisateur> findByEmailWithEnsembles(@Param("email") String email);
-}
 
+    void deleteByEmail(String email);
+}
