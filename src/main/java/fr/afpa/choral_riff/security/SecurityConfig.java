@@ -75,6 +75,7 @@ public class SecurityConfig {
 
         // Origines autorisées
         config.setAllowedOrigins(List.of(
+                "https://localhost",
                 frontendUrl,
                 "https://choral-riff.com"));
 
