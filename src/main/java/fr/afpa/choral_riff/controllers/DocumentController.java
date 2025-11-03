@@ -71,4 +71,13 @@ public class DocumentController {
         List<DocumentDto> documents = documentService.getDocumentsByEnsembleId(ensembleId);
         return ResponseEntity.ok(documents);
     }
+@DeleteMapping("/{id}")
+public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
+    documentService.delete(id);
+    return ResponseEntity.noContent().build(); // renvoie un code HTTP 204 (No Content)
+}
+
+
+
+
 }

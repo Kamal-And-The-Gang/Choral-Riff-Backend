@@ -8,6 +8,8 @@ import fr.afpa.choral_riff.mapper.DocumentMapper;
 import fr.afpa.choral_riff.repositories.DocumentRepository;
 import fr.afpa.choral_riff.repositories.MorceauRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -130,4 +132,16 @@ public class DocumentService {
                 .map(documentMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+ //  Méthode DELETE ajoutée correctement ici
+    public void delete(Long id) {
+        if (!documentRepository.existsById(id)) {
+            throw new EntityNotFoundException("Document not found with id: " + id);
+        }
+        documentRepository.deleteById(id);
+    }
+
+
+
+
 }
