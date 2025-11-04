@@ -31,14 +31,28 @@ public interface EnsembleMapper {
         // récupération de l'identifiant du créateur de l'ensembe
         Set<UtilisateurEnsemble> users = ensemble.getUtilisateurEnsembles();
 
-        for (UtilisateurEnsemble user : users) {
-            // admin == createur
-            if (user.getRoleDansEnsemble() == Role.ADMIN) {
-                ensembleDto.setCreatedBy(user.getId());
-            }
-        }
-        return ensembleDto;
+    //     for (UtilisateurEnsemble user : users) {
+    //         // admin == createur
+    //         if (user.getRoleDansEnsemble() == Role.ADMIN) {
+    //             ensembleDto.setCreatedBy(user.getId());
+    //         }
+    //     }
+    //     return ensembleDto;
+    // }
+
+
+
+    //04/11/25
+for (UtilisateurEnsemble ue : users) {
+    // admin == créateur
+    if (ue.getRoleDansEnsemble() == Role.ADMIN) {
+        ensembleDto.setCreatedBy(ue.getUtilisateur().getId());
     }
+}
+return ensembleDto;
+     }
+
+
 
     // DTO -> ENTITY
     // @Mapping(source = "id", target = "id")
