@@ -40,9 +40,7 @@ public interface EnsembleMapper {
     //     return ensembleDto;
     // }
 
-
-
-    //04/11/25
+ //04/11/25
 for (UtilisateurEnsemble ue : users) {
     // admin == créateur
     if (ue.getRoleDansEnsemble() == Role.ADMIN) {
