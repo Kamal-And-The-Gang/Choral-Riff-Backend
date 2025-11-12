@@ -28,9 +28,9 @@ public class UtilisateurService {
     }
 
     public UtilisateurDto getById(Long id) {
-        Utilisateur utilisateur = utilisateurRepository.findById(id)
+        Utilisateur utilisateurs = utilisateurRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Utilisateur non trouvé avec id " + id));
-        return utilisateurMapper.toDto(utilisateur);
+        return utilisateurMapper.toDto(utilisateurs);
     }
 
      public UtilisateurDto register(RegisterDto dto) {
