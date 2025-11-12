@@ -41,8 +41,8 @@ public class UtilisateurService {
     }
 
     public List<UtilisateurDto> getAll() {
-        List<Utilisateur> utilisateurs = utilisateurRepository.findAll();
-        return utilisateurMapper.toDtoList(utilisateurs);
+        List<Utilisateur> utilisateur = utilisateurRepository.findAll();
+        return utilisateurMapper.toDtoList(utilisateur);
     }
 
     public UtilisateurDto create(UtilisateurDto dto) {

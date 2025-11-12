@@ -31,7 +31,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // Exclure les endpoints publics (exemple : `/auth/**` et `/api/users/**`)
         String requestPath = request.getServletPath();
-        if (requestPath.startsWith("/api/auth") || requestPath.startsWith("/api/utilisateurs")) {
+        if (requestPath.startsWith("/api/auth") || requestPath.startsWith("/api/utilisateur")) {
             chain.doFilter(request, response);
             return;
         }

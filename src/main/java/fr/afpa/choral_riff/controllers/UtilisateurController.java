@@ -11,7 +11,7 @@ import java.util.List;
  * Contrôleur REST pour gérer les utilisateurs.
  */
 @RestController
-@RequestMapping("/api/utilisateurs")
+@RequestMapping("/api/utilisateur")
 public class UtilisateurController {
 
     private final UtilisateurService utilisateurService;

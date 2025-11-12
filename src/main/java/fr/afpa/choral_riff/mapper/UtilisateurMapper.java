@@ -24,7 +24,7 @@ public interface UtilisateurMapper {
     // Pour les listes
     Utilisateur fromRegisterDto(RegisterDto dto);
 
-    List<UtilisateurDto> toDtoList(List<Utilisateur> utilisateurs);
+    List<UtilisateurDto> toDtoList(List<Utilisateur> utilisateur);
 
     List<Utilisateur> toEntityList(List<UtilisateurDto> dtos);
 
