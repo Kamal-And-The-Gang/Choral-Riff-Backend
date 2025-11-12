@@ -38,17 +38,16 @@ public class AuthController {
         return ResponseEntity.ok(tokens);
     }
 
-     @PostMapping("/register")
+    @PostMapping("/register")
     public ResponseEntity<UtilisateurDto> register(@RequestBody RegisterDto dto) {
         UtilisateurDto created = utilisateurService.register(dto);
         return ResponseEntity.ok(created);
     }
 
     @PostMapping("/logout")
-public ResponseEntity<Map<String, String>> logout() {
-    Map<String, String> result = loginService.logout(null);
-    return ResponseEntity.ok(result);
-}
+    public ResponseEntity<Map<String, String>> logout() {
+        Map<String, String> result = loginService.logout(null);
+        return ResponseEntity.ok(result);
+    }
 
 }
-
