@@ -1,6 +1,9 @@
 package fr.afpa.choral_riff.controllers;
 
+import fr.afpa.choral_riff.dto.RegisterDto;
 import fr.afpa.choral_riff.dto.UtilisateurDto;
+import fr.afpa.choral_riff.entity.Utilisateur;
+import fr.afpa.choral_riff.services.InvitationService;
 import fr.afpa.choral_riff.services.UtilisateurService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +18,11 @@ import java.util.List;
 public class UtilisateurController {
 
     private final UtilisateurService utilisateurService;
+    private final InvitationService invitationService; // 👈 Ajouter ici
 
-    public UtilisateurController(UtilisateurService utilisateurService) {
+    public UtilisateurController(UtilisateurService utilisateurService, InvitationService invitationService) {
         this.utilisateurService = utilisateurService;
+        this.invitationService = invitationService; // 👈 Injection
     }
 
     /**
@@ -60,4 +65,19 @@ public class UtilisateurController {
         utilisateurService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/inscription-invitation")
+    public ResponseEntity<String> inscriptionViaInvitation(@RequestBody RegisterDto dto) {
+        // 1️⃣ Créer l'utilisateur
+        Utilisateur nouvelUtilisateur = utilisateurService.createFromRegisterDto(dto);
+
+        // 2️⃣ Rattacher l'utilisateur à l'invitation si token présent
+        String token = dto.getToken();
+        if (token != null && !token.isEmpty()) {
+            invitationService.rattacherUtilisateurApresInscription(token, nouvelUtilisateur);
+        }
+
+        return ResponseEntity.ok("Inscription via invitation réussie !");
+    }
+
 }

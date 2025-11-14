@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.NoSuchElementException;
+import fr.afpa.choral_riff.services.InvitationService;
 
 @Service
 /**
@@ -19,12 +20,14 @@ public class UtilisateurService {
     private final UtilisateurRepository utilisateurRepository;
     private final UtilisateurMapper utilisateurMapper;
     private final PasswordEncoder passwordEncoder;
+    private final InvitationService invitationService;
 
     public UtilisateurService(UtilisateurRepository utilisateurRepository, UtilisateurMapper utilisateurMapper,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder, InvitationService invitationService) {
         this.utilisateurRepository = utilisateurRepository;
         this.utilisateurMapper = utilisateurMapper;
         this.passwordEncoder = passwordEncoder;
+        this.invitationService = invitationService;
     }
 
     public UtilisateurDto getById(Long id) {
@@ -33,10 +36,30 @@ public class UtilisateurService {
         return utilisateurMapper.toDto(utilisateur);
     }
 
-     public UtilisateurDto register(RegisterDto dto) {
+    // public UtilisateurDto register(RegisterDto dto) {
+    // Utilisateur entity = utilisateurMapper.fromRegisterDto(dto);
+    // entity.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
+    // Utilisateur saved = utilisateurRepository.save(entity);
+    // return utilisateurMapper.toDto(saved);
+    // }
+
+    public UtilisateurDto register(RegisterDto dto) {
+        // 1 Conversion du DTO en entité
         Utilisateur entity = utilisateurMapper.fromRegisterDto(dto);
+
+        // 2 Encodage du mot de passe
         entity.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
+
+        // 3 Sauvegarde de l’utilisateur
         Utilisateur saved = utilisateurRepository.save(entity);
+
+        // 4 Si un token d’invitation est présent, rattacher à l’ensemble
+        // correspondant
+        if (dto.getToken() != null && !dto.getToken().isEmpty()) {
+            invitationService.rattacherUtilisateurApresInscription(dto.getToken(), saved);
+        }
+
+        // 5️⃣ Retourner le DTO
         return utilisateurMapper.toDto(saved);
     }
 
@@ -65,9 +88,9 @@ public class UtilisateurService {
     }
 
     public Utilisateur getByEmail(String email) {
-    return utilisateurRepository.findByEmail(email)
-        .orElseThrow(() -> new NoSuchElementException("Utilisateur non trouvé avec email : " + email));
-}
+        return utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException("Utilisateur non trouvé avec email : " + email));
+    }
 
     public void delete(Long id) {
         if (!utilisateurRepository.existsById(id)) {
@@ -75,4 +98,15 @@ public class UtilisateurService {
         }
         utilisateurRepository.deleteById(id);
     }
+
+    public Utilisateur createFromRegisterDto(RegisterDto dto) {
+        Utilisateur utilisateur = new Utilisateur();
+        utilisateur.setEmail(dto.getEmail());
+        utilisateur.setNom(dto.getNom());
+        utilisateur.setPrenom(dto.getPrenom());
+        utilisateur.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
+
+        return utilisateurRepository.save(utilisateur);
+    }
+
 }

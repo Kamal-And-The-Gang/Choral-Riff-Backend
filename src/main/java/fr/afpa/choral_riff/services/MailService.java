@@ -1,7 +1,5 @@
 package fr.afpa.choral_riff.services;
 
-
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.SimpleMailMessage;
@@ -26,8 +24,7 @@ public class MailService {
             return;
         }
 
-   String link = "http://localhost:5173/Inscription?token=" + token;
-
+        String link = "http://localhost:5173/Inscription?token=" + token;
 
         String subject = "Invitation à rejoindre un ensemble";
         String text = "Bonjour,\n\nVous avez été invité à rejoindre un ensemble musical. " +
@@ -35,10 +32,10 @@ public class MailService {
                 "\n\nMerci.";
 
         SimpleMailMessage message = new SimpleMailMessage();
-message.setTo(to);
-message.setSubject(subject);
-message.setText(text);  // <-- utiliser le vrai contenu avec le lien
-message.setFrom("cchoralriff@gmail.com");
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(text); // <-- utiliser le vrai contenu avec le lien
+        message.setFrom("cchoralriff@gmail.com");
         mailSender.send(message);
 
         logger.info("Email envoyé à {}", to);

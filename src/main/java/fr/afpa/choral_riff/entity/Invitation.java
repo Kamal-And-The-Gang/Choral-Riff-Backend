@@ -34,7 +34,7 @@ public class Invitation {
      * Utilisateur à qui l'invitation est envoyée.
      */
     @ManyToOne
-    @JoinColumn(name = "id_utilisateur")
+    @JoinColumn(name = "utilisateur_id")
     private Utilisateur utilisateur;// nullable
 
     @Column(name = "email_invite", nullable = false)

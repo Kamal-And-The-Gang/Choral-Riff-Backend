@@ -9,7 +9,6 @@ import fr.afpa.choral_riff.repositories.DocumentRepository;
 import fr.afpa.choral_riff.repositories.MorceauRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import jakarta.persistence.EntityNotFoundException;
-
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -20,6 +19,23 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+/**
+ * Service pour gérer les documents liés aux morceaux et utilisateurs.
+ * 
+ * Fonctionnalités :
+ * - Upload de documents
+ * - Récupération de documents par ID, morceau, utilisateur ou ensemble
+ * - Création et suppression de documents
+ *
+ * Dépendances :
+ * - DocumentRepository
+ * - MorceauRepository
+ * - UtilisateurRepository
+ * - DocumentMapper
+ */
+
+
 
 @Service
 public class DocumentService {
@@ -40,6 +56,19 @@ public class DocumentService {
         this.utilisateurRepository = utilisateurRepository;
         this.documentMapper = documentMapper;
     }
+
+/**
+ * Upload un fichier et l'associe à un morceau et un utilisateur.
+ *
+ * @param file Le fichier à uploader
+ * @param type Le type de document
+ * @param format Le format du document
+ * @param morceauId L'ID du morceau
+ * @param utilisateurId L'ID de l'utilisateur
+ * @return Le DTO du document enregistré
+ * @throws IOException Si une erreur survient lors de l'écriture du fichier
+ */
+
 
     public DocumentDto upload(MultipartFile file, String type, String format, Long morceauId, Long utilisateurId)
             throws IOException {

@@ -2,11 +2,14 @@ package fr.afpa.choral_riff.dto;
 
 /**
  * DTO (Data Transfer Object) représentant un utilisateur.
- *
+ * <p>
+ * Cette classe est utilisée pour transférer les données d'un utilisateur
+ * entre les différentes couches de l'application.
+ * </p>
  */
 
 public class UtilisateurDto {
-
+ 
     private Long id;
     private String nom;
     private String prenom;
@@ -16,6 +19,15 @@ public class UtilisateurDto {
     // Constructeur vide pour jpa
     public UtilisateurDto() {
     }
+     /**
+     * Constructeur avec tous les champs.
+     *
+     * @param id          Identifiant unique de l'utilisateur
+     * @param nom         Nom de l'utilisateur
+     * @param prenom      Prénom de l'utilisateur
+     * @param email       Adresse email de l'utilisateur
+     * @param photoProfil URL ou chemin de la photo de profil
+     */
 
     public UtilisateurDto(Long id, String nom, String prenom, String email, String photoProfil) {
         this.id = id;
