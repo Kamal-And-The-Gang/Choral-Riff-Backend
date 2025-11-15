@@ -30,6 +30,7 @@ public class MailService {
         }
 
         String link = "http://localhost:5173/Inscription?token=" + token;
+                // String link = "http://localhost:5173/invitations/accept?token=" + token;
 
         String subject = "Invitation à rejoindre un ensemble";
         String text = "Bonjour,\n\nVous avez été invité à rejoindre un ensemble musical. " +
