@@ -17,6 +17,10 @@ public class EnsembleDto {
         String description;
         Long createdBy;
 
+        private String typeEnsemble; // <-- Nouveau champ
+        // Nouveau champ pour le rôle de l’utilisateur
+        private String userRole;
+
         public EnsembleDto() {
         }
 
@@ -55,7 +59,23 @@ public class EnsembleDto {
                 return createdBy;
         }
 
+        public String getTypeEnsemble() {
+                return typeEnsemble;
+        } // <-- Getter
+
+        public void setTypeEnsemble(String typeEnsemble) {
+                this.typeEnsemble = typeEnsemble;
+        } // <-- Setter
+
         public void setCreatedBy(Long createdBy) {
                 this.createdBy = createdBy;
+        }
+
+        public String getUserRole() {
+                return userRole;
+        }
+
+        public void setUserRole(String userRole) {
+                this.userRole = userRole;
         }
 }

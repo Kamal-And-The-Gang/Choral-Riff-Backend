@@ -40,6 +40,10 @@ public class Ensemble {
     @Column(name = "date_creation")
     private LocalDate dateCreation;
 
+    // ===== Nouveau champ =====
+    @Column(name = "type_ensemble", length = 50)
+    private String typeEnsemble;
+
     @OneToMany(mappedBy = "ensemble", cascade = CascadeType.ALL)
     private List<Invitation> invitations;
 
@@ -50,9 +54,29 @@ public class Ensemble {
     public Ensemble() {
     }
 
-    public Ensemble(String nom, String description, LocalDate dateCreation) {
+    @OneToMany(mappedBy = "ensemble", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Instrument> instruments;
+
+    public Set<Instrument> getInstruments() {
+        return instruments;
+    }
+
+    public void setInstruments(Set<Instrument> instruments) {
+        this.instruments = instruments;
+    }
+
+    public Ensemble(String nom, String description, LocalDate dateCreation, String typeEnsemble) {
         this.nom = nom;
         this.description = description;
+        this.typeEnsemble = typeEnsemble;
+    }
+
+    public String getTypeEnsemble() {
+        return typeEnsemble;
+    }
+
+    public void setTypeEnsemble(String typeEnsemble) {
+        this.typeEnsemble = typeEnsemble;
     }
 
     public Long getId() {

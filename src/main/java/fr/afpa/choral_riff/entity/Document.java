@@ -40,7 +40,7 @@ public class Document {
     private Morceau morceau;
 
     @OneToMany(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
-private Set<DocumentInstrument> documentInstruments;
+    private Set<DocumentInstrument> documentInstruments;
 
     // Constructeurs
 
@@ -122,7 +122,5 @@ private Set<DocumentInstrument> documentInstruments;
     public void setDocumentInstruments(Set<DocumentInstrument> documentInstruments) {
         this.documentInstruments = documentInstruments;
     }
-
-    
 
 }

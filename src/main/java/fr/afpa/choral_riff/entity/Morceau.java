@@ -102,5 +102,4 @@ public class Morceau {
         this.documents = documents;
     }
 
-    // getters et setters
 }

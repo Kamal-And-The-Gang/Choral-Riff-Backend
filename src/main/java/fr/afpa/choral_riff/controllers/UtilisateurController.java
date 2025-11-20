@@ -18,11 +18,11 @@ import java.util.List;
 public class UtilisateurController {
 
     private final UtilisateurService utilisateurService;
-    private final InvitationService invitationService; // 👈 Ajouter ici
+    private final InvitationService invitationService; //  Ajouter ici
 
     public UtilisateurController(UtilisateurService utilisateurService, InvitationService invitationService) {
         this.utilisateurService = utilisateurService;
-        this.invitationService = invitationService; // 👈 Injection
+        this.invitationService = invitationService; //  Injection
     }
 
     /**

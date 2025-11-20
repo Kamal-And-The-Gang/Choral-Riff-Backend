@@ -18,10 +18,17 @@ public class Invitation {
     @Enumerated(EnumType.STRING)
     private StatusInvitation etat;
 
+    // private LocalDate dateEnvoi;
+
+    // @Column(unique = true, nullable = true)
+    // private String token; // Token unique d'invitation
+
     private LocalDate dateEnvoi;
 
+    private LocalDate dateExpiration; // <-- AJOUT ICI
+
     @Column(unique = true, nullable = true)
-    private String token; // Token unique d'invitation
+    private String token;
 
     /**
      * Ensemble lié à cette invitation.
@@ -108,6 +115,14 @@ public class Invitation {
 
     public void setEmailInvite(String emailInvite) {
         this.emailInvite = emailInvite;
+    }
+
+    public LocalDate getDateExpiration() {
+        return dateExpiration;
+    }
+
+    public void setDateExpiration(LocalDate dateExpiration) {
+        this.dateExpiration = dateExpiration;
     }
 
 }

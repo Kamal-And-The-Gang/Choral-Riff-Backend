@@ -9,6 +9,7 @@ import fr.afpa.choral_riff.repositories.InstrumentRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
+import fr.afpa.choral_riff.repositories.UtilisateurEnsembleRepository;
 
 @Service
 public class InstrumentService {
@@ -16,13 +17,15 @@ public class InstrumentService {
     private final InstrumentRepository instrumentRepository;
     private final EnsembleRepository ensembleRepository;
     private final InstrumentMapper instrumentMapper;
+    private final UtilisateurEnsembleService utilisateurEnsembleService;
 
     public InstrumentService(InstrumentRepository instrumentRepository,
             EnsembleRepository ensembleRepository,
-            InstrumentMapper instrumentMapper) {
+            InstrumentMapper instrumentMapper,  UtilisateurEnsembleService utilisateurEnsembleService) {
         this.instrumentRepository = instrumentRepository;
         this.ensembleRepository = ensembleRepository;
         this.instrumentMapper = instrumentMapper;
+        this.utilisateurEnsembleService = utilisateurEnsembleService;
     }
 
     // Récupérer tous les instruments
@@ -77,4 +80,23 @@ public class InstrumentService {
         }
         instrumentRepository.deleteById(id);
     }
+
+    // Ajouter un instrument à un ensemble avec contrôle de rôle
+    public InstrumentDto addInstrumentToEnsemble(Long ensembleId, Long utilisateurId, InstrumentDto dto) {
+
+        //  Vérification des droits
+        if (!utilisateurEnsembleService.utilisateurAutorise(utilisateurId, ensembleId,
+                List.of("ADMIN", "MODERATEUR"))) {
+            throw new RuntimeException("Vous n'êtes pas autorisé à ajouter un instrument à cet ensemble");
+        }
+
+        Ensemble ensemble = ensembleRepository.findById(ensembleId)
+                .orElseThrow(() -> new RuntimeException("Ensemble non trouvé avec l'ID: " + ensembleId));
+
+        Instrument instrument = instrumentMapper.toEntity(dto);
+        instrument.setEnsemble(ensemble);
+
+        return instrumentMapper.toDto(instrumentRepository.save(instrument));
+    }
+
 }

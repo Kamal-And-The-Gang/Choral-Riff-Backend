@@ -106,16 +106,24 @@ public class EnsembleService {
         throw new RuntimeException("Création ensemble - id créateur non retrouvé");
     }
 
-    // 28/10/2025
-    public List<EnsembleDto> getAllForUser(Long userId) {
-        Utilisateur user = utilisateurRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable"));
+    // 15/11/2025
+   public List<EnsembleDto> getAllForUser(Long userId) {
+    Utilisateur user = utilisateurRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable"));
 
-        return user.getUtilisateurEnsembles().stream()
-                .map(UtilisateurEnsemble::getEnsemble)
-                .map(ensembleMapper::toDto)
-                .toList();
-    }
+    return user.getUtilisateurEnsembles().stream()
+            .map(utilisateurEnsemble -> {
+                Ensemble ensemble = utilisateurEnsemble.getEnsemble();
+                EnsembleDto dto = ensembleMapper.toDto(ensemble);
+
+                // Ajout du rôle pour l'utilisateur actuel
+                dto.setUserRole(utilisateurEnsemble.getRoleDansEnsemble().name()); // ADMIN, MEMBRE, etc.
+
+                return dto;
+            })
+            .toList();
+}
+
 
     /**
      * Récupère un ensemble par son identifiant.

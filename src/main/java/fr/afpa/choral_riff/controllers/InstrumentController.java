@@ -17,13 +17,13 @@ public class InstrumentController {
         this.instrumentService = instrumentService;
     }
 
-    //  Récupérer tous les instruments
+    // Récupérer tous les instruments
     @GetMapping
     public ResponseEntity<List<InstrumentDto>> getAllInstruments() {
         return ResponseEntity.ok(instrumentService.getAll());
     }
 
-    //  Récupérer un instrument par ID
+    // Récupérer un instrument par ID
     @GetMapping("/{id}")
     public ResponseEntity<InstrumentDto> getInstrumentById(@PathVariable Long id) {
         try {
@@ -33,7 +33,7 @@ public class InstrumentController {
         }
     }
 
-    //  Créer un nouvel instrument (optionnellement lié à un ensemble)
+    // Créer un nouvel instrument (optionnellement lié à un ensemble)
     @PostMapping
     public ResponseEntity<InstrumentDto> createInstrument(
             @RequestBody InstrumentDto dto,
@@ -41,7 +41,7 @@ public class InstrumentController {
         return ResponseEntity.ok(instrumentService.create(dto, ensembleId));
     }
 
-    //  Mettre à jour un instrument
+    // Mettre à jour un instrument
     @PutMapping("/{id}")
     public ResponseEntity<InstrumentDto> updateInstrument(
             @PathVariable Long id,
@@ -54,7 +54,7 @@ public class InstrumentController {
         }
     }
 
-    //  Supprimer un instrument
+    // Supprimer un instrument
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInstrument(@PathVariable Long id) {
         try {
@@ -64,4 +64,26 @@ public class InstrumentController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PostMapping("/{ensembleId}/instruments")
+    public ResponseEntity<InstrumentDto> addInstrument(
+            @PathVariable Long ensembleId,
+            @RequestParam Long utilisateurId, // reçu depuis le front
+            @RequestBody InstrumentDto dto) {
+
+        InstrumentDto saved = instrumentService.addInstrumentToEnsemble(utilisateurId, ensembleId, dto);
+        return ResponseEntity.ok(saved);
+    }
+
+    @PostMapping("/{ensembleId}/add")
+    public ResponseEntity<InstrumentDto> addToEnsemble(
+            @PathVariable Long ensembleId,
+            @RequestParam Long utilisateurId,
+            @RequestBody InstrumentDto dto) {
+
+        // Vérifie que l'utilisateur est admin ou chef de chœur(modérateur)
+        InstrumentDto saved = instrumentService.addInstrumentToEnsemble(ensembleId, utilisateurId, dto);
+        return ResponseEntity.ok(saved);
+    }
+
 }

@@ -5,6 +5,8 @@ import fr.afpa.choral_riff.dto.CreateInvitationDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import fr.afpa.choral_riff.repositories.UtilisateurEnsembleRepository;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import fr.afpa.choral_riff.dto.InvitationDTO;
@@ -81,6 +83,9 @@ public class InvitationService {
         // Générer et assigner un token
         String token = UUID.randomUUID().toString();
         invitation.setToken(token);
+
+        invitation.setDateEnvoi(LocalDate.now());
+        invitation.setDateExpiration(LocalDate.now().plusDays(7)); // Expiration dans 7 jours
 
         // Sauvegarde
         invitationRepository.save(invitation);
@@ -167,21 +172,59 @@ public class InvitationService {
             throw new RuntimeException("Cette invitation est déjà rattachée à un utilisateur.");
         }
 
-        // 2 Rattacher l'utilisateur à l'invitation
+        // 2 Vérifier si un utilisateur existe déjà avec cet email
+        Optional<Utilisateur> optUser = utilisateurRepository.findByEmail(invitation.getEmailInvite());
+
+        if (optUser.isPresent()) {
+            Utilisateur user = optUser.get(); // on récupère l'utilisateur réel
+
+            // L'utilisateur existe déjà → ne pas créer un nouveau compte
+            // Juste l’attacher à l’ensemble
+            invitation.setUtilisateur(user);
+            invitation.setEtat(StatusInvitation.ACCEPTEE);
+            invitationRepository.saveAndFlush(invitation);
+
+            UtilisateurEnsemble ue = new UtilisateurEnsemble();
+            ue.setUtilisateur(user);
+            ue.setEnsemble(invitation.getEnsemble());
+            ue.setRoleDansEnsemble(Role.MEMBRE);
+            ue.setDateAdhesion(LocalDate.now());
+            utilisateurEnsembleRepository.saveAndFlush(ue);
+
+            return;
+        }
+
+        // 3 Sinon, utiliser le nouvel utilisateur créé à l'inscription
         invitation.setUtilisateur(nouvelUtilisateur);
         invitation.setEtat(StatusInvitation.ACCEPTEE);
-        invitationRepository.saveAndFlush(invitation); // flush immédiat pour être sûr
+        invitationRepository.saveAndFlush(invitation);
 
-        // 3 Créer l'entrée UtilisateurEnsemble pour que l'utilisateur rejoigne
-        // l'ensemble
         UtilisateurEnsemble ue = new UtilisateurEnsemble();
         ue.setUtilisateur(nouvelUtilisateur);
         ue.setEnsemble(invitation.getEnsemble());
-        ue.setRoleDansEnsemble(Role.MEMBRE); // rôle par défaut
+        ue.setRoleDansEnsemble(Role.MEMBRE);
         ue.setDateAdhesion(LocalDate.now());
+        utilisateurEnsembleRepository.saveAndFlush(ue);
+    }
 
-        // 4 Sauvegarde simple dans la base
-        utilisateurEnsembleRepository.saveAndFlush(ue); // flush pour voir immédiatement la ligne
+    // InvitationService.java
+
+    // public Invitation getByTokenEntity(String token) {
+    // return invitationRepository.findByToken(token)
+    // .orElseThrow(() -> new RuntimeException("Invitation non trouvée avec ce
+    // token."));
+    // }
+    public Invitation getByTokenEntity(String token) {
+        Invitation invitation = invitationRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Invitation non trouvée avec ce token."));
+
+        // Vérifier expiration
+        if (invitation.getDateExpiration() != null &&
+                invitation.getDateExpiration().isBefore(LocalDate.now())) {
+            throw new RuntimeException("Le lien d'invitation a expiré.");
+        }
+
+        return invitation;
     }
 
 }
