@@ -1,11 +1,14 @@
 package fr.afpa.choral_riff.services;
 
 import fr.afpa.choral_riff.dto.DocumentDto;
+import fr.afpa.choral_riff.dto.InstrumentDto;
 import fr.afpa.choral_riff.entity.Document;
+import fr.afpa.choral_riff.entity.Instrument;
 import fr.afpa.choral_riff.entity.Morceau;
 import fr.afpa.choral_riff.entity.Utilisateur;
 import fr.afpa.choral_riff.mapper.DocumentMapper;
 import fr.afpa.choral_riff.repositories.DocumentRepository;
+import fr.afpa.choral_riff.repositories.InstrumentRepository;
 import fr.afpa.choral_riff.repositories.MorceauRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -19,6 +22,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 
 /**
  * Service pour gérer les documents liés aux morceaux et utilisateurs.
@@ -44,18 +48,22 @@ public class DocumentService {
     private final MorceauRepository morceauRepository;
     private final UtilisateurRepository utilisateurRepository;
     private final DocumentMapper documentMapper;
+private final InstrumentRepository instrumentRepository;
 
     private static final String UPLOAD_DIR = "uploads/documents/";
 
     public DocumentService(DocumentRepository documentRepository,
-                           MorceauRepository morceauRepository,
-                           UtilisateurRepository utilisateurRepository,
-                           DocumentMapper documentMapper) {
-        this.documentRepository = documentRepository;
-        this.morceauRepository = morceauRepository;
-        this.utilisateurRepository = utilisateurRepository;
-        this.documentMapper = documentMapper;
-    }
+                       MorceauRepository morceauRepository,
+                       UtilisateurRepository utilisateurRepository,
+                       DocumentMapper documentMapper,
+                       InstrumentRepository instrumentRepository) {
+    this.documentRepository = documentRepository;
+    this.morceauRepository = morceauRepository;
+    this.utilisateurRepository = utilisateurRepository;
+    this.documentMapper = documentMapper;
+    this.instrumentRepository = instrumentRepository;
+}
+
 
 /**
  * Upload un fichier et l'associe à un morceau et un utilisateur.
@@ -170,6 +178,28 @@ public class DocumentService {
         documentRepository.deleteById(id);
     }
 
+    // public void addInstrument(Long documentId, Long instrumentId) {
+    //     // TODO Auto-generated method stub
+    //     throw new UnsupportedOperationException("Unimplemented method 'addInstrument'");
+    // }
+
+    public List<InstrumentDto> getInstrumentsByDocument(Long documentId) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getInstrumentsByDocument'");
+    }
+
+public DocumentDto addInstrument(Long documentId, Long instrumentId) {
+    Document document = documentRepository.findById(documentId)
+            .orElseThrow(() -> new RuntimeException("Document non trouvé avec l'ID : " + documentId));
+
+    Instrument instrument = instrumentRepository.findById(instrumentId)
+            .orElseThrow(() -> new RuntimeException("Instrument non trouvé avec l'ID : " + instrumentId));
+
+    document.addInstrument(instrument);
+    Document savedDocument = documentRepository.save(document);
+
+    return documentMapper.toDto(savedDocument);
+}
 
 
 

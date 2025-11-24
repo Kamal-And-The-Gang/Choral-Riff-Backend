@@ -2,6 +2,7 @@
 package fr.afpa.choral_riff.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * DTO (Data Transfer Object) représentant un document.
@@ -18,11 +19,12 @@ import java.time.LocalDate;
  */
 
 public record DocumentDto(
-                Long id_document,
-                String type,
-                String format,
-                LocalDate dateAjout,
-                String urlFichier,
-                Long utilisateurId,
-                Long morceauId) {
-}
+        Long id_document,
+        String type,
+        String format,
+        LocalDate dateAjout,
+        String urlFichier,
+        Long utilisateurId,
+        Long morceauId,
+        List<InstrumentDto> instruments // <-- instruments associés
+) {}

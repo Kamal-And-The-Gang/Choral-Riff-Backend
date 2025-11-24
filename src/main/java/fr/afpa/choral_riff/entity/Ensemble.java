@@ -11,6 +11,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 
@@ -54,8 +55,12 @@ public class Ensemble {
     public Ensemble() {
     }
 
-    @OneToMany(mappedBy = "ensemble", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Instrument> instruments;
+    // @OneToMany(mappedBy = "ensemble", cascade = CascadeType.ALL, orphanRemoval =
+    // true)
+    // private Set<Instrument> instruments;
+
+    @ManyToMany(mappedBy = "ensembles")
+    private Set<Instrument> instruments = new HashSet<>();
 
     public Set<Instrument> getInstruments() {
         return instruments;

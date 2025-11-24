@@ -1,5 +1,7 @@
 package fr.afpa.choral_riff.dto;
 
+import java.util.Set;
+
 /**
  * DTO (Data Transfer Object) représentant un instrument de musique.
  * Sert à transférer les données d'instrument entre les couches de
@@ -11,8 +13,8 @@ package fr.afpa.choral_riff.dto;
  */
 
 public record InstrumentDto(
-        Long id,
-        String nom,
-        Long ensembleId // juste l'id de l'ensemble
-) {
+                Long id,
+                String nom,
+                Set<Long> ensembleIds,
+                Set<Long> documentIds) {
 }

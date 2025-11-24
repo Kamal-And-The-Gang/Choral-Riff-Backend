@@ -1,6 +1,7 @@
 package fr.afpa.choral_riff.controllers;
 
 import fr.afpa.choral_riff.dto.DocumentDto;
+import fr.afpa.choral_riff.dto.InstrumentDto;
 import fr.afpa.choral_riff.services.DocumentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 /**
@@ -75,6 +77,40 @@ public class DocumentController {
 public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
     documentService.delete(id);
     return ResponseEntity.noContent().build(); // renvoie un code HTTP 204 (No Content)
+}
+
+// @PostMapping("/{documentId}/instruments")
+// public ResponseEntity<Void> addInstrumentToDocument(
+//         @PathVariable Long documentId,
+//         @RequestParam Long instrumentId) {
+//     documentService.addInstrument(documentId, instrumentId);
+//     return ResponseEntity.ok().build();
+// }
+
+// @PostMapping("/{documentId}/instruments")
+// public ResponseEntity<DocumentDto> addInstrumentToDocument(
+//         @PathVariable Long documentId,
+//         @RequestBody String nomInstrument) { // récupère le nom
+//     DocumentDto updatedDocument = documentService.addInstrument(documentId, nomInstrument);
+//     return ResponseEntity.ok(updatedDocument);
+// }
+// === Ajout d’un instrument à un document ===
+    @PostMapping("/{documentId}/instruments")
+    public ResponseEntity<DocumentDto> addInstrumentToDocument(
+            @PathVariable Long documentId,
+            @RequestParam Long instrumentId) {
+
+        DocumentDto updatedDocument = documentService.addInstrument(documentId, instrumentId);
+        return ResponseEntity.ok(updatedDocument);
+    }
+
+
+
+
+@GetMapping("/{documentId}/instruments")
+public ResponseEntity<List<InstrumentDto>> getInstrumentsByDocument(@PathVariable Long documentId) {
+    List<InstrumentDto> instruments = documentService.getInstrumentsByDocument(documentId);
+    return ResponseEntity.ok(instruments);
 }
 
 

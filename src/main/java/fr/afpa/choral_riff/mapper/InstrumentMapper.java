@@ -1,36 +1,70 @@
 package fr.afpa.choral_riff.mapper;
 
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
 import fr.afpa.choral_riff.dto.InstrumentDto;
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Instrument;
-import org.mapstruct.*;
-import java.util.List;
 
-/**
- * Mapper Mapstruct pour convertir entre les entités et les DTOs
- * 
- */
+@Component
+public class InstrumentMapper {
 
-@Mapper(componentModel = "spring")
-public interface InstrumentMapper {
-    @Mapping(target = "ensembleId", source = "ensemble.id")
-    InstrumentDto toDto(Instrument instrument);
+    // ENTITY -> DTO
+    public InstrumentDto toDto(Instrument entity) {
+        if (entity == null) return null;
 
-    @Mapping(target = "ensemble", source = "dto.ensembleId", qualifiedByName = "convertIdToEnsemble")
-    Instrument toEntity(InstrumentDto dto);
+        Set<Long> documentIds = entity.getDocuments() != null
+                ? entity.getDocuments().stream().map(d -> d.getId()).collect(Collectors.toSet())
+                : Set.of();
 
-    List<InstrumentDto> toDtoList(List<Instrument> instruments);
+        return new InstrumentDto(
+                entity.getId(),
+                entity.getNom(),
+                entity.getEnsembles().stream().map(e -> e.getId()).collect(Collectors.toSet()),
+                documentIds
+        );
+    }
 
-    @Mapping(target = "ensemble", source = "dto.ensembleId", qualifiedByName = "convertIdToEnsemble")
-    void updateEntityFromDto(InstrumentDto dto, @MappingTarget Instrument entity);
+    // DTO -> ENTITY
+    public Instrument toEntity(InstrumentDto dto) {
+        if (dto == null) return null;
 
-    @Named("convertIdToEnsemble")
-    static Ensemble convertIdToEnsemble(Long id) {
-        if (id == null) {
-            return null;
+        Instrument instrument = new Instrument();
+        instrument.setId(dto.id());
+        instrument.setNom(dto.nom());
+
+        Set<Ensemble> ensembles = new HashSet<>();
+        if (dto.ensembleIds() != null) {
+            dto.ensembleIds().forEach(id -> {
+                Ensemble e = new Ensemble();
+                e.setId(id);
+                ensembles.add(e);
+            });
         }
-        Ensemble ensemble = new Ensemble();
-        ensemble.setId(id);
-        return ensemble;
+        instrument.setEnsembles(ensembles);
+
+        // Les documents ne sont pas créés ici, juste une relation si nécessaire
+        return instrument;
+    }
+
+    public void updateEntityFromDto(InstrumentDto dto, Instrument entity) {
+        if (dto == null || entity == null) return;
+
+        entity.setNom(dto.nom());
+
+        if (dto.ensembleIds() != null) {
+            Set<Ensemble> ensembles = new HashSet<>();
+            dto.ensembleIds().forEach(id -> {
+                Ensemble e = new Ensemble();
+                e.setId(id);
+                ensembles.add(e);
+            });
+            entity.setEnsembles(ensembles);
+        }
     }
 }

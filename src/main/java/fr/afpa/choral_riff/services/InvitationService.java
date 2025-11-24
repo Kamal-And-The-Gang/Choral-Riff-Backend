@@ -207,13 +207,6 @@ public class InvitationService {
         utilisateurEnsembleRepository.saveAndFlush(ue);
     }
 
-    // InvitationService.java
-
-    // public Invitation getByTokenEntity(String token) {
-    // return invitationRepository.findByToken(token)
-    // .orElseThrow(() -> new RuntimeException("Invitation non trouvée avec ce
-    // token."));
-    // }
     public Invitation getByTokenEntity(String token) {
         Invitation invitation = invitationRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Invitation non trouvée avec ce token."));

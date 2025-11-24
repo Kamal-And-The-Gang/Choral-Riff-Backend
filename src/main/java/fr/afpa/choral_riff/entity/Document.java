@@ -1,15 +1,15 @@
+
 package fr.afpa.choral_riff.entity;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
  * Représente un document musical (partition, enregistrement, etc.)
  * associé à un morceau et un utilisateur dans l'application Choral Riff.
  */
-
 @Entity
 @Table(name = "document")
 public class Document {
@@ -39,11 +39,11 @@ public class Document {
     @JoinColumn(name = "id_morceau", nullable = false)
     private Morceau morceau;
 
+    // Relation Many-to-Many via DocumentInstrument
     @OneToMany(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<DocumentInstrument> documentInstruments;
+    private Set<DocumentInstrument> documentInstruments = new HashSet<>();
 
     // Constructeurs
-
     public Document() {
     }
 
@@ -58,7 +58,6 @@ public class Document {
     }
 
     // Getters et Setters
-
     public Long getId() {
         return id;
     }
@@ -121,6 +120,40 @@ public class Document {
 
     public void setDocumentInstruments(Set<DocumentInstrument> documentInstruments) {
         this.documentInstruments = documentInstruments;
+    }
+
+    // Méthode utilitaire pour récupérer les instruments liés
+    @Transient
+    public Set<Instrument> getInstruments() {
+        Set<Instrument> instruments = new HashSet<>();
+        for (DocumentInstrument di : documentInstruments) {
+            instruments.add(di.getInstrument());
+        }
+        return instruments;
+    }
+
+    public void addInstrument(Instrument instrument) {
+
+        // Vérifie si l’association existe déjà
+        boolean exists = documentInstruments.stream()
+                .anyMatch(di -> di.getInstrument().equals(instrument));
+
+        if (exists) {
+            return; // ne rien faire si déjà lié
+        }
+
+        // Crée une nouvelle ligne dans document_instrument
+        DocumentInstrument di = new DocumentInstrument(
+                this,
+                instrument,
+                LocalDate.now());
+
+        documentInstruments.add(di); // SEULEMENT ce côté !
+    }
+
+    // Méthode utilitaire pour supprimer un instrument
+    public void removeInstrument(Instrument instrument) {
+        documentInstruments.removeIf(di -> di.getInstrument().equals(instrument));
     }
 
 }
