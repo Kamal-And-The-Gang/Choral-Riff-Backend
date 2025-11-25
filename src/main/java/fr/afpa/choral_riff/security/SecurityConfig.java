@@ -4,7 +4,7 @@ import fr.afpa.choral_riff.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -42,7 +42,10 @@ public class SecurityConfig {
                 // Autorise tout pour le moment (tu pourras restreindre plus tard)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        // .requestMatchers(HttpMethod.POST, "/api/invitations").permitAll() 
+                        .requestMatchers("/api/invitations/token/**").permitAll() // accès libre pour récupération du
+                                                                                  // token
+
+                        // .requestMatchers(HttpMethod.POST, "/api/invitations").permitAll()
                         .anyRequest().permitAll())
 
                 // (Optionnel) politique de sécurité de contenu
