@@ -10,8 +10,8 @@ import java.util.Optional;
 @Repository
 public interface InvitationRepository extends JpaRepository<Invitation, Long> {
     List<Invitation> findByEnsembleId(Long ensembleId);
-    Optional<Invitation> findByToken(String token);
 
+    Optional<Invitation> findByToken(String token);
 
     boolean existsByEmailInvite(String emailInvite);
 

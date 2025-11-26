@@ -1,7 +1,8 @@
 package fr.afpa.choral_riff.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
+
+import java.time.LocalDateTime;
 
 /**
  * Entité représentant une invitation envoyée à un utilisateur pour rejoindre un
@@ -23,9 +24,9 @@ public class Invitation {
     // @Column(unique = true, nullable = true)
     // private String token; // Token unique d'invitation
 
-    private LocalDate dateEnvoi;
+    private LocalDateTime dateEnvoi;
 
-    private LocalDate dateExpiration; // <-- AJOUT ICI
+    private LocalDateTime dateExpiration; // <-- AJOUT ICI
 
     @Column(unique = true, nullable = true)
     private String token;
@@ -52,7 +53,7 @@ public class Invitation {
     public Invitation() {
     }
 
-    public Invitation(StatusInvitation etat, LocalDate dateEnvoi, String token, Ensemble ensemble,
+    public Invitation(StatusInvitation etat, LocalDateTime dateEnvoi, String token, Ensemble ensemble,
             Utilisateur utilisateur) {
         this.etat = etat;
         this.dateEnvoi = dateEnvoi;
@@ -77,11 +78,11 @@ public class Invitation {
         this.etat = etat;
     }
 
-    public LocalDate getDateEnvoi() {
+    public LocalDateTime getDateEnvoi() {
         return dateEnvoi;
     }
 
-    public void setDateEnvoi(LocalDate dateEnvoi) {
+    public void setDateEnvoi(LocalDateTime dateEnvoi) {
         this.dateEnvoi = dateEnvoi;
     }
 
@@ -117,11 +118,11 @@ public class Invitation {
         this.emailInvite = emailInvite;
     }
 
-    public LocalDate getDateExpiration() {
+    public LocalDateTime getDateExpiration() {
         return dateExpiration;
     }
 
-    public void setDateExpiration(LocalDate dateExpiration) {
+    public void setDateExpiration(LocalDateTime dateExpiration) {
         this.dateExpiration = dateExpiration;
     }
 

@@ -1,7 +1,8 @@
 package fr.afpa.choral_riff.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
+
+import java.time.LocalDateTime;
 
 /**
  * Entité représentant la relation entre un {@link Utilisateur} et un
@@ -40,7 +41,7 @@ public class UtilisateurEnsemble {
 
 
     @Column(nullable = false)
-    private LocalDate dateAdhesion;
+    private LocalDateTime dateAdhesion;
 
     public UtilisateurEnsemble() {
     }
@@ -48,7 +49,7 @@ public class UtilisateurEnsemble {
     public UtilisateurEnsemble(Utilisateur utilisateur,
                                 Ensemble ensemble,
                                 Role roleDansEnsemble,
-                                LocalDate dateAdhesion) {
+                                LocalDateTime dateAdhesion) {
         this.utilisateur = utilisateur;
         this.ensemble = ensemble;
         this.roleDansEnsemble = roleDansEnsemble;
@@ -88,11 +89,11 @@ public class UtilisateurEnsemble {
         this.roleDansEnsemble = roleDansEnsemble;
     }
 
-    public LocalDate getDateAdhesion() {
+    public LocalDateTime getDateAdhesion() {
         return dateAdhesion;
     }
 
-    public void setDateAdhesion(LocalDate dateAdhesion) {
+    public void setDateAdhesion(LocalDateTime dateAdhesion) {
         this.dateAdhesion = dateAdhesion;
     }
 }

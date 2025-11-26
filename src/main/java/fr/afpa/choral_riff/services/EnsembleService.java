@@ -12,7 +12,8 @@ import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -92,7 +93,7 @@ public class EnsembleService {
             UtilisateurEnsemble utilisateurEnsemble = new UtilisateurEnsemble(createur.get(),
                     ensemble,
                     Role.ADMIN,
-                    LocalDate.now());
+                    LocalDateTime.now());
 
             userEnsemble.add(utilisateurEnsemble);
             // ensemble.setDateCreation(userId);

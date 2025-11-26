@@ -4,7 +4,6 @@ import fr.afpa.choral_riff.dto.RegisterDto;
 import fr.afpa.choral_riff.dto.UtilisateurDto;
 import fr.afpa.choral_riff.entity.Utilisateur;
 import org.mapstruct.*;
-
 import java.util.List;
 
 @Mapper(componentModel = "spring")
