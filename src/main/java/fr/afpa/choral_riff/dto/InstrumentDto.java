@@ -13,8 +13,7 @@ import java.util.Set;
  */
 
 public record InstrumentDto(
-                Long id,
-                String nom,
-                Set<Long> ensembleIds,
-                Set<Long> documentIds) {
+        Long id,
+        String nom,
+        Set<Long> documentIds) {
 }

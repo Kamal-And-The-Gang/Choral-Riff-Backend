@@ -60,16 +60,16 @@ public class Ensemble {
     @OneToMany(mappedBy = "ensemble", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Morceau> morceaux;
 
-    @ManyToMany(mappedBy = "ensembles")
-    private Set<Instrument> instruments = new HashSet<>();
+    // @ManyToMany(mappedBy = "ensembles")
+    // private Set<Instrument> instruments = new HashSet<>();
 
-    public Set<Instrument> getInstruments() {
-        return instruments;
-    }
+    // public Set<Instrument> getInstruments() {
+    //     return instruments;
+    // }
 
-    public void setInstruments(Set<Instrument> instruments) {
-        this.instruments = instruments;
-    }
+    // public void setInstruments(Set<Instrument> instruments) {
+    //     this.instruments = instruments;
+    // }
 
     public Ensemble(String nom, String description, LocalDate dateCreation, String typeEnsemble) {
         this.nom = nom;

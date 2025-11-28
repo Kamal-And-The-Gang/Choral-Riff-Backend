@@ -2,12 +2,10 @@ package fr.afpa.choral_riff.services;
 
 import fr.afpa.choral_riff.entity.Utilisateur;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import java.util.Collections;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
