@@ -55,9 +55,10 @@ public class Ensemble {
     public Ensemble() {
     }
 
-    // @OneToMany(mappedBy = "ensemble", cascade = CascadeType.ALL, orphanRemoval =
-    // true)
-    // private Set<Instrument> instruments;
+    // Dans la classe Ensemble
+    // Cela garantit que supprimer un Ensemble supprimera automatiquement tous ses Morceaux
+    @OneToMany(mappedBy = "ensemble", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Morceau> morceaux;
 
     @ManyToMany(mappedBy = "ensembles")
     private Set<Instrument> instruments = new HashSet<>();
@@ -133,4 +134,13 @@ public class Ensemble {
         this.utilisateurEnsembles = utilisateurEnsembles;
     }
 
+    // Getter et setter
+    public List<Morceau> getMorceaux() {
+        return morceaux;
+    }
+
+    public void setMorceaux(List<Morceau> morceaux) {
+        this.morceaux = morceaux;
+
+    }
 }

@@ -1,4 +1,5 @@
 package fr.afpa.choral_riff.entity;
+
 /**
  * 
  */

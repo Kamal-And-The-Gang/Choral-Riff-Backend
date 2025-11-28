@@ -107,6 +107,7 @@ package fr.afpa.choral_riff.entity;
 
 import jakarta.persistence.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -133,9 +134,14 @@ public class Morceau {
 
     private String descriptif;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "ensembleId")
-    private Ensemble ensemble;
+    // @ManyToOne(cascade = CascadeType.ALL)
+    // @JoinColumn(name = "ensembleId")
+    // private Ensemble ensemble;
+
+  @ManyToOne
+@JoinColumn(name = "ensembleId")
+private Ensemble ensemble;
+
 
     @ManyToOne
     @JoinColumn(name = "id_createur")
@@ -143,8 +149,6 @@ public class Morceau {
 
     @OneToMany(mappedBy = "morceau", cascade = CascadeType.ALL)
     private Set<Document> documents;
-
-    
 
     // ===== Getters / Setters =====
     public Long getId() {
@@ -211,6 +215,4 @@ public class Morceau {
         this.documents = documents;
     }
 
-    
 }
-

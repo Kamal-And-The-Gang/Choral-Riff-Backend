@@ -99,28 +99,28 @@ public class InvitationService {
         return invitationMapper.toDto(invitation);
     }
 
-    public InvitationDTO createSimple(CreateInvitationDTO dto) {
-        // Vérifie s'il existe déjà une invitation pour cet email
-        if (invitationRepository.existsByEmailInvite(dto.getEmailInvite())) {
-            throw new IllegalArgumentException("Une invitation existe déjà pour cet email.");
-        }
+    // public InvitationDTO createSimple(CreateInvitationDTO dto) {
+    //     // Vérifie s'il existe déjà une invitation pour cet email
+    //     if (invitationRepository.existsByEmailInvite(dto.getEmailInvite())) {
+    //         throw new IllegalArgumentException("Une invitation existe déjà pour cet email.");
+    //     }
 
-        // Cherche l'ensemble par ID
-        Ensemble ensemble = ensembleRepository.findById(dto.getEnsembleId())
-                .orElseThrow(() -> new RuntimeException("Ensemble non trouvé"));
+    //     // Cherche l'ensemble par ID
+    //     Ensemble ensemble = ensembleRepository.findById(dto.getEnsembleId())
+    //             .orElseThrow(() -> new RuntimeException("Ensemble non trouvé"));
 
-        // Crée une nouvelle invitation à partir du DTO
-        Invitation invitation = createInvitationMapper.toEntity(dto);
+    //     // Crée une nouvelle invitation à partir du DTO
+    //     Invitation invitation = createInvitationMapper.toEntity(dto);
 
-        // Associe l'ensemble à l'invitation
-        invitation.setEnsemble(ensemble);
+    //     // Associe l'ensemble à l'invitation
+    //     invitation.setEnsemble(ensemble);
 
-        // Sauvegarde l'invitation en base
-        Invitation saved = invitationRepository.save(invitation);
+    //     // Sauvegarde l'invitation en base
+    //     Invitation saved = invitationRepository.save(invitation);
 
-        // Retourne le DTO résultat
-        return invitationMapper.toDto(saved);
-    }
+    //     // Retourne le DTO résultat
+    //     return invitationMapper.toDto(saved);
+    // }
 
     // === Accepter une invitation via token ===
     public InvitationDTO accept(String token) {

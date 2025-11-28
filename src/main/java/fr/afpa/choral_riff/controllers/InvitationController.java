@@ -88,11 +88,11 @@ public class InvitationController {
     /**
      * Récupérer une invitation via son token.
      */
-    @GetMapping("/token/{token}")
-    public ResponseEntity<InvitationDTO> getByToken(@PathVariable String token) {
-        InvitationDTO dto = invitationService.getByToken(token);
-        return ResponseEntity.ok(dto);
-    }
+    // @GetMapping("/token/{token}")
+    // public ResponseEntity<InvitationDTO> getByToken(@PathVariable String token) {
+    //     InvitationDTO dto = invitationService.getByToken(token);
+    //     return ResponseEntity.ok(dto);
+    // }
 
     @GetMapping("/role/{token}")
     public ResponseEntity<String> getRoleViaToken(@PathVariable String token) {
