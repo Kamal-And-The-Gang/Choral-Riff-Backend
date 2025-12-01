@@ -16,4 +16,6 @@ public interface InvitationRepository extends JpaRepository<Invitation, Long> {
     boolean existsByEmailInvite(String emailInvite);
 
     boolean existsByEmailInviteAndEnsembleId(String emailInvite, Long ensembleId);
+    Optional<Invitation> findByEmailInviteAndEnsembleId(String emailInvite, Long ensembleId);
+
 }

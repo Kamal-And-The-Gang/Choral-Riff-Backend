@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.NoSuchElementException;
 import fr.afpa.choral_riff.services.InvitationService;
+import java.util.Optional;
 
 @Service
 /**
@@ -36,30 +37,35 @@ public class UtilisateurService {
         return utilisateurMapper.toDto(utilisateur);
     }
 
-    // public UtilisateurDto register(RegisterDto dto) {
-    // Utilisateur entity = utilisateurMapper.fromRegisterDto(dto);
-    // entity.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
-    // Utilisateur saved = utilisateurRepository.save(entity);
-    // return utilisateurMapper.toDto(saved);
-    // }
-
     public UtilisateurDto register(RegisterDto dto) {
-        // 1 Conversion du DTO en entité
+
+        // 1️⃣ Vérifier si l’utilisateur existe déjà
+        Optional<Utilisateur> existingUser = utilisateurRepository.findByEmail(dto.getEmail());
+
+        Utilisateur utilisateur;
+
+        if (existingUser.isPresent()) {
+            // L’utilisateur existe déjà → ne pas le recréer
+            utilisateur = existingUser.get();
+
+            // Si token présent → rattacher à l'ensemble
+            if (dto.getToken() != null && !dto.getToken().isEmpty()) {
+                invitationService.rattacherUtilisateurApresInscription(dto.getToken(), utilisateur);
+            }
+
+            return utilisateurMapper.toDto(utilisateur);
+        }
+
+        // 2️⃣ L’utilisateur n'existe pas → création normale
         Utilisateur entity = utilisateurMapper.fromRegisterDto(dto);
-
-        // 2 Encodage du mot de passe
         entity.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
-
-        // 3 Sauvegarde de l’utilisateur
         Utilisateur saved = utilisateurRepository.save(entity);
 
-        // 4 Si un token d’invitation est présent, rattacher à l’ensemble
-        // correspondant
+        // 3️⃣ Si un token existe → rattacher
         if (dto.getToken() != null && !dto.getToken().isEmpty()) {
             invitationService.rattacherUtilisateurApresInscription(dto.getToken(), saved);
         }
 
-        // 5️⃣ Retourner le DTO
         return utilisateurMapper.toDto(saved);
     }
 

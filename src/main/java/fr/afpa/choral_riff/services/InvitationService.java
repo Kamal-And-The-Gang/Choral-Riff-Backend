@@ -1,6 +1,5 @@
 package fr.afpa.choral_riff.services;
 
-
 import fr.afpa.choral_riff.dto.CreateInvitationDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -27,7 +26,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 
 @Service
 public class InvitationService {
@@ -67,60 +65,37 @@ public class InvitationService {
     }
 
     public InvitationDTO creerInvitation(CreateInvitationDTO dto) {
-        // Vérifie si une invitation existe déjà pour cet email et ensemble
-        if (invitationRepository.existsByEmailInviteAndEnsembleId(dto.getEmailInvite(), dto.getEnsembleId())) {
-            throw new IllegalArgumentException("Une invitation existe déjà pour cet email.");
+        Optional<Utilisateur> optUser = utilisateurRepository.findByEmail(dto.getEmailInvite());
+        Utilisateur utilisateur = optUser.orElse(null);
+
+        if (utilisateur != null) {
+            // Vérifier si déjà membre de cet ensemble
+            boolean dejaMembre = utilisateurEnsembleRepository
+                    .existsByUtilisateurIdAndEnsembleId(utilisateur.getId(), dto.getEnsembleId());
+
+            InvitationDTO dtoResult = new InvitationDTO();
+            dtoResult.setExistant(true);
+            dtoResult.setUtilisateurId(utilisateur.getId());
+            dtoResult.setInvitationDejaEnvoyee(dejaMembre); // si déjà membre, inutile d’envoyer invitation
+            return dtoResult;
         }
 
-        // Récupère l'ensemble
+        // Sinon, créer l’invitation pour un nouvel utilisateur
         Ensemble ensemble = ensembleRepository.findById(dto.getEnsembleId())
                 .orElseThrow(() -> new EntityNotFoundException("Ensemble introuvable"));
 
-        // Crée l'invitation simple
         Invitation invitation = new Invitation();
         invitation.setEmailInvite(dto.getEmailInvite());
         invitation.setEnsemble(ensemble);
-
-        // Générer et assigner un token
-        String token = UUID.randomUUID().toString();
-        invitation.setToken(token);
-
+        invitation.setToken(UUID.randomUUID().toString());
         invitation.setDateEnvoi(LocalDateTime.now());
-        invitation.setDateExpiration(LocalDateTime.now().plusDays(7)); // Expiration dans 7 jours
+        invitation.setDateExpiration(LocalDateTime.now().plusDays(7));
 
-        // Sauvegarde
         invitationRepository.save(invitation);
-
-        // Envoyer le mail avec le token
-        // mailService.sendInvitationEmail(invitation.getEmailInvite(), null);
         mailService.sendInvitationEmail(invitation.getEmailInvite(), invitation.getToken());
 
-        // Convertit et renvoie le DTO
         return invitationMapper.toDto(invitation);
     }
-
-    // public InvitationDTO createSimple(CreateInvitationDTO dto) {
-    //     // Vérifie s'il existe déjà une invitation pour cet email
-    //     if (invitationRepository.existsByEmailInvite(dto.getEmailInvite())) {
-    //         throw new IllegalArgumentException("Une invitation existe déjà pour cet email.");
-    //     }
-
-    //     // Cherche l'ensemble par ID
-    //     Ensemble ensemble = ensembleRepository.findById(dto.getEnsembleId())
-    //             .orElseThrow(() -> new RuntimeException("Ensemble non trouvé"));
-
-    //     // Crée une nouvelle invitation à partir du DTO
-    //     Invitation invitation = createInvitationMapper.toEntity(dto);
-
-    //     // Associe l'ensemble à l'invitation
-    //     invitation.setEnsemble(ensemble);
-
-    //     // Sauvegarde l'invitation en base
-    //     Invitation saved = invitationRepository.save(invitation);
-
-    //     // Retourne le DTO résultat
-    //     return invitationMapper.toDto(saved);
-    // }
 
     // === Accepter une invitation via token ===
     public InvitationDTO accept(String token) {
@@ -155,152 +130,45 @@ public class InvitationService {
         return invitationMapper.toDto(invitation);
     }
 
-    /**
-     * Rattache un utilisateur à une invitation après son inscription via le token.
-     * 
-     * @param token             Le token unique de l'invitation
-     * @param nouvelUtilisateur L'utilisateur créé (inscrit)
-     * @throws RuntimeException si l'invitation n'existe pas ou est déjà rattachée
-     */
+    @Transactional
+    public InvitationDTO rattacherUtilisateurApresInscription(String token, Utilisateur nouvelUtilisateur) {
+        // 1️⃣ Récupérer l'invitation
+        Invitation invitation = invitationRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Invitation non trouvée avec ce token."));
 
-    // @Transactional
-    // public void rattacherUtilisateurApresInscription(String token, Utilisateur nouvelUtilisateur) {
-    //     // 1 Récupérer l'invitation
-    //     Invitation invitation = invitationRepository.findByToken(token)
-    //             .orElseThrow(() -> new RuntimeException("Invitation non trouvée avec ce token."));
+        // 2️⃣ Vérifier si l'utilisateur existe déjà en base
+        Optional<Utilisateur> optUser = utilisateurRepository.findByEmail(invitation.getEmailInvite());
+        Utilisateur utilisateurFinal = optUser.orElse(nouvelUtilisateur);
 
-    //     if (invitation.getUtilisateur() != null) {
-    //         throw new RuntimeException("Cette invitation est déjà rattachée à un utilisateur.");
-    //     }
+        // 3️⃣ Vérifier si l'utilisateur est déjà membre de cet ensemble
+        boolean dejaMembre = utilisateurEnsembleRepository
+                .existsByUtilisateurIdAndEnsembleId(utilisateurFinal.getId(), invitation.getEnsemble().getId());
 
-    //     // 2 Vérifier si un utilisateur existe déjà avec cet email
-    //     Optional<Utilisateur> optUser = utilisateurRepository.findByEmail(invitation.getEmailInvite());
+        InvitationDTO dto = invitationMapper.toDto(invitation);
 
-    //     if (optUser.isPresent()) {
-    //         Utilisateur user = optUser.get(); // on récupère l'utilisateur réel
+        if (dejaMembre) {
+            // L'utilisateur existe déjà et est membre de l'ensemble
+            dto.setExistant(true);
+            dto.setUtilisateurId(utilisateurFinal.getId());
+            dto.setInvitationDejaEnvoyee(true); // inutile d'envoyer/rattacher l'invitation
+            return dto;
+        }
 
-    //         // L'utilisateur existe déjà → ne pas créer un nouveau compte
-    //         // Juste l’attacher à l’ensemble
-    //         invitation.setUtilisateur(user);
-    //         invitation.setEtat(StatusInvitation.ACCEPTEE);
-    //         invitationRepository.saveAndFlush(invitation);
+        //  Si pas encore membre, rattacher l'utilisateur à l'invitation
+        invitation.setUtilisateur(utilisateurFinal);
+        invitation.setEtat(StatusInvitation.ACCEPTEE);
+        invitationRepository.saveAndFlush(invitation);
 
-    //         UtilisateurEnsemble ue = new UtilisateurEnsemble();
-    //         ue.setUtilisateur(user);
-    //         ue.setEnsemble(invitation.getEnsemble());
-    //         ue.setRoleDansEnsemble(Role.MEMBRE);
-    //         ue.setDateAdhesion(LocalDateTime.now());
-    //         utilisateurEnsembleRepository.saveAndFlush(ue);
-
-    //         return;
-    //     }
-
-    //     // 3 Sinon, utiliser le nouvel utilisateur créé à l'inscription
-    //     invitation.setUtilisateur(nouvelUtilisateur);
-    //     invitation.setEtat(StatusInvitation.ACCEPTEE);
-    //     invitationRepository.saveAndFlush(invitation);
-
-    //     UtilisateurEnsemble ue = new UtilisateurEnsemble();
-    //     ue.setUtilisateur(nouvelUtilisateur);
-    //     ue.setEnsemble(invitation.getEnsemble());
-    //     ue.setRoleDansEnsemble(Role.MEMBRE);
-    //     ue.setDateAdhesion(LocalDateTime.now());
-    //     utilisateurEnsembleRepository.saveAndFlush(ue);
-    // }
-
-
-// public void rattacherUtilisateurApresInscription(String token, Utilisateur nouvelUtilisateur) {
-
-//     // === 1. Récupérer l'invitation ===
-//     Invitation invitation = invitationRepository.findByToken(token)
-//             .orElseThrow(() -> new RuntimeException("Invitation non trouvée avec ce token."));
-
-//     // === 2. L'invitation a déjà un utilisateur rattaché ===
-//     if (invitation.getUtilisateur() != null) {
-//         throw new RuntimeException("Cette invitation est déjà rattachée à un utilisateur.");
-//     }
-
-//     // === 3. Vérifier si un utilisateur existe déjà avec cet email ===
-//     Optional<Utilisateur> optUser = utilisateurRepository.findByEmail(invitation.getEmailInvite());
-
-//     Utilisateur user;
-
-//     if (optUser.isPresent()) {
-//         // Utilisateur existant
-//         user = optUser.get();
-//     } else {
-//         // Utilisateur nouvellement inscrit
-//         user = nouvelUtilisateur;
-//     }
-
-//     Long ensembleId = invitation.getEnsemble().getId();
-
-//     // === 4. Vérifier si l'utilisateur est DEJA membre de l'ensemble ===
-//     boolean dejaMembre = utilisateurEnsembleRepository
-//             .existsByUtilisateurIdAndEnsembleId(user.getId(), ensembleId);
-
-//     if (dejaMembre) {
-//         // Pas besoin de rattacher → invitation juste marquée comme acceptée
-//         invitation.setUtilisateur(user);
-//         invitation.setEtat(StatusInvitation.ACCEPTEE);
-//         invitationRepository.saveAndFlush(invitation);
-//         return;
-//     }
-
-//     // === 5. Rattacher l’utilisateur à l’ensemble ===
-//     UtilisateurEnsemble ue = new UtilisateurEnsemble();
-//     ue.setUtilisateur(user);
-//     ue.setEnsemble(invitation.getEnsemble());
-//     ue.setRoleDansEnsemble(Role.MEMBRE);
-//     ue.setDateAdhesion(LocalDateTime.now());
-//     utilisateurEnsembleRepository.saveAndFlush(ue);
-
-//     // === 6. Mettre à jour l'invitation ===
-//     invitation.setUtilisateur(user);
-//     invitation.setEtat(StatusInvitation.ACCEPTEE);
-//     invitationRepository.saveAndFlush(invitation);
-// }
-@Transactional
-public void rattacherUtilisateurApresInscription(String token, Utilisateur nouvelUtilisateur) {
-    // 1️⃣ Récupérer l'invitation
-    Invitation invitation = invitationRepository.findByToken(token)
-            .orElseThrow(() -> new RuntimeException("Invitation non trouvée avec ce token."));
-
-    if (invitation.getUtilisateur() != null) {
-        throw new RuntimeException("Cette invitation est déjà rattachée à un utilisateur.");
-    }
-
-    // 2️⃣ Vérifier si un utilisateur existe déjà avec cet email
-    Optional<Utilisateur> optUser = utilisateurRepository.findByEmail(invitation.getEmailInvite());
-
-    Utilisateur utilisateurFinal;
-    if (optUser.isPresent()) {
-        // L'utilisateur existe déjà
-        utilisateurFinal = optUser.get();
-    } else {
-        // Utiliser le nouvel utilisateur créé à l'inscription
-        utilisateurFinal = nouvelUtilisateur;
-    }
-
-    // 3️⃣ Rattacher l'utilisateur à l'invitation
-    invitation.setUtilisateur(utilisateurFinal);
-    invitation.setEtat(StatusInvitation.ACCEPTEE);
-    invitationRepository.saveAndFlush(invitation);
-
-    // 4️⃣ Vérifier si l'utilisateur est déjà membre de l'ensemble
-    boolean dejaMembre = utilisateurEnsembleRepository
-            .existsByUtilisateurIdAndEnsembleId(utilisateurFinal.getId(), invitation.getEnsemble().getId());
-
-    if (!dejaMembre) {
+        //  Ajouter l'utilisateur à l'ensemble si nécessaire
         UtilisateurEnsemble ue = new UtilisateurEnsemble();
         ue.setUtilisateur(utilisateurFinal);
         ue.setEnsemble(invitation.getEnsemble());
         ue.setRoleDansEnsemble(Role.MEMBRE);
         ue.setDateAdhesion(LocalDateTime.now());
         utilisateurEnsembleRepository.saveAndFlush(ue);
-    }
-}
 
+        return invitationMapper.toDto(invitation);
+    }
 
     public Invitation getByTokenEntity(String token) {
         Invitation invitation = invitationRepository.findByToken(token)
@@ -315,7 +183,4 @@ public void rattacherUtilisateurApresInscription(String token, Utilisateur nouve
         return invitation;
     }
 
-
-
-    
 }

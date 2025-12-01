@@ -32,17 +32,19 @@ public class InvitationController {
         this.utilisateurEnsembleService = utilisateurEnsembleService; // <-- ajout
     }
 
-    
-
     @PostMapping
     public ResponseEntity<?> creerInvitation(@Valid @RequestBody CreateInvitationDTO createInvitationDTO) {
         try {
             InvitationDTO created = invitationService.creerInvitation(createInvitationDTO);
-            // Utiliser le token réel de l'invitation
-            mailService.sendInvitationEmail(created.getEmailInvite(), created.getToken());
+
+            // Si l'utilisateur existe déjà ou invitation déjà envoyée, ne pas renvoyer
+            // d'email
+            if (!created.isExistant() && !created.isInvitationDejaEnvoyee()) {
+                mailService.sendInvitationEmail(created.getEmailInvite(), created.getToken());
+            }
+
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         }
@@ -90,8 +92,8 @@ public class InvitationController {
      */
     // @GetMapping("/token/{token}")
     // public ResponseEntity<InvitationDTO> getByToken(@PathVariable String token) {
-    //     InvitationDTO dto = invitationService.getByToken(token);
-    //     return ResponseEntity.ok(dto);
+    // InvitationDTO dto = invitationService.getByToken(token);
+    // return ResponseEntity.ok(dto);
     // }
 
     @GetMapping("/role/{token}")
@@ -115,4 +117,19 @@ public class InvitationController {
             return ResponseEntity.status(410).body("Invitation expirée");
         }
     }
+
+    @PostMapping("/rattacher")
+    public ResponseEntity<?> rattacherUtilisateur(
+            @RequestParam Long ensembleId,
+            @RequestParam Long utilisateurId) {
+        try {
+            utilisateurEnsembleService.rattacherUtilisateurAEnsemble(utilisateurId, ensembleId);
+            return ResponseEntity.ok(Map.of("message", "Vous êtes maintenant rattaché à l'ensemble."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    
+
 }
