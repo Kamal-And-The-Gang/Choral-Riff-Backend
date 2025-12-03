@@ -9,11 +9,9 @@ import fr.afpa.choral_riff.services.UtilisateurEnsembleService;
 import fr.afpa.choral_riff.dto.CreateInvitationDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
 
@@ -22,13 +20,16 @@ import java.util.Map;
 public class InvitationController {
 
     private final InvitationService invitationService;
-    private final MailService mailService;
+
     private final UtilisateurEnsembleService utilisateurEnsembleService; // <-- ajout
+
+    private final MailService mailService;
 
     public InvitationController(InvitationService invitationService, MailService mailService,
             UtilisateurEnsembleService utilisateurEnsembleService) {
         this.invitationService = invitationService;
         this.mailService = mailService;
+
         this.utilisateurEnsembleService = utilisateurEnsembleService; // <-- ajout
     }
 
@@ -37,16 +38,11 @@ public class InvitationController {
         try {
             InvitationDTO created = invitationService.creerInvitation(createInvitationDTO);
 
-            // Si l'utilisateur existe déjà ou invitation déjà envoyée, ne pas renvoyer
-            // d'email
-            if (!created.isExistant() && !created.isInvitationDejaEnvoyee()) {
-                mailService.sendInvitationEmail(created.getEmailInvite(), created.getToken());
-            }
-
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
 
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -130,6 +126,19 @@ public class InvitationController {
         }
     }
 
-    
+   @PostMapping("/resend/{id}")
+public ResponseEntity<?> resendInvitation(@PathVariable Long id) {
+    try {
+        InvitationDTO inv = invitationService.getById(id);
+        mailService.sendInvitationEmail(inv.getEmailInvite(), inv.getToken());
+        return ResponseEntity.ok(Map.of("message", "Email renvoyé"));
+    } catch (EntityNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                             .body(Map.of("error", "Invitation non trouvée"));
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                             .body(Map.of("error", "Erreur lors de l'envoi de l'email"));
+    }
+}
 
 }

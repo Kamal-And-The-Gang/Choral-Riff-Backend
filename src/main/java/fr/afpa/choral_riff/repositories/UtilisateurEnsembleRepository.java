@@ -13,11 +13,11 @@ import org.springframework.stereotype.Repository;
 public interface UtilisateurEnsembleRepository extends JpaRepository<UtilisateurEnsemble, Long> {
 
     boolean existsByUtilisateur_IdAndEnsemble_IdAndRoleDansEnsembleIn(Long utilisateurId,
-                                                                     Long ensembleId,
-                                                                     List<Role> roles);
+            Long ensembleId,
+            List<Role> roles);
 
     boolean existsByUtilisateurIdAndEnsembleId(Long id, Long id2);
+List<UtilisateurEnsemble> findByEnsembleId(Long ensembleId);
 
     Optional<UtilisateurEnsemble> findByUtilisateur_IdAndEnsemble_Id(Long utilisateurId, Long ensembleId);
 }
-

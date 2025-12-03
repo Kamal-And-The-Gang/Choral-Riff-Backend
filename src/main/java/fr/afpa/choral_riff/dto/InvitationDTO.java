@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
+
+
 /**
  * DTO représentant une invitation envoyée à un utilisateur
  * pour rejoindre un ensemble musical.
@@ -16,8 +18,9 @@ public class InvitationDTO {
     @Email(message = "L'email doit être valide")
     @NotBlank(message = "L'email du destinataire est obligatoire")
     private String emailInvite;
-
     private Long utilisateurId; // pour lier à un utilisateur existant
+    private String utilisateurNom; // <-- nouveau champ pour le vrai nom
+
     private Long ensembleId;
     private String ensembleNom;
     private String etat;
@@ -28,7 +31,7 @@ public class InvitationDTO {
     private boolean existant = false;
 
     // --- Nouveau champ pour indiquer que l'invitation a déjà été envoyée ---
-    private boolean invitationDejaEnvoyee = false;
+    private boolean dejaMembre = false;
 
     // --- Getters & Setters ---
     public Long getId() {
@@ -53,6 +56,14 @@ public class InvitationDTO {
 
     public void setUtilisateurId(Long utilisateurId) {
         this.utilisateurId = utilisateurId;
+    }
+
+    public String getUtilisateurNom() {
+        return utilisateurNom;
+    }
+
+    public void setUtilisateurNom(String utilisateurNom) {
+        this.utilisateurNom = utilisateurNom;
     }
 
     public Long getEnsembleId() {
@@ -103,16 +114,12 @@ public class InvitationDTO {
         this.existant = existant;
     }
 
-    public boolean isInvitationDejaEnvoyee() {
-        return invitationDejaEnvoyee;
+    public boolean isDejaMembre() {
+        return dejaMembre;
     }
 
-    public void setInvitationDejaEnvoyee(boolean invitationDejaEnvoyee) {
-        this.invitationDejaEnvoyee = invitationDejaEnvoyee;
+    public void setDejaMembre(boolean dejaMembre) {
+        this.dejaMembre = dejaMembre;
     }
 
-    public void setNomInvite(String nom) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setNomInvite'");
-    }
 }

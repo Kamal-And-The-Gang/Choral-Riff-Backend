@@ -9,7 +9,7 @@ package fr.afpa.choral_riff.dto;
  */
 
 public class UtilisateurDto {
- 
+
     private Long id;
     private String nom;
     private String prenom;
@@ -19,7 +19,8 @@ public class UtilisateurDto {
     // Constructeur vide pour jpa
     public UtilisateurDto() {
     }
-     /**
+
+    /**
      * Constructeur avec tous les champs.
      *
      * @param id          Identifiant unique de l'utilisateur

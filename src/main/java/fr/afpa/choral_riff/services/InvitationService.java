@@ -76,7 +76,7 @@ public class InvitationService {
             InvitationDTO dtoResult = new InvitationDTO();
             dtoResult.setExistant(true);
             dtoResult.setUtilisateurId(utilisateur.getId());
-            dtoResult.setInvitationDejaEnvoyee(dejaMembre); // si déjà membre, inutile d’envoyer invitation
+            dtoResult.setDejaMembre(dejaMembre); // si déjà membre, inutile d’envoyer invitation
             return dtoResult;
         }
 
@@ -132,15 +132,15 @@ public class InvitationService {
 
     @Transactional
     public InvitationDTO rattacherUtilisateurApresInscription(String token, Utilisateur nouvelUtilisateur) {
-        // 1️⃣ Récupérer l'invitation
+        // Récupérer l'invitation
         Invitation invitation = invitationRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Invitation non trouvée avec ce token."));
 
-        // 2️⃣ Vérifier si l'utilisateur existe déjà en base
+        // Vérifier si l'utilisateur existe déjà en base
         Optional<Utilisateur> optUser = utilisateurRepository.findByEmail(invitation.getEmailInvite());
         Utilisateur utilisateurFinal = optUser.orElse(nouvelUtilisateur);
 
-        // 3️⃣ Vérifier si l'utilisateur est déjà membre de cet ensemble
+        // Vérifier si l'utilisateur est déjà membre de cet ensemble
         boolean dejaMembre = utilisateurEnsembleRepository
                 .existsByUtilisateurIdAndEnsembleId(utilisateurFinal.getId(), invitation.getEnsemble().getId());
 
@@ -150,16 +150,16 @@ public class InvitationService {
             // L'utilisateur existe déjà et est membre de l'ensemble
             dto.setExistant(true);
             dto.setUtilisateurId(utilisateurFinal.getId());
-            dto.setInvitationDejaEnvoyee(true); // inutile d'envoyer/rattacher l'invitation
+            dto.setDejaMembre(true); // inutile d'envoyer/rattacher l'invitation
             return dto;
         }
 
-        //  Si pas encore membre, rattacher l'utilisateur à l'invitation
+        // Si pas encore membre, rattacher l'utilisateur à l'invitation
         invitation.setUtilisateur(utilisateurFinal);
         invitation.setEtat(StatusInvitation.ACCEPTEE);
         invitationRepository.saveAndFlush(invitation);
 
-        //  Ajouter l'utilisateur à l'ensemble si nécessaire
+        // Ajouter l'utilisateur à l'ensemble si nécessaire
         UtilisateurEnsemble ue = new UtilisateurEnsemble();
         ue.setUtilisateur(utilisateurFinal);
         ue.setEnsemble(invitation.getEnsemble());
@@ -181,6 +181,27 @@ public class InvitationService {
         }
 
         return invitation;
+    }
+
+    // --- NOUVELLE METHODE POUR RECUPERER PAR ID ---
+    public InvitationDTO getById(Long id) {
+        Invitation invitation = invitationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Invitation non trouvée"));
+
+        InvitationDTO dto = new InvitationDTO();
+        dto.setId(invitation.getId());
+        dto.setEmailInvite(invitation.getEmailInvite());
+        dto.setToken(invitation.getToken());
+        dto.setUtilisateurId(invitation.getUtilisateur() != null ? invitation.getUtilisateur().getId() : null);
+        dto.setUtilisateurNom(invitation.getUtilisateur() != null ? invitation.getUtilisateur().getNom() : null);
+        dto.setEnsembleId(invitation.getEnsemble().getId());
+        dto.setEnsembleNom(invitation.getEnsemble().getNom());
+        dto.setEtat(invitation.getEtat() != null ? invitation.getEtat().name() : null);
+        dto.setDateEnvoi(invitation.getDateEnvoi());
+        dto.setExistant(invitation.getUtilisateur() != null);
+        dto.setDejaMembre(invitation.getEtat() == StatusInvitation.ACCEPTEE);
+
+        return dto;
     }
 
 }

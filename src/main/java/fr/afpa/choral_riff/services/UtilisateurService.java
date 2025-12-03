@@ -3,7 +3,9 @@ package fr.afpa.choral_riff.services;
 import fr.afpa.choral_riff.dto.RegisterDto;
 import fr.afpa.choral_riff.dto.UtilisateurDto;
 import fr.afpa.choral_riff.entity.Utilisateur;
+import fr.afpa.choral_riff.entity.UtilisateurEnsemble;
 import fr.afpa.choral_riff.mapper.UtilisateurMapper;
+import fr.afpa.choral_riff.repositories.UtilisateurEnsembleRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import fr.afpa.choral_riff.services.InvitationService;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 /**
@@ -22,13 +25,16 @@ public class UtilisateurService {
     private final UtilisateurMapper utilisateurMapper;
     private final PasswordEncoder passwordEncoder;
     private final InvitationService invitationService;
+    private UtilisateurEnsembleRepository utilisateurEnsembleRepository;
 
     public UtilisateurService(UtilisateurRepository utilisateurRepository, UtilisateurMapper utilisateurMapper,
-            PasswordEncoder passwordEncoder, InvitationService invitationService) {
+            PasswordEncoder passwordEncoder, InvitationService invitationService,
+            UtilisateurEnsembleRepository utilisateurEnsembleRepository) {
         this.utilisateurRepository = utilisateurRepository;
         this.utilisateurMapper = utilisateurMapper;
         this.passwordEncoder = passwordEncoder;
         this.invitationService = invitationService;
+
     }
 
     public UtilisateurDto getById(Long id) {
@@ -37,34 +43,55 @@ public class UtilisateurService {
         return utilisateurMapper.toDto(utilisateur);
     }
 
+    // public UtilisateurDto register(RegisterDto dto) {
+
+    // // Vérifier si l’utilisateur existe déjà
+    // Optional<Utilisateur> existingUser =
+    // utilisateurRepository.findByEmail(dto.getEmail());
+
+    // Utilisateur utilisateur;
+
+    // if (existingUser.isPresent()) {
+    // // L’utilisateur existe déjà → ne pas le recréer
+    // utilisateur = existingUser.get();
+
+    // // Si token présent → rattacher à l'ensemble
+    // if (dto.getToken() != null && !dto.getToken().isEmpty()) {
+    // invitationService.rattacherUtilisateurApresInscription(dto.getToken(),
+    // utilisateur);
+    // }
+
+    // return utilisateurMapper.toDto(utilisateur);
+    // }
+
+    // // L’utilisateur n'existe pas → création normale
+    // Utilisateur entity = utilisateurMapper.fromRegisterDto(dto);
+    // entity.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
+    // Utilisateur saved = utilisateurRepository.save(entity);
+
+    // // Si un token existe → rattacher
+    // if (dto.getToken() != null && !dto.getToken().isEmpty()) {
+    // invitationService.rattacherUtilisateurApresInscription(dto.getToken(),
+    // saved);
+    // }
+
+    // return utilisateurMapper.toDto(saved);
+    // }
+
     public UtilisateurDto register(RegisterDto dto) {
-
-        // 1️⃣ Vérifier si l’utilisateur existe déjà
+        // Vérifier si l’utilisateur existe déjà
         Optional<Utilisateur> existingUser = utilisateurRepository.findByEmail(dto.getEmail());
-
-        Utilisateur utilisateur;
-
         if (existingUser.isPresent()) {
-            // L’utilisateur existe déjà → ne pas le recréer
-            utilisateur = existingUser.get();
-
-            // Si token présent → rattacher à l'ensemble
-            if (dto.getToken() != null && !dto.getToken().isEmpty()) {
-                invitationService.rattacherUtilisateurApresInscription(dto.getToken(), utilisateur);
-            }
-
-            return utilisateurMapper.toDto(utilisateur);
+            // L’utilisateur existe → juste retourner le DTO
+            return utilisateurMapper.toDto(existingUser.get());
         }
 
-        // 2️⃣ L’utilisateur n'existe pas → création normale
+        // L’utilisateur n'existe pas → création normale
         Utilisateur entity = utilisateurMapper.fromRegisterDto(dto);
         entity.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
         Utilisateur saved = utilisateurRepository.save(entity);
 
-        // 3️⃣ Si un token existe → rattacher
-        if (dto.getToken() != null && !dto.getToken().isEmpty()) {
-            invitationService.rattacherUtilisateurApresInscription(dto.getToken(), saved);
-        }
+        // Rattachement via token est maintenant géré uniquement par InvitationService
 
         return utilisateurMapper.toDto(saved);
     }
@@ -113,6 +140,13 @@ public class UtilisateurService {
         utilisateur.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
 
         return utilisateurRepository.save(utilisateur);
+    }
+
+    public List<UtilisateurDto> getUtilisateursParEnsemble(Long ensembleId) {
+        return utilisateurEnsembleRepository.findByEnsembleId(ensembleId).stream()
+                .map(UtilisateurEnsemble::getUtilisateur) // récupère l'utilisateur depuis la relation
+                .map(utilisateurMapper::toDto)
+                .collect(Collectors.toList());
     }
 
 }

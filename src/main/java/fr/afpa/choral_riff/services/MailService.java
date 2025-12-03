@@ -18,6 +18,7 @@ public class MailService {
     }
 
     public void sendInvitationEmail(String to, String token) {
+         System.out.println("Envoi de l'email à : " + to + " avec le token : " + token);
           // Vérification de l'adresse email
     if (to == null || to.isBlank()) {
         logger.warn("Impossible d'envoyer un email : adresse email vide ou nulle");
