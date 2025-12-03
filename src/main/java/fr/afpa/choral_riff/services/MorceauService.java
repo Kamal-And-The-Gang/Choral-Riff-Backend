@@ -103,7 +103,7 @@ public class MorceauService {
     }
 
     public MorceauDto findLastAddedMorceau() {
-    return morceauRepository.findTopByOrderByMorceauIdDesc()
+    return morceauRepository.findTopByOrderByIdDesc()
     .map(morceauMapper::toDto)
     .orElse(null); // Retourne null ou un Optional vide si aucun morceau n'existe
     }
