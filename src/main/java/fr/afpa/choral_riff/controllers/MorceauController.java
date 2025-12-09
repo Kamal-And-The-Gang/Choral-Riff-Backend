@@ -55,15 +55,16 @@ public class MorceauController {
      /**
      * Récupérer le dernier morceau ajouté
      */
-    @GetMapping("/last")
-    public ResponseEntity<MorceauDto> getLastMorceau() {
-        MorceauDto lastMorceau = morceauService.findLastAddedMorceau();
+    @GetMapping("/ensemble/{ensembleId}/last")
+    public ResponseEntity<MorceauDto> getLastMorceauByEnsemble(@PathVariable Long ensembleId) {
+        // 1. Appel à la méthode du service qui filtre par ensembleId
+        MorceauDto lastMorceau = morceauService.findLastAddedMorceauByEnsemble(ensembleId); 
 
         if (lastMorceau != null) {
             return ResponseEntity.ok(lastMorceau);
         } else {
-            // Si aucun morceau n'est trouvé, renvoyer 404
-            return ResponseEntity.notFound().build();
+            // 2. Retourne 404 Not Found si aucun morceau n'est trouvé pour cet ensemble
+            return ResponseEntity.notFound().build(); 
         }
     }
 

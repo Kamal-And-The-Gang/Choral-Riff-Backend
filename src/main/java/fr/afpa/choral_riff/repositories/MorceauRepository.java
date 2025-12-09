@@ -13,6 +13,6 @@ import org.springframework.stereotype.Repository;
 public interface MorceauRepository extends JpaRepository<Morceau, Long> {
 
     List<Morceau> findByEnsembleId(Long ensembleId);
-    Optional<Morceau> findTopByOrderByIdDesc(); 
+    Optional<Morceau> findTopByEnsembleIdOrderByIdDesc(Long ensembleId);
 
 }
