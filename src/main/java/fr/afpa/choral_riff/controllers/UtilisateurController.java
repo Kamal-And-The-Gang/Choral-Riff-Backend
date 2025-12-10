@@ -6,7 +6,10 @@ import fr.afpa.choral_riff.entity.Utilisateur;
 import fr.afpa.choral_riff.services.InvitationService;
 import fr.afpa.choral_riff.services.UtilisateurService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 /**
@@ -84,6 +87,21 @@ public class UtilisateurController {
     public ResponseEntity<List<UtilisateurDto>> getMembresEnsemble(@PathVariable Long ensembleId) {
         List<UtilisateurDto> membres = utilisateurService.getUtilisateursParEnsemble(ensembleId);
         return ResponseEntity.ok(membres);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UtilisateurDto> getCurrentUser(@AuthenticationPrincipal Utilisateur utilisateur) {
+        if (utilisateur == null) {
+            return ResponseEntity.status(401).build(); // Non authentifié
+        }
+        UtilisateurDto dto = utilisateurService.toDto(utilisateur);
+        return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping("/me/photo")
+    public ResponseEntity<UtilisateurDto> updatePhotoProfil(@RequestParam("photoProfil") MultipartFile file) {
+        UtilisateurDto updatedUser = utilisateurService.updatePhotoProfil(file);
+        return ResponseEntity.ok(updatedUser);
     }
 
 }

@@ -8,10 +8,10 @@ import fr.afpa.choral_riff.entity.Utilisateur;
 import fr.afpa.choral_riff.entity.UtilisateurEnsemble;
 import fr.afpa.choral_riff.mapper.EnsembleMapper;
 import fr.afpa.choral_riff.repositories.EnsembleRepository;
+import fr.afpa.choral_riff.repositories.UtilisateurEnsembleRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
-
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,8 +43,9 @@ public class EnsembleService {
 
     private final EnsembleRepository ensembleRepository;
     private final UtilisateurRepository utilisateurRepository;
+    private final UtilisateurEnsembleRepository utilisateurEnsembleRepository; // <-- ajout
     private final EnsembleMapper ensembleMapper;
-    private final RoleService roleService;
+    // private final RoleService roleService;
 
     /**
      * Constructeur avec injection des dépendances.
@@ -54,12 +55,14 @@ public class EnsembleService {
      */
     public EnsembleService(EnsembleRepository ensembleRepository,
             EnsembleMapper ensembleMapper,
-            RoleService roleService,
-            UtilisateurRepository utilisateurRepository) {
+            // RoleService roleService,
+            UtilisateurRepository utilisateurRepository,
+            UtilisateurEnsembleRepository utilisateurEnsembleRepository) {
         this.ensembleRepository = ensembleRepository;
         this.ensembleMapper = ensembleMapper;
-        this.roleService = roleService;
+        // this.roleService = roleService;
         this.utilisateurRepository = utilisateurRepository;
+        this.utilisateurEnsembleRepository = utilisateurEnsembleRepository; // <-- affectation
     }
 
     /**
@@ -90,10 +93,14 @@ public class EnsembleService {
             // d'abord on récupére la liste
             Set<UtilisateurEnsemble> userEnsemble = ensemble.getUtilisateurEnsembles();
             // on la modifie avec un nouvel objet de la classe USerEnsemble
-            UtilisateurEnsemble utilisateurEnsemble = new UtilisateurEnsemble(createur.get(),
+            UtilisateurEnsemble utilisateurEnsemble = new UtilisateurEnsemble(
+                    createur.get(),
                     ensemble,
                     Role.ADMIN,
                     LocalDateTime.now());
+            // On indique que c'est le créateur de l'ensemble
+            utilisateurEnsemble.setCreator(true);
+            // On ajoute à la liste des utilisateurs de l'ensemble
 
             userEnsemble.add(utilisateurEnsemble);
             // ensemble.setDateCreation(userId);
@@ -108,23 +115,22 @@ public class EnsembleService {
     }
 
     // 15/11/2025
-   public List<EnsembleDto> getAllForUser(Long userId) {
-    Utilisateur user = utilisateurRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable"));
+    public List<EnsembleDto> getAllForUser(Long userId) {
+        Utilisateur user = utilisateurRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable"));
 
-    return user.getUtilisateurEnsembles().stream()
-            .map(utilisateurEnsemble -> {
-                Ensemble ensemble = utilisateurEnsemble.getEnsemble();
-                EnsembleDto dto = ensembleMapper.toDto(ensemble);
+        return user.getUtilisateurEnsembles().stream()
+                .map(utilisateurEnsemble -> {
+                    Ensemble ensemble = utilisateurEnsemble.getEnsemble();
+                    EnsembleDto dto = ensembleMapper.toDto(ensemble);
 
-                // Ajout du rôle pour l'utilisateur actuel
-                dto.setUserRole(utilisateurEnsemble.getRoleDansEnsemble().name()); // ADMIN, MEMBRE, etc.
+                    // Ajout du rôle pour l'utilisateur actuel
+                    dto.setUserRole(utilisateurEnsemble.getRoleDansEnsemble().name()); // ADMIN, MEMBRE, etc.
 
-                return dto;
-            })
-            .toList();
-}
-
+                    return dto;
+                })
+                .toList();
+    }
 
     /**
      * Récupère un ensemble par son identifiant.
@@ -139,6 +145,22 @@ public class EnsembleService {
         return ensembleMapper.toDto(ensemble);
     }
 
+    public EnsembleDto getByIdForUser(Long ensembleId, Long userId) {
+        Ensemble ensemble = ensembleRepository.findById(ensembleId)
+                .orElseThrow(() -> new EntityNotFoundException("Ensemble non trouvé avec l’ID : " + ensembleId));
+
+        EnsembleDto dto = ensembleMapper.toDto(ensemble);
+
+        // Récupérer la relation utilisateur-ensemble
+        utilisateurEnsembleRepository.findByUtilisateur_IdAndEnsemble_Id(userId, ensembleId)
+                .ifPresent(ue -> {
+                    dto.setUserRole(ue.getRoleDansEnsemble().name()); // MODERATEUR, MEMBRE...
+                    dto.setIsCreator(ue.isCreator()); // boolean pour le créateur
+                });
+
+        return dto;
+    }
+
     /**
      * Met à jour les informations d’un ensemble existant.
      *
@@ -148,15 +170,17 @@ public class EnsembleService {
      * @throws EntityNotFoundException si aucun ensemble avec cet ID n’existe
      */
     //
-    public EnsembleDto update(Long id, EnsembleDto dto) {
+    public EnsembleDto update(Long id, EnsembleDto dto, Long userId) {
         Ensemble existing = ensembleRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Impossible de mettre à jour : ID " + id + " introuvable"));
-
+        if (!hasRights(userId, id)) {
+            throw new RuntimeException("Vous n'avez pas les droits pour modifier cet ensemble");
+        }
         // Mettre à jour uniquement les champs sauf l'ID
         existing.setNom(dto.getNom());
         existing.setDescription(dto.getDescription());
-
+        existing.setTypeEnsemble(dto.getTypeEnsemble()); //  important, c'était manquant
         // ... autres champs sauf id
 
         Ensemble updated = ensembleRepository.save(existing);
@@ -164,16 +188,28 @@ public class EnsembleService {
     }
 
     /**
-     * Supprime un ensemble existant par son identifiant.
-     *
-     * @param id l’identifiant de l’ensemble à supprimer
-     * @throws EntityNotFoundException si aucun ensemble avec cet ID n’existe
+     * Vérifie si un utilisateur a les droits de MODÉRATEUR ou ADMIN sur un ensemble
      */
-    public void delete(Long id) {
-        if (!ensembleRepository.existsById(id)) {
-            throw new EntityNotFoundException("Impossible de supprimer : ensemble avec ID " + id + " introuvable");
+    public boolean hasRights(Long userId, Long ensembleId) {
+        return utilisateurEnsembleRepository
+                .findByUtilisateur_IdAndEnsemble_Id(userId, ensembleId)
+                .map(ue -> ue.isCreator() || ue.getRoleDansEnsemble() == Role.ADMIN)
+
+                .orElse(false);
+    }
+
+    public void delete(Long ensembleId, Long userId) {
+        // Vérifier si l'utilisateur a les droits
+        if (!hasRights(userId, ensembleId)) {
+            throw new RuntimeException("Vous n'avez pas les droits pour supprimer cet ensemble");
         }
-        ensembleRepository.deleteById(id);
+
+        if (!ensembleRepository.existsById(ensembleId)) {
+            throw new EntityNotFoundException(
+                    "Impossible de supprimer : ensemble avec ID " + ensembleId + " introuvable");
+        }
+
+        ensembleRepository.deleteById(ensembleId);
     }
 
 }

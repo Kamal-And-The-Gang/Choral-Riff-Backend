@@ -42,6 +42,14 @@ public class EnsembleController {
         }
     }
 
+    @GetMapping("/{ensembleId}/forUser/{userId}")
+
+    public EnsembleDto getEnsembleForUser(
+            @PathVariable Long ensembleId,
+            @PathVariable Long userId) {
+        return ensembleService.getByIdForUser(ensembleId, userId);
+    }
+
     // Créer un nouvel ensemble
     @PostMapping
     public ResponseEntity<EnsembleDto> createEnsemble(@RequestBody EnsembleDto dto, @RequestParam Long userId) {
@@ -51,9 +59,15 @@ public class EnsembleController {
 
     // Mettre à jour un ensemble
     @PutMapping("/{id}")
-    public ResponseEntity<EnsembleDto> updateEnsemble(@PathVariable Long id, @RequestBody EnsembleDto dto) {
+    public ResponseEntity<EnsembleDto> updateEnsemble(@PathVariable Long id,
+            @RequestParam Long userId,
+            @RequestBody EnsembleDto dto) {
+        // Vérification des droits
+        if (!ensembleService.hasRights(userId, id)) {
+            return ResponseEntity.status(403).build(); // Forbidden
+        }
         try {
-            return ResponseEntity.ok(ensembleService.update(id, dto));
+            return ResponseEntity.ok(ensembleService.update(id, dto, userId));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
@@ -61,12 +75,15 @@ public class EnsembleController {
 
     // Supprimer un ensemble
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEnsemble(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteEnsemble(@PathVariable Long id, @RequestParam Long userId) {
         try {
-            ensembleService.delete(id);
+            ensembleService.delete(id, userId);
             return ResponseEntity.noContent().build();
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(403).build(); // accès interdit
         }
     }
+
 }

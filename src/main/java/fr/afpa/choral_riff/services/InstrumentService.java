@@ -2,22 +2,24 @@
 package fr.afpa.choral_riff.services;
 
 import fr.afpa.choral_riff.dto.InstrumentDto;
+import fr.afpa.choral_riff.entity.Document;
 import fr.afpa.choral_riff.entity.Instrument;
 import fr.afpa.choral_riff.entity.Morceau;
 import fr.afpa.choral_riff.mapper.InstrumentMapper;
+import fr.afpa.choral_riff.repositories.DocumentRepository;
 import fr.afpa.choral_riff.repositories.EnsembleRepository;
 import fr.afpa.choral_riff.repositories.InstrumentRepository;
 import fr.afpa.choral_riff.repositories.MorceauRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
-
-
 @Service
 public class InstrumentService {
 
     private final InstrumentRepository instrumentRepository;
     private final InstrumentMapper instrumentMapper;
+    private final DocumentRepository documentRepository; // <-- ajouter
+    private final UtilisateurEnsembleService utilisateurEnsembleService;
 
     private final MorceauRepository morceauRepository;
 
@@ -29,12 +31,14 @@ public class InstrumentService {
     public InstrumentService(InstrumentRepository instrumentRepository,
             InstrumentMapper instrumentMapper,
             UtilisateurEnsembleService utilisateurEnsembleService,
-            MorceauRepository morceauRepository, EnsembleRepository ensembleRepository) {
+            MorceauRepository morceauRepository,
+            EnsembleRepository ensembleRepository,
+            DocumentRepository documentRepository) {
         this.instrumentRepository = instrumentRepository;
-
         this.instrumentMapper = instrumentMapper;
-
+        this.utilisateurEnsembleService = utilisateurEnsembleService; // <-- important
         this.morceauRepository = morceauRepository;
+        this.documentRepository = documentRepository;
     }
 
     /*
@@ -89,7 +93,7 @@ public class InstrumentService {
         // 2 — Récupère l’instrument
         Instrument instrument = getInstrumentOrThrow(instrumentId);
 
-        // Ici tu pourrais faire morceau.getInstruments().add(instrument);
+        // Ici on pourrait faire morceau.getInstruments().add(instrument);
 
         // 3 — Sauvegarde
         morceauRepository.save(morceau);
@@ -113,5 +117,31 @@ public class InstrumentService {
         Instrument updated = instrumentRepository.save(instrument);
         return instrumentMapper.toDto(updated);
     }
+
+    // nouvelle méthode update avec les droits
+
+   public InstrumentDto update(Long userId, Long instrumentId, InstrumentDto dto) {
+    //  Récupère l’instrument
+    Instrument instrument = getInstrumentOrThrow(instrumentId);
+
+    //  Récupère le document lié à l’instrument
+    Document document = instrument.getDocuments().stream().findFirst()
+            .orElseThrow(() -> new RuntimeException("Instrument non lié à un document"));
+
+    //  Récupère l'ensemble du morceau
+    Long ensembleId = document.getMorceau().getEnsemble().getId();
+
+    //  Vérifie les droits
+    if (!utilisateurEnsembleService.utilisateurAutorise(userId, ensembleId, List.of("ADMIN", "MODERATEUR"))) {
+        throw new RuntimeException("Vous n'avez pas les droits pour modifier cet instrument");
+    }
+
+    //  Mettre à jour les champs via le mapper
+    instrumentMapper.updateEntityFromDto(dto, instrument);
+
+    //  Sauvegarder et retourner le DTO
+    Instrument updated = instrumentRepository.save(instrument);
+    return instrumentMapper.toDto(updated);
+}
 
 }

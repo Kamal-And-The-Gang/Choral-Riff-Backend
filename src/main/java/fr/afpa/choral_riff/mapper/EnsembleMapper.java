@@ -102,6 +102,8 @@ public interface EnsembleMapper {
             for (UtilisateurEnsemble ue : users) {
                 if (ue.getRoleDansEnsemble() == Role.ADMIN) {
                     ensembleDto.setCreatedBy(ue.getUtilisateur().getId());
+                    ensembleDto.setCreateurNom(ue.getUtilisateur().getNom());
+                    ensembleDto.setCreateurPrenom(ue.getUtilisateur().getPrenom());
                     break; // Un seul créateur
                 }
             }

@@ -20,19 +20,49 @@ public class EnsembleDto {
         private String typeEnsemble; // <-- Nouveau champ
         // Nouveau champ pour le rôle de l’utilisateur
         private String userRole;
-
+private String createurNom;
+private String createurPrenom;
         public EnsembleDto() {
         }
 
-        public EnsembleDto(Long id, String nom, String description, Long createdBy) {
-                this.id = id;
-                this.nom = nom;
-                this.description = description;
-                this.createdBy = createdBy;
-        }
+      public EnsembleDto(Long id, String nom, String description, Long createdBy, String createurNom, String createurPrenom) {
+    this.id = id;
+    this.nom = nom;
+    this.description = description;
+    this.createdBy = createdBy;
+    this.createurNom = createurNom;
+    this.createurPrenom = createurPrenom;
+}
+
+
+        public String getCreateurNom() {
+    return createurNom;
+}
+
+public void setCreateurNom(String createurNom) {
+    this.createurNom = createurNom;
+}
+
+public String getCreateurPrenom() {
+    return createurPrenom;
+}
+
+public void setCreateurPrenom(String createurPrenom) {
+    this.createurPrenom = createurPrenom;
+}
 
         public Long getId() {
                 return id;
+        }
+
+        private boolean isCreator;
+
+        public boolean isCreator() {
+                return isCreator;
+        }
+
+        public void setIsCreator(boolean isCreator) {
+                this.isCreator = isCreator;
         }
 
         public void setId(Long id) {

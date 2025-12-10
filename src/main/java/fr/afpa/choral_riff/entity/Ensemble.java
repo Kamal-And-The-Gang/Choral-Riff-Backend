@@ -26,6 +26,18 @@ import org.hibernate.annotations.CreationTimestamp;
 @Entity
 @Table(name = "ensemble")
 public class Ensemble {
+
+    @Column(name = "created_by")
+    private Long createdBy; // id de l'utilisateur qui a créé l'ensemble
+
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // auto-incrément
     @Column(name = "id")
@@ -56,7 +68,8 @@ public class Ensemble {
     }
 
     // Dans la classe Ensemble
-    // Cela garantit que supprimer un Ensemble supprimera automatiquement tous ses Morceaux
+    // Cela garantit que supprimer un Ensemble supprimera automatiquement tous ses
+    // Morceaux
     @OneToMany(mappedBy = "ensemble", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Morceau> morceaux;
 
@@ -64,11 +77,11 @@ public class Ensemble {
     // private Set<Instrument> instruments = new HashSet<>();
 
     // public Set<Instrument> getInstruments() {
-    //     return instruments;
+    // return instruments;
     // }
 
     // public void setInstruments(Set<Instrument> instruments) {
-    //     this.instruments = instruments;
+    // this.instruments = instruments;
     // }
 
     public Ensemble(String nom, String description, LocalDate dateCreation, String typeEnsemble) {

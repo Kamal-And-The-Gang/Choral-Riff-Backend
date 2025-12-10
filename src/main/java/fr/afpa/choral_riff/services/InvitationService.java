@@ -90,6 +90,7 @@ public class InvitationService {
         invitation.setToken(UUID.randomUUID().toString());
         invitation.setDateEnvoi(LocalDateTime.now());
         invitation.setDateExpiration(LocalDateTime.now().plusDays(7));
+        invitation.setEtat(StatusInvitation.EN_ATTENTE); // ← IMPORTANT
 
         invitationRepository.save(invitation);
         mailService.sendInvitationEmail(invitation.getEmailInvite(), invitation.getToken());

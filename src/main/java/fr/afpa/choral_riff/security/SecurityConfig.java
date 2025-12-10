@@ -43,8 +43,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/invitations/token/**").permitAll() // accès libre pour récupération du
-                                                                                  // token
+                        .requestMatchers("/api/utilisateur/**").permitAll() // accès libre temporaire // token
 
+                        .requestMatchers("/api/ensembles/*/forUser/*").permitAll() // <-- autorisé sans token
                         // .requestMatchers(HttpMethod.POST, "/api/invitations").permitAll()
                         .anyRequest().permitAll())
 

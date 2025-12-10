@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
  * (une personne ne peut avoir qu'un seul rôle par ensemble).
  */
 
+
+
 @Entity
 @Table(name = "utilisateur_ensemble", uniqueConstraints = @UniqueConstraint(columnNames = { "utilisateur_id",
         "ensemble_id" }))
@@ -34,11 +36,10 @@ public class UtilisateurEnsemble {
     private Ensemble ensemble;
 
     // @Column(nullable = false)
-    // private String roleDansEnsemble; 
+    // private String roleDansEnsemble;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role roleDansEnsemble;// utilise l'enum rôle
-
 
     @Column(nullable = false)
     private LocalDateTime dateAdhesion;
@@ -47,13 +48,28 @@ public class UtilisateurEnsemble {
     }
 
     public UtilisateurEnsemble(Utilisateur utilisateur,
-                                Ensemble ensemble,
-                                Role roleDansEnsemble,
-                                LocalDateTime dateAdhesion) {
+            Ensemble ensemble,
+            Role roleDansEnsemble,
+            LocalDateTime dateAdhesion) {
         this.utilisateur = utilisateur;
         this.ensemble = ensemble;
         this.roleDansEnsemble = roleDansEnsemble;
         this.dateAdhesion = dateAdhesion;
+    }
+
+    @Column(name = "is_creator", nullable = false)
+    private boolean isCreator = false;
+     // --- Nouvelle colonne nomComplet ---
+    @Column(name = "nom_complet")
+    private String nomComplet;
+
+    // Getter et setter
+    public boolean isCreator() {
+        return isCreator;
+    }
+
+    public void setCreator(boolean creator) {
+        isCreator = creator;
     }
 
     // getters et setters
@@ -95,5 +111,12 @@ public class UtilisateurEnsemble {
 
     public void setDateAdhesion(LocalDateTime dateAdhesion) {
         this.dateAdhesion = dateAdhesion;
+    }
+    public String getNomComplet() {
+        return nomComplet;
+    }
+
+    public void setNomComplet(String nomComplet) {
+        this.nomComplet = nomComplet;
     }
 }

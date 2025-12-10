@@ -9,11 +9,25 @@ import fr.afpa.choral_riff.repositories.UtilisateurEnsembleRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.NoSuchElementException;
-import fr.afpa.choral_riff.services.InvitationService;
+
+// import jakarta.persistence.criteria.Path;
+
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Service
 /**
@@ -24,7 +38,6 @@ public class UtilisateurService {
     private final UtilisateurRepository utilisateurRepository;
     private final UtilisateurMapper utilisateurMapper;
     private final PasswordEncoder passwordEncoder;
-    private final InvitationService invitationService;
     private UtilisateurEnsembleRepository utilisateurEnsembleRepository;
 
     public UtilisateurService(UtilisateurRepository utilisateurRepository, UtilisateurMapper utilisateurMapper,
@@ -33,8 +46,7 @@ public class UtilisateurService {
         this.utilisateurRepository = utilisateurRepository;
         this.utilisateurMapper = utilisateurMapper;
         this.passwordEncoder = passwordEncoder;
-        this.invitationService = invitationService;
-
+        this.utilisateurEnsembleRepository = utilisateurEnsembleRepository;
     }
 
     public UtilisateurDto getById(Long id) {
@@ -42,41 +54,6 @@ public class UtilisateurService {
                 .orElseThrow(() -> new NoSuchElementException("Utilisateur non trouvé avec id " + id));
         return utilisateurMapper.toDto(utilisateur);
     }
-
-    // public UtilisateurDto register(RegisterDto dto) {
-
-    // // Vérifier si l’utilisateur existe déjà
-    // Optional<Utilisateur> existingUser =
-    // utilisateurRepository.findByEmail(dto.getEmail());
-
-    // Utilisateur utilisateur;
-
-    // if (existingUser.isPresent()) {
-    // // L’utilisateur existe déjà → ne pas le recréer
-    // utilisateur = existingUser.get();
-
-    // // Si token présent → rattacher à l'ensemble
-    // if (dto.getToken() != null && !dto.getToken().isEmpty()) {
-    // invitationService.rattacherUtilisateurApresInscription(dto.getToken(),
-    // utilisateur);
-    // }
-
-    // return utilisateurMapper.toDto(utilisateur);
-    // }
-
-    // // L’utilisateur n'existe pas → création normale
-    // Utilisateur entity = utilisateurMapper.fromRegisterDto(dto);
-    // entity.setMotDePasse(passwordEncoder.encode(dto.getMotDePasse()));
-    // Utilisateur saved = utilisateurRepository.save(entity);
-
-    // // Si un token existe → rattacher
-    // if (dto.getToken() != null && !dto.getToken().isEmpty()) {
-    // invitationService.rattacherUtilisateurApresInscription(dto.getToken(),
-    // saved);
-    // }
-
-    // return utilisateurMapper.toDto(saved);
-    // }
 
     public UtilisateurDto register(RegisterDto dto) {
         // Vérifier si l’utilisateur existe déjà
@@ -148,5 +125,109 @@ public class UtilisateurService {
                 .map(utilisateurMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public UtilisateurDto toDto(Utilisateur utilisateur) {
+        if (utilisateur == null)
+            return null;
+        return new UtilisateurDto(
+                utilisateur.getId(),
+                utilisateur.getNom(),
+                utilisateur.getPrenom(),
+                utilisateur.getEmail(),
+                utilisateur.getPhotoProfil());
+    }
+
+    // public Utilisateur getCurrentUser() {
+    // Object principal =
+    // SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+    // if (principal instanceof UserDetails userDetails) {
+    // String email = userDetails.getUsername();
+    // return utilisateurRepository.findByEmail(email)
+    // .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+    // } else {
+    // throw new RuntimeException("Utilisateur non authentifié");
+    // }
+    // }
+
+    public Utilisateur getCurrentUser() {
+        // temporaire pour tester la récupération de la photo
+        return utilisateurRepository.findById(1L)
+                .orElseThrow(() -> new RuntimeException("Utilisateur de test non trouvé"));
+    }
+
+    // public UtilisateurDto updatePhotoProfil(@RequestParam("photoProfil")
+    // MultipartFile file) {
+    // // Récupérer l'utilisateur connecté
+    // Utilisateur utilisateur = getCurrentUser();
+    // if (utilisateur == null) {
+    // throw new RuntimeException("Utilisateur non authentifié");
+    // }
+    // if (file == null || file.isEmpty()) {
+    // throw new RuntimeException("Fichier vide");
+    // }
+
+    // try {
+    // // Définir le dossier où enregistrer la photo
+    // String uploadDir = "uploads/profil/"; // par exemple dans ton projet
+    // Path uploadPath = Paths.get(uploadDir);
+    // if (!Files.exists(uploadPath)) {
+    // Files.createDirectories(uploadPath);
+    // }
+
+    // // Générer un nom de fichier unique
+    // String fileName = utilisateur.getId() + "_" + file.getOriginalFilename();
+    // Path filePath = uploadPath.resolve(fileName);
+
+    // // Enregistrer le fichier sur le serveur
+    // file.transferTo(filePath.toFile());
+
+    // // Mettre à jour le chemin dans l’utilisateur
+    // utilisateur.setPhotoProfil("/" + uploadDir + fileName);
+
+    // // Sauvegarder l’utilisateur dans la base
+    // utilisateur = utilisateurRepository.save(utilisateur);
+
+    // // Retourner le DTO avec la photo mise à jour
+    // return new UtilisateurDto(
+    // utilisateur.getId(),
+    // utilisateur.getNom(),
+    // utilisateur.getPrenom(),
+    // utilisateur.getEmail(),
+    // utilisateur.getPhotoProfil());
+
+    // } catch (IOException e) {
+    // throw new RuntimeException("Erreur lors de l'enregistrement de la photo", e);
+    // }
+    // }
+
+   public UtilisateurDto updatePhotoProfil(@RequestParam("photoProfil") MultipartFile file) {
+    Utilisateur utilisateur = getCurrentUser();
+    if (file == null || file.isEmpty())
+        throw new RuntimeException("Fichier vide");
+
+    try {
+        // Chemin absolu sur le serveur
+        String uploadDir = "/workspaces/Choral-Riff-Backend/uploads/profil/";
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        String fileName = utilisateur.getId() + "_" + file.getOriginalFilename();
+        Path filePath = uploadPath.resolve(fileName);
+        file.transferTo(filePath.toFile()); // fichier enregistré physiquement
+
+        // Mettre à jour la base
+        utilisateur.setPhotoProfil("/uploads/profil/" + fileName);
+        utilisateur = utilisateurRepository.save(utilisateur);
+
+        return utilisateurMapper.toDto(utilisateur);
+
+    } catch (IOException e) {
+        throw new RuntimeException("Erreur lors de l'enregistrement de la photo", e);
+    }
+}
+
 
 }

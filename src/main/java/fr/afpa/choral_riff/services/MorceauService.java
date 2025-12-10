@@ -1,5 +1,8 @@
 package fr.afpa.choral_riff.services;
 
+
+
+
 import fr.afpa.choral_riff.dto.MorceauDto;
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Morceau;
@@ -9,9 +12,13 @@ import fr.afpa.choral_riff.repositories.EnsembleRepository;
 import fr.afpa.choral_riff.repositories.MorceauRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
+
+
+
+
+
 
 @Service
 public class MorceauService {
