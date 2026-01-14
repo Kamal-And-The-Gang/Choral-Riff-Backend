@@ -21,7 +21,6 @@ import fr.afpa.choral_riff.repositories.InvitationRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -40,6 +39,8 @@ public class InvitationService {
 
     private static final Logger logger = LoggerFactory.getLogger(InvitationService.class);
 
+    private final NotificationService notificationService;
+
     public InvitationService(
             InvitationRepository invitationRepository,
             InvitationMapper invitationMapper,
@@ -47,7 +48,8 @@ public class InvitationService {
             UtilisateurRepository utilisateurRepository,
             MailService mailService,
             CreateInvitationMapper createInvitationMapper,
-            UtilisateurEnsembleRepository utilisateurEnsembleRepository) {
+            UtilisateurEnsembleRepository utilisateurEnsembleRepository,
+            NotificationService notificationService) { // <-- ajouter ici
         this.invitationRepository = invitationRepository;
         this.invitationMapper = invitationMapper;
         this.ensembleRepository = ensembleRepository;
@@ -55,6 +57,7 @@ public class InvitationService {
         this.createInvitationMapper = createInvitationMapper;
         this.utilisateurEnsembleRepository = utilisateurEnsembleRepository;
         this.utilisateurRepository = utilisateurRepository;
+        this.notificationService = notificationService; // <-- affecter
     }
 
     // === Récupérer toutes les invitations pour un ensemble ===
@@ -131,15 +134,26 @@ public class InvitationService {
         return invitationMapper.toDto(invitation);
     }
 
-    @Transactional
-    public InvitationDTO rattacherUtilisateurApresInscription(String token, Utilisateur nouvelUtilisateur) {
-        // Récupérer l'invitation
-        Invitation invitation = invitationRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invitation non trouvée avec ce token."));
+    // Quelqu’un reçoit une invitation par email
 
-        // Vérifier si l'utilisateur existe déjà en base
-        Optional<Utilisateur> optUser = utilisateurRepository.findByEmail(invitation.getEmailInvite());
-        Utilisateur utilisateurFinal = optUser.orElse(nouvelUtilisateur);
+    // Il s’inscrit (ou existe déjà)
+
+    // On vérifie l’invitation
+
+    // On ajoute l’utilisateur à un ensemble
+
+    // On accepte l’invitation
+
+    // On crée une notification
+
+    // On renvoie un DTO au frontend
+
+    @Transactional
+    public InvitationDTO rattacherUtilisateurApresInscription(Utilisateur nouvelUtilisateur, Invitation invitation) {
+
+        // Vérifier si l'utilisateur existe déjà
+        Utilisateur utilisateurFinal = utilisateurRepository.findByEmail(invitation.getEmailInvite())
+                .orElse(nouvelUtilisateur);
 
         // Vérifier si l'utilisateur est déjà membre de cet ensemble
         boolean dejaMembre = utilisateurEnsembleRepository
@@ -148,19 +162,34 @@ public class InvitationService {
         InvitationDTO dto = invitationMapper.toDto(invitation);
 
         if (dejaMembre) {
-            // L'utilisateur existe déjà et est membre de l'ensemble
             dto.setExistant(true);
             dto.setUtilisateurId(utilisateurFinal.getId());
-            dto.setDejaMembre(true); // inutile d'envoyer/rattacher l'invitation
+            dto.setDejaMembre(true);
             return dto;
         }
 
-        // Si pas encore membre, rattacher l'utilisateur à l'invitation
+        // Sauvegarder l'utilisateur si c'est un nouvel utilisateur
+        if (utilisateurFinal.getId() == null) {
+            utilisateurFinal = utilisateurRepository.save(utilisateurFinal);
+        }
+
+        // Rattacher l'utilisateur à l'invitation et accepter
         invitation.setUtilisateur(utilisateurFinal);
         invitation.setEtat(StatusInvitation.ACCEPTEE);
         invitationRepository.saveAndFlush(invitation);
 
-        // Ajouter l'utilisateur à l'ensemble si nécessaire
+       
+        System.out.println("Invitation saved: id=" + invitation.getId());
+
+        // Créer la notification
+        notificationService.createNotification(
+                utilisateurFinal.getId(),
+                "INVITATION",
+                "Vous avez été ajouté à l'ensemble " + invitation.getEnsemble().getNom(),
+                invitation.getId() // <-- on passe juste l'ID pour rester compatible
+        );
+
+        // Ajouter l'utilisateur à l'ensemble
         UtilisateurEnsemble ue = new UtilisateurEnsemble();
         ue.setUtilisateur(utilisateurFinal);
         ue.setEnsemble(invitation.getEnsemble());
@@ -168,6 +197,7 @@ public class InvitationService {
         ue.setDateAdhesion(LocalDateTime.now());
         utilisateurEnsembleRepository.saveAndFlush(ue);
 
+        // Retourner le DTO mis à jour
         return invitationMapper.toDto(invitation);
     }
 
@@ -204,5 +234,7 @@ public class InvitationService {
 
         return dto;
     }
+
+    
 
 }

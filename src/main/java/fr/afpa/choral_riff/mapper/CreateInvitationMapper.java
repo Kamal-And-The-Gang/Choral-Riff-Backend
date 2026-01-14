@@ -5,8 +5,17 @@ import fr.afpa.choral_riff.entity.Invitation;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+/**
+ * Mapper MapStruct pour convertir entre {@link CreateInvitationDTO} et
+ * {@link Invitation}.
+ * <p>
+ * Permet de transformer facilement les données reçues depuis le front-end en
+ * entité
+ * persistable et inversement.
+ * </p>
+ */
 
+@Mapper(componentModel = "spring")
 public interface CreateInvitationMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -18,6 +27,7 @@ public interface CreateInvitationMapper {
     @Mapping(target = "token", ignore = true)
     Invitation toEntity(CreateInvitationDTO dto);
 
-    // Optionnel si besoin d’un DTO pour retour — sinon on peut utiliser InvitationDTO
+    // Optionnel si besoin d’un DTO pour retour — sinon on peut utiliser
+    // InvitationDTO
     CreateInvitationDTO toDto(Invitation invitation);
 }

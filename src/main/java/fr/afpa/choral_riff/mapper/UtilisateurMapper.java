@@ -17,7 +17,7 @@ public interface UtilisateurMapper {
     @Mapping(target = "documentsAjoutes", ignore = true)
     @Mapping(target = "utilisateurEnsembles", ignore = true) // <--- changé ici
     @Mapping(target = "motDePasse", ignore = true)
-    @Mapping(target = "authorities", ignore = true)
+    // @Mapping(target = "authorities", ignore = true)
     Utilisateur toEntity(UtilisateurDto dto);
 
     // Pour les listes
@@ -32,6 +32,6 @@ public interface UtilisateurMapper {
     @Mapping(target = "documentsAjoutes", ignore = true)
     @Mapping(target = "utilisateurEnsembles", ignore = true) // <--- changé ici aussi
     @Mapping(target = "motDePasse", ignore = true)
-    @Mapping(target = "authorities", ignore = true)
+    // @Mapping(target = "authorities", ignore = true)
     void updateEntityFromDto(UtilisateurDto dto, @MappingTarget Utilisateur entity);
 }

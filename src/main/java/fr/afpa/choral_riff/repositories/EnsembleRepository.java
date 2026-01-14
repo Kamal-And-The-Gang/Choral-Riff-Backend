@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 public interface EnsembleRepository extends JpaRepository<Ensemble, Long> {
 
     void deleteByNom(String nom);
+
+    
 }

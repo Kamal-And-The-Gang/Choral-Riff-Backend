@@ -1,3 +1,153 @@
+
+// //         Map<String, Object> claims = new HashMap<>();
+// //         return createToken(claims, user.getEmail(), jwtExpiration);
+// //     }
+
+// //     // Génération d'un refresh token
+// //     public String generateRefreshToken(Utilisateur user, String refreshTokenId) {
+// //         Map<String, Object> claims = new HashMap<>();
+// //         claims.put("refreshTokenId", refreshTokenId);
+// //         return createToken(claims, user.getEmail(), refreshTokenExpiration);
+// //     }
+
+// //     // Génération d'un ID unique pour le refresh token
+// //     public String generateRefreshTokenId() {
+// //         return UUID.randomUUID().toString();
+// //     }
+
+// //     // Création du JWT
+// //     private String createToken(Map<String, Object> claims, String subject, long expiration) {
+// //         return Jwts.builder()
+// //                 .setClaims(claims)
+// //                 .setSubject(subject)
+// //                 .setIssuedAt(new Date())
+// //                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
+// //                 .signWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)), SignatureAlgorithm.HS256)
+// //                 .compact();
+// //     }
+
+// //     // Validation du token
+// //     public boolean isTokenValid(String token, Utilisateur user) {
+// //         final String username = extractUsername(token);
+// //         return (username.equals(user.getEmail()) && !isTokenExpired(token));
+// //     }
+
+// //     // private boolean isTokenExpired(String token) {
+// //     //     Claims claims = Jwts.parserBuilder()
+// //     //             .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
+// //     //             .build()
+// //     //             .parseClaimsJws(token)
+// //     //             .getBody();
+// //     //     return claims.getExpiration().before(new Date());
+// //     // }
+// //     private boolean isTokenExpired(String token) {
+// //     Claims claims = Jwts.parserBuilder()
+// //             .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
+// //             .build()
+// //             .parseClaimsJws(token)
+// //             .getBody();
+// //     return claims.getExpiration().before(new Date());
+// // }
+
+// //     // Surcharge pour UserDetails (Spring Security)
+// //    public boolean isTokenValid(String token, org.springframework.security.core.userdetails.UserDetails userDetails) {
+// //     final String username = extractUsername(token);
+// //     return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+// // }
+
+// // }
+// package fr.afpa.choral_riff.security;
+
+// import fr.afpa.choral_riff.entity.Utilisateur;
+// import io.jsonwebtoken.Claims;
+// import io.jsonwebtoken.Jwts;
+// import io.jsonwebtoken.security.Keys;
+// import org.springframework.stereotype.Service;
+
+// import javax.crypto.SecretKey;
+// import java.nio.charset.StandardCharsets;
+// import java.util.Date;
+// import java.util.HashMap;
+// import java.util.Map;
+// import java.util.UUID;
+
+// @Service
+// public class JwtService {
+
+//     //  AU MOINS 32 caractères
+//     private static final String SECRET =
+//             "ta_cle_secrete_super_longue_tres_securisee_32_chars_min";
+
+//     private static final long JWT_EXPIRATION = 1000 * 60 * 60; // 1h
+//     private static final long REFRESH_EXPIRATION = 1000 * 60 * 60 * 24 * 7; // 7j
+
+//     private final SecretKey secretKey =
+//             Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+
+//     // ===================== EXTRACTION =====================
+
+//     public String extractUsername(String token) {
+//         return extractAllClaims(token).getSubject();
+//     }
+
+//     private Claims extractAllClaims(String token) {
+//         return Jwts.parser()
+//                 .verifyWith(secretKey)
+//                 .build()
+//                 .parseSignedClaims(token)
+//                 .getPayload();
+//     }
+
+//     // ===================== GÉNÉRATION =====================
+
+//     public String generateToken(Utilisateur user) {
+//         return createToken(new HashMap<>(), user.getEmail(), JWT_EXPIRATION);
+//     }
+
+//     public String generateRefreshToken(Utilisateur user, String refreshTokenId) {
+//         Map<String, Object> claims = new HashMap<>();
+//         claims.put("refreshTokenId", refreshTokenId);
+//         return createToken(claims, user.getEmail(), REFRESH_EXPIRATION);
+//     }
+
+//     public String generateRefreshTokenId() {
+//         return UUID.randomUUID().toString();
+//     }
+
+//     private String createToken(Map<String, Object> claims,
+//                                String subject,
+//                                long expiration) {
+
+//         return Jwts.builder()
+//                 .claims(claims)
+//                 .subject(subject)
+//                 .issuedAt(new Date())
+//                 .expiration(new Date(System.currentTimeMillis() + expiration))
+//                 .signWith(secretKey) // ✅ plus de SignatureAlgorithm
+//                 .compact();
+//     }
+
+//     // ===================== VALIDATION =====================
+
+//     public boolean isTokenValid(String token, Utilisateur user) {
+//         return extractUsername(token).equals(user.getEmail())
+//                 && !isTokenExpired(token);
+//     }
+
+//     public boolean isTokenValid(
+//             String token,
+//             org.springframework.security.core.userdetails.UserDetails userDetails) {
+
+//         return extractUsername(token).equals(userDetails.getUsername())
+//                 && !isTokenExpired(token);
+//     }
+
+//     private boolean isTokenExpired(String token) {
+//         return extractAllClaims(token)
+//                 .getExpiration()
+//                 .before(new Date());
+//     }
+// }
 package fr.afpa.choral_riff.security;
 
 import io.jsonwebtoken.Claims;

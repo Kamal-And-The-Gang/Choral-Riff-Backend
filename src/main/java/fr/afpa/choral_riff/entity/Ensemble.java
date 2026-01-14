@@ -6,40 +6,38 @@ import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Représente un ensemble musical.
- * Un ensemble possède un nom, une description, une date de création,
- * et une liste d'invitations associées.
+ * <p>
+ * Un ensemble possède un nom, une description, une date de création, un type,
+ * et des relations avec des invitations, des morceaux et des utilisateurs
+ * associés.
+ * </p>
  */
 
 @Entity
 @Table(name = "ensemble")
+@JsonIgnoreProperties({ "invitations" }) // On ignore les invitations pour la sérialisation JSON
 public class Ensemble {
 
-    @Column(name = "created_by")
-    private Long createdBy; // id de l'utilisateur qui a créé l'ensemble
-
-    public Long getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(Long createdBy) {
-        this.createdBy = createdBy;
-    }
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // auto-incrément
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
@@ -53,50 +51,43 @@ public class Ensemble {
     @Column(name = "date_creation")
     private LocalDate dateCreation;
 
-    // ===== Nouveau champ =====
+    @Enumerated(EnumType.STRING)
     @Column(name = "type_ensemble", length = 50)
-    private String typeEnsemble;
+    private TypeEnsemble typeEnsemble;
 
-    @OneToMany(mappedBy = "ensemble", cascade = CascadeType.ALL)
+    @Column(name = "created_by")
+    private Long createdBy;
+
+    // ===========================================
+    // Relation avec Invitations
+    // CascadeType.ALL supprime automatiquement toutes les invitations liées
+    // orphanRemoval=true supprime les invitations orphelines
+    @OneToMany(mappedBy = "ensemble", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Invitation> invitations;
 
+    // Relation avec Morceaux
+    @OneToMany(mappedBy = "ensemble", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Morceau> morceaux;
+
+    // Relation avec UtilisateurEnsemble
     @OneToMany(mappedBy = "ensemble", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UtilisateurEnsemble> utilisateurEnsembles = new HashSet<>();
 
+   
+    // ===========================================
     // Constructeurs
     public Ensemble() {
     }
 
-    // Dans la classe Ensemble
-    // Cela garantit que supprimer un Ensemble supprimera automatiquement tous ses
-    // Morceaux
-    @OneToMany(mappedBy = "ensemble", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Morceau> morceaux;
-
-    // @ManyToMany(mappedBy = "ensembles")
-    // private Set<Instrument> instruments = new HashSet<>();
-
-    // public Set<Instrument> getInstruments() {
-    // return instruments;
-    // }
-
-    // public void setInstruments(Set<Instrument> instruments) {
-    // this.instruments = instruments;
-    // }
-
-    public Ensemble(String nom, String description, LocalDate dateCreation, String typeEnsemble) {
+    public Ensemble(String nom, String description, LocalDate dateCreation, TypeEnsemble typeEnsemble) {
         this.nom = nom;
         this.description = description;
+        this.dateCreation = dateCreation;
         this.typeEnsemble = typeEnsemble;
     }
 
-    public String getTypeEnsemble() {
-        return typeEnsemble;
-    }
-
-    public void setTypeEnsemble(String typeEnsemble) {
-        this.typeEnsemble = typeEnsemble;
-    }
+    // ===========================================
+    // Getters / Setters
 
     public Long getId() {
         return id;
@@ -130,6 +121,22 @@ public class Ensemble {
         this.dateCreation = dateCreation;
     }
 
+    public TypeEnsemble getTypeEnsemble() {
+        return typeEnsemble;
+    }
+
+    public void setTypeEnsemble(TypeEnsemble typeEnsemble) {
+        this.typeEnsemble = typeEnsemble;
+    }
+
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
+
     public List<Invitation> getInvitations() {
         return invitations;
     }
@@ -138,22 +145,19 @@ public class Ensemble {
         this.invitations = invitations;
     }
 
-    // Getters et setters
-    public Set<UtilisateurEnsemble> getUtilisateurEnsembles() {
-        return utilisateurEnsembles;
-    }
-
-    public void setUtilisateurEnsembles(Set<UtilisateurEnsemble> utilisateurEnsembles) {
-        this.utilisateurEnsembles = utilisateurEnsembles;
-    }
-
-    // Getter et setter
     public List<Morceau> getMorceaux() {
         return morceaux;
     }
 
     public void setMorceaux(List<Morceau> morceaux) {
         this.morceaux = morceaux;
+    }
 
+    public Set<UtilisateurEnsemble> getUtilisateurEnsembles() {
+        return utilisateurEnsembles;
+    }
+
+    public void setUtilisateurEnsembles(Set<UtilisateurEnsemble> utilisateurEnsembles) {
+        this.utilisateurEnsembles = utilisateurEnsembles;
     }
 }

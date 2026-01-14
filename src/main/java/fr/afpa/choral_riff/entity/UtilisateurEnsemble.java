@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Entité représentant la relation entre un {@link Utilisateur} et un
  * {@link Ensemble}.
@@ -28,6 +30,7 @@ public class UtilisateurEnsemble {
     private Long id; // clé artificielle
 
     @ManyToOne
+    @JsonIgnore  // Ignore la sérialisation du côté utilisateur pour éviter la boucle
     @JoinColumn(name = "utilisateur_id", nullable = false)
     private Utilisateur utilisateur;
 
@@ -35,8 +38,7 @@ public class UtilisateurEnsemble {
     @JoinColumn(name = "ensemble_id", nullable = false)
     private Ensemble ensemble;
 
-    // @Column(nullable = false)
-    // private String roleDansEnsemble;
+   
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role roleDansEnsemble;// utilise l'enum rôle

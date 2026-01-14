@@ -7,7 +7,6 @@ import fr.afpa.choral_riff.mapper.InstrumentMapper;
 import fr.afpa.choral_riff.repositories.DocumentRepository;
 import fr.afpa.choral_riff.repositories.InstrumentRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.Set;
 import java.util.stream.Collectors;
 

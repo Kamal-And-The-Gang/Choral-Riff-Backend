@@ -3,7 +3,7 @@ package fr.afpa.choral_riff.services;
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Role;
 import fr.afpa.choral_riff.entity.Utilisateur;
-import fr.afpa.choral_riff.entity.Utilisateur.UtilisateurDTO;
+
 import fr.afpa.choral_riff.entity.UtilisateurEnsemble;
 import fr.afpa.choral_riff.repositories.EnsembleRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurEnsembleRepository;
@@ -84,9 +84,5 @@ public class UtilisateurEnsembleService {
             throw new RuntimeException("L'utilisateur est déjà membre de cet ensemble");
         }
     }
-
-    // public List<UtilisateurDTO> getUtilisateursAvecNomComplet(Long ensembleId) {
-    //     return utilisateurEnsembleRepository.findUtilisateursAvecNomComplet(ensembleId);
-    // }
 
 }

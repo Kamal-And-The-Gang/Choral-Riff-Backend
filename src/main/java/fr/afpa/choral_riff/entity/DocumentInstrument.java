@@ -4,9 +4,11 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 /**
- * Représente l'association entre un Document et un Instrument.
- * Cette entité modélise la relation ManyToMany entre Document et Instrument
- * avec une date d'ajout pour cette association.
+ * Représente l'association entre un {@link Document} et un {@link Instrument}.
+ * <p>
+ * Cette entité modélise la relation Many-to-Many entre Document et Instrument
+ * et permet de stocker la date d'ajout de chaque association.
+ * </p>
  */
 
 @Entity
@@ -14,7 +16,13 @@ import java.time.LocalDate;
         @UniqueConstraint(columnNames = { "document_id", "instrument_id" })
 })
 
-
+/**
+ * Constructeur complet pour créer une association avec date.
+ *
+ * @param document   document associé
+ * @param instrument instrument associé
+ * @param dateAjout  date d'ajout de l'association
+ */
 public class DocumentInstrument {
 
     @Id
@@ -41,7 +49,7 @@ public class DocumentInstrument {
         this.dateAjout = dateAjout;
     }
 
-    /** 
+    /**
      * @return Long
      */
     // --- Getters / Setters ---
@@ -49,42 +57,42 @@ public class DocumentInstrument {
         return id;
     }
 
-    /** 
+    /**
      * @return Document
      */
     public Document getDocument() {
         return document;
     }
 
-    /** 
+    /**
      * @param document
      */
     public void setDocument(Document document) {
         this.document = document;
     }
 
-    /** 
+    /**
      * @return Instrument
      */
     public Instrument getInstrument() {
         return instrument;
     }
 
-    /** 
+    /**
      * @param instrument
      */
     public void setInstrument(Instrument instrument) {
         this.instrument = instrument;
     }
 
-    /** 
+    /**
      * @return LocalDate
      */
     public LocalDate getDateAjout() {
         return dateAjout;
     }
 
-    /** 
+    /**
      * @param dateAjout
      */
     public void setDateAjout(LocalDate dateAjout) {

@@ -8,9 +8,10 @@ package fr.afpa.choral_riff.entity;
  * </p>
  */
 
-public enum Role {
-    ADMIN,
-    MEMBRE,
-    MODERATEUR
+public enum NotificationType {
+    INVITATION,
+    MORCEAU_AJOUTE,
+    RATTACHEMENT,
+    GENERAL
 
 }

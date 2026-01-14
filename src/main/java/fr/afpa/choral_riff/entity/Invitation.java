@@ -3,6 +3,9 @@ package fr.afpa.choral_riff.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 /**
  * Entité représentant une invitation envoyée à un utilisateur pour rejoindre un
@@ -26,6 +29,9 @@ public class Invitation {
 
     private LocalDateTime dateEnvoi;
 
+    @OneToMany(mappedBy = "invitation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications;
+
     private LocalDateTime dateExpiration; // <-- AJOUT ICI
 
     @Column(unique = true, nullable = true)
@@ -36,6 +42,7 @@ public class Invitation {
      */
     @ManyToOne
     @JoinColumn(name = "ensembleId", nullable = false)
+    @JsonBackReference // Cela évite de sérialiser l'Ensemble à nouveau (récursivité)
     private Ensemble ensemble;
 
     /**

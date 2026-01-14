@@ -1,3 +1,4 @@
+
 package fr.afpa.choral_riff.entity;
 
 import jakarta.persistence.*;
@@ -7,11 +8,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Entité représentant un utilisateur de l'application Choral Riff.
@@ -46,45 +48,24 @@ public class Utilisateur implements UserDetails {
 
     private String photoProfil;
 
-    public Utilisateur() {
-    }
-
-    public class UtilisateurDTO {
-    private Long id;
-    private String nomComplet;
-
-    public UtilisateurDTO(Long id, String nomComplet) {
-        this.id = id;
-        this.nomComplet = nomComplet;
-    }
-
-    public Long getId() {
-        return id;
-    }
-@Transient // pour que JPA ne crée pas une colonne dans la BDD
-    public String getNomComplet() {
-        return nomComplet;
-    }
-}
-
     // Associations
     @OneToMany(mappedBy = "createur")
     private Set<Morceau> morceauxCree;
-
+    // Eviter la sérialisation de la relation circulaire avec les ensembles
+    @JsonIgnore
     @OneToMany(mappedBy = "utilisateur")
     private Set<Document> documentsAjoutes;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UtilisateurEnsemble> utilisateurEnsembles = new HashSet<>();
 
-    
+    // -------------------- UserDetails --------------------
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return utilisateurEnsembles.stream()
-                .map(UtilisateurEnsemble::getRoleDansEnsemble) // récupère le Role (ENUM)
-                .map(Enum::name) // convertit en String ("ROLE_ADMIN" etc.)
-                .map(SimpleGrantedAuthority::new) // transforme en GrantedAuthority
-                .collect(Collectors.toSet()); // évite les doublons
+        List<SimpleGrantedAuthority> listAuthorities = new ArrayList<>();
+        listAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        return listAuthorities;
     }
 
     @Override

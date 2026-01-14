@@ -8,11 +8,14 @@ import fr.afpa.choral_riff.entity.Utilisateur;
 import fr.afpa.choral_riff.entity.UtilisateurEnsemble;
 import fr.afpa.choral_riff.mapper.EnsembleMapper;
 import fr.afpa.choral_riff.repositories.EnsembleRepository;
+import fr.afpa.choral_riff.repositories.InvitationRepository;
+import fr.afpa.choral_riff.repositories.MorceauRepository;
+import fr.afpa.choral_riff.repositories.NotificationRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurEnsembleRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +48,10 @@ public class EnsembleService {
     private final UtilisateurRepository utilisateurRepository;
     private final UtilisateurEnsembleRepository utilisateurEnsembleRepository; // <-- ajout
     private final EnsembleMapper ensembleMapper;
+    private final NotificationRepository notificationRepository;
+    private final InvitationRepository invitationRepository;
+    private final MorceauRepository morceauRepository;
+
     // private final RoleService roleService;
 
     /**
@@ -53,16 +60,22 @@ public class EnsembleService {
      * @param ensembleRepository le repository pour l'entité Ensemble
      * @param ensembleMapper     le mapper pour convertir entre Entity et DTO
      */
-    public EnsembleService(EnsembleRepository ensembleRepository,
+    public EnsembleService(
+            EnsembleRepository ensembleRepository,
             EnsembleMapper ensembleMapper,
-            // RoleService roleService,
             UtilisateurRepository utilisateurRepository,
-            UtilisateurEnsembleRepository utilisateurEnsembleRepository) {
+            UtilisateurEnsembleRepository utilisateurEnsembleRepository,
+            NotificationRepository notificationRepository,
+            InvitationRepository invitationRepository,
+            MorceauRepository morceauRepository) {
+
         this.ensembleRepository = ensembleRepository;
         this.ensembleMapper = ensembleMapper;
-        // this.roleService = roleService;
         this.utilisateurRepository = utilisateurRepository;
-        this.utilisateurEnsembleRepository = utilisateurEnsembleRepository; // <-- affectation
+        this.utilisateurEnsembleRepository = utilisateurEnsembleRepository;
+        this.notificationRepository = notificationRepository;
+        this.invitationRepository = invitationRepository;
+        this.morceauRepository = morceauRepository;
     }
 
     /**
@@ -70,9 +83,9 @@ public class EnsembleService {
      *
      * @return une liste de DTO représentant les ensembles
      */
-    public List<EnsembleDto> getAll() {
+    public List<EnsembleDto> getAll(Long userId) {
         return ensembleRepository.findAll().stream()
-                .map(ensembleMapper::toDto)
+                .map(e -> ensembleMapper.toDto(e, userId))
                 .toList();
     }
 
@@ -107,7 +120,7 @@ public class EnsembleService {
             // enregistre le créateur
 
             Ensemble saved = ensembleRepository.save(ensemble);
-            return ensembleMapper.toDto(saved);
+            return ensembleMapper.toDto(saved, userId);
         }
 
         // créateur non retrouvé, notamelement c'est la panique
@@ -122,7 +135,7 @@ public class EnsembleService {
         return user.getUtilisateurEnsembles().stream()
                 .map(utilisateurEnsemble -> {
                     Ensemble ensemble = utilisateurEnsemble.getEnsemble();
-                    EnsembleDto dto = ensembleMapper.toDto(ensemble);
+                    EnsembleDto dto = ensembleMapper.toDto(ensemble, userId);
 
                     // Ajout du rôle pour l'utilisateur actuel
                     dto.setUserRole(utilisateurEnsemble.getRoleDansEnsemble().name()); // ADMIN, MEMBRE, etc.
@@ -139,17 +152,18 @@ public class EnsembleService {
      * @return le DTO correspondant
      * @throws EntityNotFoundException si aucun ensemble n’a été trouvé
      */
-    public EnsembleDto getById(Long id) {
+
+    public EnsembleDto getById(Long id, Long userId) {
         Ensemble ensemble = ensembleRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ensemble non trouvé avec l’ID : " + id));
-        return ensembleMapper.toDto(ensemble);
+        return ensembleMapper.toDto(ensemble, userId);
     }
 
     public EnsembleDto getByIdForUser(Long ensembleId, Long userId) {
         Ensemble ensemble = ensembleRepository.findById(ensembleId)
                 .orElseThrow(() -> new EntityNotFoundException("Ensemble non trouvé avec l’ID : " + ensembleId));
 
-        EnsembleDto dto = ensembleMapper.toDto(ensemble);
+        EnsembleDto dto = ensembleMapper.toDto(ensemble, userId);
 
         // Récupérer la relation utilisateur-ensemble
         utilisateurEnsembleRepository.findByUtilisateur_IdAndEnsemble_Id(userId, ensembleId)
@@ -169,22 +183,22 @@ public class EnsembleService {
      * @return le DTO de l’ensemble mis à jour
      * @throws EntityNotFoundException si aucun ensemble avec cet ID n’existe
      */
-    //
+
     public EnsembleDto update(Long id, EnsembleDto dto, Long userId) {
         Ensemble existing = ensembleRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Impossible de mettre à jour : ID " + id + " introuvable"));
+
         if (!hasRights(userId, id)) {
             throw new RuntimeException("Vous n'avez pas les droits pour modifier cet ensemble");
         }
-        // Mettre à jour uniquement les champs sauf l'ID
+
         existing.setNom(dto.getNom());
         existing.setDescription(dto.getDescription());
-        existing.setTypeEnsemble(dto.getTypeEnsemble()); //  important, c'était manquant
-        // ... autres champs sauf id
+        existing.setTypeEnsemble(dto.getTypeEnsemble());
 
         Ensemble updated = ensembleRepository.save(existing);
-        return ensembleMapper.toDto(updated);
+        return ensembleMapper.toDto(updated, userId);
     }
 
     /**
@@ -198,18 +212,61 @@ public class EnsembleService {
                 .orElse(false);
     }
 
+    @Transactional
     public void delete(Long ensembleId, Long userId) {
-        // Vérifier si l'utilisateur a les droits
         if (!hasRights(userId, ensembleId)) {
             throw new RuntimeException("Vous n'avez pas les droits pour supprimer cet ensemble");
         }
 
-        if (!ensembleRepository.existsById(ensembleId)) {
-            throw new EntityNotFoundException(
-                    "Impossible de supprimer : ensemble avec ID " + ensembleId + " introuvable");
-        }
+        Ensemble ensemble = ensembleRepository.findById(ensembleId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Impossible de supprimer : ensemble avec ID " + ensembleId + " introuvable"));
 
-        ensembleRepository.deleteById(ensembleId);
+        // Vider explicitement les collections (optionnel)
+        ensemble.getInvitations().clear();
+        ensemble.getMorceaux().clear();
+        ensemble.getUtilisateurEnsembles().clear();
+
+        ensembleRepository.delete(ensemble);
+    }
+
+    /**
+     * Récupère tous les ensembles enregistrés, sans information spécifique à un
+     * utilisateur.
+     */
+    public List<EnsembleDto> getAll() {
+        return ensembleRepository.findAll().stream()
+                .map(ensemble -> {
+                    EnsembleDto dto = new EnsembleDto();
+                    dto.setId(ensemble.getId());
+                    dto.setNom(ensemble.getNom());
+                    dto.setDescription(ensemble.getDescription());
+                    dto.setTypeEnsemble(ensemble.getTypeEnsemble());
+                    dto.setDateCreation(ensemble.getDateCreation());
+
+                    // Créateur (ADMIN)
+                    ensemble.getUtilisateurEnsembles().stream()
+                            .filter(ue -> ue.getRoleDansEnsemble() == Role.ADMIN)
+                            .findFirst()
+                            .ifPresent(ue -> {
+                                dto.setCreatedBy(ue.getUtilisateur().getId());
+                                dto.setCreateurNom(ue.getUtilisateur().getNom());
+                                dto.setCreateurPrenom(ue.getUtilisateur().getPrenom());
+                            });
+
+                    dto.setNombreMembres(ensemble.getUtilisateurEnsembles().size());
+
+                    // Pas de rôle spécifique à l'utilisateur
+                    dto.setUserRole(null);
+                    dto.setIsCreator(false);
+
+                    return dto;
+                })
+                .toList();
+    }
+
+    public int getNombreMembres(Long ensembleId) {
+        return (int) utilisateurEnsembleRepository.countByEnsemble_Id(ensembleId);
     }
 
 }

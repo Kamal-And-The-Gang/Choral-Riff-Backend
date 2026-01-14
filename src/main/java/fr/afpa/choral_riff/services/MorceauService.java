@@ -1,8 +1,5 @@
 package fr.afpa.choral_riff.services;
 
-
-
-
 import fr.afpa.choral_riff.dto.MorceauDto;
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Morceau;
@@ -14,11 +11,7 @@ import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
-
-
-
-
-
+import java.util.Objects;
 
 @Service
 public class MorceauService {
@@ -62,8 +55,10 @@ public class MorceauService {
 
     // Créer un morceau
     public MorceauDto create(MorceauDto dto) {
-        Morceau morceau = morceauMapper.toEntity(dto);
-
+        Objects.requireNonNull(dto, "Le DTO ne doit pas être null");
+        Morceau morceau = Objects.requireNonNull(
+                morceauMapper.toEntity(dto),
+                "Le mapper a retourné null");
         if (dto.ensembleId() != null) {
             Ensemble ensemble = ensembleRepository.findById(dto.ensembleId())
                     .orElseThrow(() -> new RuntimeException("Ensemble non trouvé avec l'ID: " + dto.ensembleId()));
@@ -82,6 +77,7 @@ public class MorceauService {
 
     // Mettre à jour un morceau existant
     public MorceauDto update(Long id, MorceauDto dto) {
+        Objects.requireNonNull(dto, "Le DTO ne doit pas être null");
         Morceau morceau = morceauRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID: " + id));
 
@@ -118,8 +114,8 @@ public class MorceauService {
     }
 
     public MorceauDto findLastAddedMorceauByEnsemble(Long ensembleId) {
-    return morceauRepository.findTopByEnsembleIdOrderByIdDesc(ensembleId) // <-- Appel au Repository
-            .map(morceauMapper::toDto)
-            .orElse(null); 
-}
+        return morceauRepository.findTopByEnsembleIdOrderByIdDesc(ensembleId) // <-- Appel au Repository
+                .map(morceauMapper::toDto)
+                .orElseThrow(() -> new RuntimeException("Aucun morceau trouvé pour l'ensemble " + ensembleId));
+    }
 }

@@ -115,13 +115,17 @@ public class InvitationController {
         }
     }
 
+    
+
     @PostMapping("/rattacher-apres-inscription")
     public ResponseEntity<InvitationDTO> rattacherApresInscription(
             @RequestParam String token,
             @RequestBody Utilisateur nouvelUtilisateur) {
 
         // Appelle le service pour rattacher l'utilisateur à l'invitation
-        InvitationDTO invitationDTO = invitationService.rattacherUtilisateurApresInscription(token, nouvelUtilisateur);
+        InvitationDTO invitationDTO = invitationService.rattacherUtilisateurApresInscription(
+                nouvelUtilisateur,
+                invitationService.getByTokenEntity(token));
 
         return ResponseEntity.ok(invitationDTO);
     }

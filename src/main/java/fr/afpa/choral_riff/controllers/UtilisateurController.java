@@ -2,6 +2,7 @@ package fr.afpa.choral_riff.controllers;
 
 import fr.afpa.choral_riff.dto.RegisterDto;
 import fr.afpa.choral_riff.dto.UtilisateurDto;
+import fr.afpa.choral_riff.entity.Invitation;
 import fr.afpa.choral_riff.entity.Utilisateur;
 import fr.afpa.choral_riff.services.InvitationService;
 import fr.afpa.choral_riff.services.UtilisateurService;
@@ -9,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.List;
 
 /**
@@ -77,7 +77,10 @@ public class UtilisateurController {
         // Rattacher l'utilisateur à l'invitation si token présent
         String token = dto.getToken();
         if (token != null && !token.isEmpty()) {
-            invitationService.rattacherUtilisateurApresInscription(token, nouvelUtilisateur);
+            // 🔹 Correction : récupérer l'invitation et passer l'utilisateur et
+            // l'invitation
+            Invitation invitation = invitationService.getByTokenEntity(token);
+            invitationService.rattacherUtilisateurApresInscription(nouvelUtilisateur, invitation);
         }
 
         return ResponseEntity.ok("Inscription via invitation réussie !");

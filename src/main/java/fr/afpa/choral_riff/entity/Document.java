@@ -8,44 +8,59 @@ import java.util.Set;
 
 /**
  * Représente un document musical (partition, enregistrement, etc.)
- * associé à un morceau et un utilisateur dans l'application Choral Riff.
+ * associé à un morceau et à un utilisateur dans l'application Choral Riff.
+ * <p>
+ * Un document peut être lié à plusieurs instruments via la table de jointure
+ * {@link DocumentInstrument}.
+ * </p>
  */
 @Entity
 @Table(name = "document")
 public class Document {
-
+    /** Identifiant unique du document. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_document")
     private Long id;
-
+    /** Type du document (ex: partition, enregistrement). */
     @Column(name = "type", length = 100)
     private String type;
-
+    /** Format du document (ex: PDF, MP3). */
     @Column(name = "format", length = 50)
     private String format;
-
+    /** Date d'ajout du document. */
     @Column(name = "date_ajout")
     private LocalDate dateAjout;
-
+    /** URL du fichier stocké. */
     @Column(name = "url_fichier", length = 255)
     private String urlFichier;
-
+    /** Utilisateur ayant ajouté ce document. */
     @ManyToOne
     @JoinColumn(name = "utilisateur_id", nullable = false)
     private Utilisateur utilisateur;
-
+    /** Morceau associé à ce document. */
     @ManyToOne
     @JoinColumn(name = "id_morceau", nullable = false)
     private Morceau morceau;
 
-    // Relation Many-to-Many via DocumentInstrument
+    /** Liste des relations document-instrument. */
     @OneToMany(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<DocumentInstrument> documentInstruments = new HashSet<>();
 
-    // Constructeurs
+    /** Constructeur par défaut. */
     public Document() {
     }
+
+    /**
+     * Constructeur avec tous les champs nécessaires.
+     * 
+     * @param type        type du document
+     * @param format      format du document
+     * @param dateAjout   date d'ajout
+     * @param urlFichier  URL du fichier
+     * @param utilisateur utilisateur ayant ajouté le document
+     * @param morceau     morceau associé
+     */
 
     public Document(String type, String format, LocalDate dateAjout, String urlFichier,
             Utilisateur utilisateur, Morceau morceau) {
