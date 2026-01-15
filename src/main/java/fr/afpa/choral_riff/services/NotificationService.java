@@ -153,36 +153,6 @@ public class NotificationService {
         return createNotification(utilisateurId, type, message, null);
     }
 
-    // Spécificités
-
-    // Retourne une liste
-
-    // Utilise une requête personnalisée
-
-    // Charge aussi les invitations associées
-
-    // Convertit Entity → DTO
-
-    // Utilise les Streams Java
-
-    // public List<NotificationDto> getNotificationsByUtilisateur(Long
-    // utilisateurId) {
-
-    // List<Notification> notifications =
-    // notificationRepository.findByUtilisateurIdWithInvitation(utilisateurId);
-
-    // for (Notification n : notifications) {
-    // System.out.println("=== NOTIFICATION ===");
-    // System.out.println("notif id = " + n.getId());
-    // System.out.println("id_invitation FK = " +
-    // (n.getInvitation() != null ? n.getInvitation().getId() : "NULL"));
-    // }
-
-    // return notifications.stream()
-    // .map(notificationMapper::toDTO)
-    // .collect(Collectors.toList());
-    // }
-
     public List<NotificationDto> getNotificationsByUtilisateur(Long utilisateurId) {
         List<Notification> notifications = notificationRepository.findByUtilisateurId(utilisateurId);
 

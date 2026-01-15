@@ -240,45 +240,4 @@ public class InvitationService {
         return dto;
     }
 
-
-// @Transactional
-// public Notification createNotificationRattachement(Long utilisateurId, Long
-// ensembleId) {
-// // Récupérer l'utilisateur
-// Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
-// .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-
-// // Vérifier si l'utilisateur est déjà membre de cet ensemble
-// boolean dejaMembre = utilisateurEnsembleRepository
-// .existsByUtilisateurIdAndEnsembleId(utilisateurId, ensembleId);
-
-// if (dejaMembre) {
-// // Ne rien faire si déjà membre, ou renvoyer null
-// return null;
-// }
-
-// // Ajouter l'utilisateur à l'ensemble
-// UtilisateurEnsemble ue = new UtilisateurEnsemble();
-// ue.setUtilisateur(utilisateur);
-// Ensemble ensemble = ensembleRepository.findById(ensembleId)
-// .orElseThrow(() -> new RuntimeException("Ensemble introuvable"));
-// ue.setEnsemble(ensemble);
-// ue.setRoleDansEnsemble(Role.MEMBRE);
-// ue.setDateAdhesion(LocalDateTime.now());
-// utilisateurEnsembleRepository.saveAndFlush(ue);
-
-// // Créer la notification
-// Notification notification = new Notification();
-// notification.setUtilisateur(utilisateur);
-// notification.setType(NotificationType.RATTACHEMENT);
-
-// notification.setDateCreation(LocalDateTime.now());
-// notification.setIsRead(false);
-// notification.setEnsembleId(ensembleId);
-
-// // Persister
-// return notificationRepository.saveAndFlush(notification);
-// }
-
-// }
 }
