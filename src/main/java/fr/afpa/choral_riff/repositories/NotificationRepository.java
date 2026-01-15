@@ -27,4 +27,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
   void deleteAllByEnsembleId(@Param("ensembleId") Long ensembleId);
 void deleteAllByInvitationId(Long invitationId);
 
+@Query("SELECT n FROM Notification n WHERE n.utilisateur.id = :utilisateurId")
+List<Notification> findByUtilisateurId(@Param("utilisateurId") Long utilisateurId);
+
+
 }

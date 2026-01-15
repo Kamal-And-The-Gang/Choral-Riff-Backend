@@ -36,6 +36,11 @@ public class NotificationMapper {
                 dto.setStatus(notification.getInvitation().getEtat().name()); // "ACCEPTEE", "REFUSEE", "EN_ATTENTE"
             }
 
+            // <-- si c'est un rattachement, ajouter l'utilisateur
+            if (notification.getUtilisateur() != null) {
+                dto.setUtilisateurId(notification.getUtilisateur().getId());
+            }
+
             else {
                 dto.setStatus("EN_ATTENTE"); // valeur par défaut
             }

@@ -21,6 +21,8 @@ public class NotificationDto {
 
     // Pour accepter/refuser via backend
     private String token;
+ // ← NOUVEAU CHAMP
+    private Long utilisateurId;
 
     // Getters et setters
     public Long getId() {
@@ -110,4 +112,8 @@ public class NotificationDto {
     public void setToken(String token) {
         this.token = token;
     }
+
+    // ← GETTER/SETTER pour utilisateurId
+    public Long getUtilisateurId() { return utilisateurId; }
+    public void setUtilisateurId(Long utilisateurId) { this.utilisateurId = utilisateurId; }
 }

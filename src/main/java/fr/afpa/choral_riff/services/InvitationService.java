@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import fr.afpa.choral_riff.dto.InvitationDTO;
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Invitation;
+import fr.afpa.choral_riff.entity.Notification;
+import fr.afpa.choral_riff.entity.NotificationType;
 import fr.afpa.choral_riff.entity.Role;
 import fr.afpa.choral_riff.entity.StatusInvitation;
 import fr.afpa.choral_riff.entity.Utilisateur;
@@ -18,6 +20,7 @@ import fr.afpa.choral_riff.mapper.CreateInvitationMapper;
 import fr.afpa.choral_riff.mapper.InvitationMapper;
 import fr.afpa.choral_riff.repositories.EnsembleRepository;
 import fr.afpa.choral_riff.repositories.InvitationRepository;
+import fr.afpa.choral_riff.repositories.NotificationRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +41,7 @@ public class InvitationService {
     private final UtilisateurRepository utilisateurRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(InvitationService.class);
+    private NotificationRepository notificationRepository; // <-- ajoute cette ligne !
 
     private final NotificationService notificationService;
 
@@ -49,7 +53,8 @@ public class InvitationService {
             MailService mailService,
             CreateInvitationMapper createInvitationMapper,
             UtilisateurEnsembleRepository utilisateurEnsembleRepository,
-            NotificationService notificationService) { // <-- ajouter ici
+            NotificationRepository notificationRepository, // <-- ajouter ici
+            NotificationService notificationService) {
         this.invitationRepository = invitationRepository;
         this.invitationMapper = invitationMapper;
         this.ensembleRepository = ensembleRepository;
@@ -57,7 +62,8 @@ public class InvitationService {
         this.createInvitationMapper = createInvitationMapper;
         this.utilisateurEnsembleRepository = utilisateurEnsembleRepository;
         this.utilisateurRepository = utilisateurRepository;
-        this.notificationService = notificationService; // <-- affecter
+        this.notificationRepository = notificationRepository; // <-- affecter ici
+        this.notificationService = notificationService;
     }
 
     // === Récupérer toutes les invitations pour un ensemble ===
@@ -178,7 +184,6 @@ public class InvitationService {
         invitation.setEtat(StatusInvitation.ACCEPTEE);
         invitationRepository.saveAndFlush(invitation);
 
-       
         System.out.println("Invitation saved: id=" + invitation.getId());
 
         // Créer la notification
@@ -235,6 +240,45 @@ public class InvitationService {
         return dto;
     }
 
-    
 
+// @Transactional
+// public Notification createNotificationRattachement(Long utilisateurId, Long
+// ensembleId) {
+// // Récupérer l'utilisateur
+// Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+// .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+// // Vérifier si l'utilisateur est déjà membre de cet ensemble
+// boolean dejaMembre = utilisateurEnsembleRepository
+// .existsByUtilisateurIdAndEnsembleId(utilisateurId, ensembleId);
+
+// if (dejaMembre) {
+// // Ne rien faire si déjà membre, ou renvoyer null
+// return null;
+// }
+
+// // Ajouter l'utilisateur à l'ensemble
+// UtilisateurEnsemble ue = new UtilisateurEnsemble();
+// ue.setUtilisateur(utilisateur);
+// Ensemble ensemble = ensembleRepository.findById(ensembleId)
+// .orElseThrow(() -> new RuntimeException("Ensemble introuvable"));
+// ue.setEnsemble(ensemble);
+// ue.setRoleDansEnsemble(Role.MEMBRE);
+// ue.setDateAdhesion(LocalDateTime.now());
+// utilisateurEnsembleRepository.saveAndFlush(ue);
+
+// // Créer la notification
+// Notification notification = new Notification();
+// notification.setUtilisateur(utilisateur);
+// notification.setType(NotificationType.RATTACHEMENT);
+
+// notification.setDateCreation(LocalDateTime.now());
+// notification.setIsRead(false);
+// notification.setEnsembleId(ensembleId);
+
+// // Persister
+// return notificationRepository.saveAndFlush(notification);
+// }
+
+// }
 }

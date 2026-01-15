@@ -2,6 +2,7 @@
 package fr.afpa.choral_riff.services;
 
 import fr.afpa.choral_riff.dto.NotificationDto;
+import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Invitation;
 import fr.afpa.choral_riff.entity.Notification;
 import fr.afpa.choral_riff.entity.NotificationType;
@@ -128,7 +129,7 @@ public class NotificationService {
         // LIGNE CRUCIALE
         notification.setInvitation(invitation);
 
-        //  UN SEUL SAVE
+        // UN SEUL SAVE
         notificationRepository.saveAndFlush(notification);
 
         return notificationMapper.toDTO(notification);
@@ -164,9 +165,26 @@ public class NotificationService {
 
     // Utilise les Streams Java
 
-    public List<NotificationDto> getNotificationsByUtilisateur(Long utilisateurId) {
+    // public List<NotificationDto> getNotificationsByUtilisateur(Long
+    // utilisateurId) {
 
-        List<Notification> notifications = notificationRepository.findByUtilisateurIdWithInvitation(utilisateurId);
+    // List<Notification> notifications =
+    // notificationRepository.findByUtilisateurIdWithInvitation(utilisateurId);
+
+    // for (Notification n : notifications) {
+    // System.out.println("=== NOTIFICATION ===");
+    // System.out.println("notif id = " + n.getId());
+    // System.out.println("id_invitation FK = " +
+    // (n.getInvitation() != null ? n.getInvitation().getId() : "NULL"));
+    // }
+
+    // return notifications.stream()
+    // .map(notificationMapper::toDTO)
+    // .collect(Collectors.toList());
+    // }
+
+    public List<NotificationDto> getNotificationsByUtilisateur(Long utilisateurId) {
+        List<Notification> notifications = notificationRepository.findByUtilisateurId(utilisateurId);
 
         for (Notification n : notifications) {
             System.out.println("=== NOTIFICATION ===");
@@ -203,4 +221,16 @@ public class NotificationService {
         notificationRepository.deleteById(notificationId);
     }
 
+    public void notifyRattachement(Utilisateur utilisateur, Ensemble ensemble) {
+        Notification notification = new Notification();
+        notification.setUtilisateur(utilisateur);
+        notification.setType(NotificationType.RATTACHEMENT);
+        notification.setMessage(
+                "Vous avez été rattaché à l’ensemble \"" + ensemble.getNom() + "\"");
+        notification.setIsRead(false);
+        notification.setDateCreation(LocalDateTime.now());
+        notification.setEnsembleId(ensemble.getId());
+
+        notificationRepository.save(notification);
+    }
 }
