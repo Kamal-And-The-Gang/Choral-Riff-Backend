@@ -13,6 +13,7 @@ public class NotificationDto {
     // Contexte
     private Long ensembleId;
     private String ensembleNom;
+private String morceauTitre;
 
     // Spécifique à l'invitation
     private Long invitationId;
@@ -112,6 +113,14 @@ public class NotificationDto {
     public void setToken(String token) {
         this.token = token;
     }
+
+    public String getMorceauTitre() {
+    return morceauTitre;
+}
+
+public void setMorceauTitre(String morceauTitre) {
+    this.morceauTitre = morceauTitre;
+}
 
     // ← GETTER/SETTER pour utilisateurId
     public Long getUtilisateurId() { return utilisateurId; }

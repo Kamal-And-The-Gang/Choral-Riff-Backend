@@ -9,71 +9,47 @@ import java.time.LocalDateTime;
 @Component
 public class NotificationMapper {
 
-    // Convertir Notification en NotificationDto
     public NotificationDto toDTO(Notification notification) {
-        if (notification == null) {
+        if (notification == null)
             return null;
-        }
 
         NotificationDto dto = new NotificationDto();
         dto.setId(notification.getId());
-        dto.setType(notification.getType().name()); // Convertir NotificationType en String ("INVITATION",
-                                                    // "MORCEAU_AJOUTE", etc.)
+        dto.setType(notification.getType().name());
         dto.setMessage(notification.getMessage());
         dto.setIsRead(notification.getIsRead());
-
-        // LocalDateTime -> String en format ISO
         dto.setCreatedAt(notification.getDateCreation());
 
-        if (notification.getInvitation() != null) {
-
-            System.out.println("Notification " + notification.getId() + " a une invitation");
-            System.out.println("Etat invitation : " + notification.getInvitation().getEtat());
-
-            dto.setInvitationId(notification.getInvitation().getId());
-
-            if (notification.getInvitation() != null && notification.getInvitation().getEtat() != null) {
-                dto.setStatus(notification.getInvitation().getEtat().name()); // "ACCEPTEE", "REFUSEE", "EN_ATTENTE"
-            }
-
-            // <-- si c'est un rattachement, ajouter l'utilisateur
-            if (notification.getUtilisateur() != null) {
-                dto.setUtilisateurId(notification.getUtilisateur().getId());
-            }
-
-            else {
-                dto.setStatus("EN_ATTENTE"); // valeur par défaut
-            }
-            dto.setSenderName(notification.getInvitation().getUtilisateur().getNom());
+        // Champs communs : toujours remplis
+        if (notification.getUtilisateur() != null) {
+            dto.setUtilisateurId(notification.getUtilisateur().getId());
+            dto.setSenderName(notification.getUtilisateur().getNom());
         }
 
-        if (notification.getInvitation().getEnsemble() != null) {
-            dto.setEnsembleId(
-                    notification.getInvitation().getEnsemble().getId());
-            dto.setEnsembleNom(
-                    notification.getInvitation().getEnsemble().getNom());
+        // Ensemble si présent
+        dto.setEnsembleId(notification.getEnsembleId());
+        // dto.setEnsembleNom(notification.getEnsembleNom());
+
+        // Cas spécial invitation
+        if (notification.getInvitation() != null) {
+            dto.setInvitationId(notification.getInvitation().getId());
+            dto.setStatus(notification.getInvitation().getEtat() != null
+                    ? notification.getInvitation().getEtat().name()
+                    : "EN_ATTENTE");
+
+            if (notification.getInvitation().getUtilisateur() != null) {
+                dto.setSenderName(notification.getInvitation().getUtilisateur().getNom());
+            }
+            if (notification.getInvitation().getEnsemble() != null) {
+                dto.setEnsembleId(notification.getInvitation().getEnsemble().getId());
+                dto.setEnsembleNom(notification.getInvitation().getEnsemble().getNom());
+            }
+        }
+        // Pour les types autres que invitation, on peut définir un status par défaut
+        else if (notification.getType() == NotificationType.RATTACHEMENT) {
+            dto.setStatus("ACCEPTEE");
         }
 
         return dto;
-    }
-
-    // Convertir NotificationDto en Notification
-    public Notification toEntity(NotificationDto notificationDTO) {
-        if (notificationDTO == null) {
-            return null;
-        }
-
-        Notification notification = new Notification();
-        notification.setId(notificationDTO.getId());
-        notification.setType(NotificationType.valueOf(notificationDTO.getType())); // Convertir String ("INVITATION") en
-                                                                                   // NotificationType
-        notification.setMessage(notificationDTO.getMessage());
-        notification.setIsRead(notificationDTO.getIsRead());
-
-        // String -> LocalDateTime (ISO format)
-        notification.setDateCreation(notificationDTO.getCreatedAt()); // Si `createdAt` est déjà un LocalDateTime, on
-                                                                      // peut le passer directement
-
-        return notification;
     }
 }

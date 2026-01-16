@@ -20,16 +20,19 @@ public class MorceauService {
     private final EnsembleRepository ensembleRepository;
     private final UtilisateurRepository utilisateurRepository;
     private final MorceauMapper morceauMapper;
+    private final NotificationService notificationService;
 
-    public MorceauService(MorceauRepository morceauRepository,
-            EnsembleRepository ensembleRepository,
-            UtilisateurRepository utilisateurRepository,
-            MorceauMapper morceauMapper) {
-        this.morceauRepository = morceauRepository;
-        this.ensembleRepository = ensembleRepository;
-        this.utilisateurRepository = utilisateurRepository;
-        this.morceauMapper = morceauMapper;
-    }
+   public MorceauService(MorceauRepository morceauRepository,
+                      EnsembleRepository ensembleRepository,
+                      UtilisateurRepository utilisateurRepository,
+                      MorceauMapper morceauMapper,
+                      NotificationService notificationService) {
+    this.morceauRepository = morceauRepository;
+    this.ensembleRepository = ensembleRepository;
+    this.utilisateurRepository = utilisateurRepository;
+    this.morceauMapper = morceauMapper;
+    this.notificationService = notificationService;
+}
 
     // Récupérer tous les morceaux
     public List<MorceauDto> getAll() {
@@ -54,26 +57,69 @@ public class MorceauService {
     }
 
     // Créer un morceau
+    // public MorceauDto create(MorceauDto dto) {
+    //     Objects.requireNonNull(dto, "Le DTO ne doit pas être null");
+    //     Morceau morceau = Objects.requireNonNull(
+    //             morceauMapper.toEntity(dto),
+    //             "Le mapper a retourné null");
+    //     if (dto.ensembleId() != null) {
+    //         Ensemble ensemble = ensembleRepository.findById(dto.ensembleId())
+    //                 .orElseThrow(() -> new RuntimeException("Ensemble non trouvé avec l'ID: " + dto.ensembleId()));
+    //         morceau.setEnsemble(ensemble);
+    //     }
+
+    //     if (dto.createurId() != null) {
+    //         Utilisateur createur = utilisateurRepository.findById(dto.createurId())
+    //                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + dto.createurId()));
+    //         morceau.setCreateur(createur);
+    //     }
+
+    //     Morceau saved = morceauRepository.save(morceau);
+    //     return morceauMapper.toDto(saved);
+
+        
+    // }
+
     public MorceauDto create(MorceauDto dto) {
-        Objects.requireNonNull(dto, "Le DTO ne doit pas être null");
-        Morceau morceau = Objects.requireNonNull(
-                morceauMapper.toEntity(dto),
-                "Le mapper a retourné null");
-        if (dto.ensembleId() != null) {
-            Ensemble ensemble = ensembleRepository.findById(dto.ensembleId())
-                    .orElseThrow(() -> new RuntimeException("Ensemble non trouvé avec l'ID: " + dto.ensembleId()));
-            morceau.setEnsemble(ensemble);
-        }
+    Objects.requireNonNull(dto, "Le DTO ne doit pas être null");
 
-        if (dto.createurId() != null) {
-            Utilisateur createur = utilisateurRepository.findById(dto.createurId())
-                    .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + dto.createurId()));
-            morceau.setCreateur(createur);
-        }
+    // Transformer le DTO en entité
+    Morceau morceau = Objects.requireNonNull(
+            morceauMapper.toEntity(dto),
+            "Le mapper a retourné null"
+    );
 
-        Morceau saved = morceauRepository.save(morceau);
-        return morceauMapper.toDto(saved);
+    // Lier l'ensemble si nécessaire
+    if (dto.ensembleId() != null) {
+        Ensemble ensemble = ensembleRepository.findById(dto.ensembleId())
+                .orElseThrow(() -> new RuntimeException("Ensemble non trouvé avec l'ID: " + dto.ensembleId()));
+        morceau.setEnsemble(ensemble);
     }
+
+    // Lier le créateur si nécessaire
+    Utilisateur createur = null;
+    if (dto.createurId() != null) {
+        createur = utilisateurRepository.findById(dto.createurId())
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + dto.createurId()));
+        morceau.setCreateur(createur);
+    }
+
+    // Sauvegarder le morceau
+    Morceau saved = morceauRepository.save(morceau);
+
+    // --- Notification ---
+    if (createur != null && saved.getEnsemble() != null) {
+        notificationService.notifyMorceauAjoute(
+                createur,
+                saved.getEnsemble(),
+                saved.getTitre()
+        );
+    }
+
+    // Retourner le DTO pour le front
+    return morceauMapper.toDto(saved);
+}
+
 
     // Mettre à jour un morceau existant
     public MorceauDto update(Long id, MorceauDto dto) {

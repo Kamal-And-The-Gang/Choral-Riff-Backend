@@ -80,7 +80,7 @@ public class UtilisateurService {
 
     public UtilisateurDto create(UtilisateurDto dto) {
         Utilisateur entity = utilisateurMapper.toEntity(dto);
-        // ici tu peux gérer motDePasse si besoin, ex : encoder le mot de passe avant
+        // ici on peut gérer motDePasse si besoin, ex : encoder le mot de passe avant
         // save
 
         // Encoder le mot de passe AVANT sauvegarde
@@ -156,78 +156,32 @@ public class UtilisateurService {
                 .orElseThrow(() -> new RuntimeException("Utilisateur de test non trouvé"));
     }
 
-    // public UtilisateurDto updatePhotoProfil(@RequestParam("photoProfil")
-    // MultipartFile file) {
-    // // Récupérer l'utilisateur connecté
-    // Utilisateur utilisateur = getCurrentUser();
-    // if (utilisateur == null) {
-    // throw new RuntimeException("Utilisateur non authentifié");
-    // }
-    // if (file == null || file.isEmpty()) {
-    // throw new RuntimeException("Fichier vide");
-    // }
+    public UtilisateurDto updatePhotoProfil(@RequestParam("photoProfil") MultipartFile file) {
+        Utilisateur utilisateur = getCurrentUser();
+        if (file == null || file.isEmpty())
+            throw new RuntimeException("Fichier vide");
 
-    // try {
-    // // Définir le dossier où enregistrer la photo
-    // String uploadDir = "uploads/profil/"; // par exemple dans ton projet
-    // Path uploadPath = Paths.get(uploadDir);
-    // if (!Files.exists(uploadPath)) {
-    // Files.createDirectories(uploadPath);
-    // }
+        try {
+            // Chemin absolu sur le serveur
+            String uploadDir = "/workspaces/Choral-Riff-Backend/uploads/profil/";
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
 
-    // // Générer un nom de fichier unique
-    // String fileName = utilisateur.getId() + "_" + file.getOriginalFilename();
-    // Path filePath = uploadPath.resolve(fileName);
+            String fileName = utilisateur.getId() + "_" + file.getOriginalFilename();
+            Path filePath = uploadPath.resolve(fileName);
+            file.transferTo(filePath.toFile()); // fichier enregistré physiquement
 
-    // // Enregistrer le fichier sur le serveur
-    // file.transferTo(filePath.toFile());
+            // Mettre à jour la base
+            utilisateur.setPhotoProfil("/uploads/profil/" + fileName);
+            utilisateur = utilisateurRepository.save(utilisateur);
 
-    // // Mettre à jour le chemin dans l’utilisateur
-    // utilisateur.setPhotoProfil("/" + uploadDir + fileName);
+            return utilisateurMapper.toDto(utilisateur);
 
-    // // Sauvegarder l’utilisateur dans la base
-    // utilisateur = utilisateurRepository.save(utilisateur);
-
-    // // Retourner le DTO avec la photo mise à jour
-    // return new UtilisateurDto(
-    // utilisateur.getId(),
-    // utilisateur.getNom(),
-    // utilisateur.getPrenom(),
-    // utilisateur.getEmail(),
-    // utilisateur.getPhotoProfil());
-
-    // } catch (IOException e) {
-    // throw new RuntimeException("Erreur lors de l'enregistrement de la photo", e);
-    // }
-    // }
-
-   public UtilisateurDto updatePhotoProfil(@RequestParam("photoProfil") MultipartFile file) {
-    Utilisateur utilisateur = getCurrentUser();
-    if (file == null || file.isEmpty())
-        throw new RuntimeException("Fichier vide");
-
-    try {
-        // Chemin absolu sur le serveur
-        String uploadDir = "/workspaces/Choral-Riff-Backend/uploads/profil/";
-        Path uploadPath = Paths.get(uploadDir);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
+        } catch (IOException e) {
+            throw new RuntimeException("Erreur lors de l'enregistrement de la photo", e);
         }
-
-        String fileName = utilisateur.getId() + "_" + file.getOriginalFilename();
-        Path filePath = uploadPath.resolve(fileName);
-        file.transferTo(filePath.toFile()); // fichier enregistré physiquement
-
-        // Mettre à jour la base
-        utilisateur.setPhotoProfil("/uploads/profil/" + fileName);
-        utilisateur = utilisateurRepository.save(utilisateur);
-
-        return utilisateurMapper.toDto(utilisateur);
-
-    } catch (IOException e) {
-        throw new RuntimeException("Erreur lors de l'enregistrement de la photo", e);
     }
-}
-
 
 }
