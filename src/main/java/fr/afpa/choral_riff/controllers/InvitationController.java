@@ -18,7 +18,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -162,10 +161,10 @@ public class InvitationController {
             @RequestParam Long ensembleId,
             @RequestParam Long utilisateurId) {
         try {
-            // 1️⃣ Rattachement réel
+            // Rattachement réel
             utilisateurEnsembleService.rattacherUtilisateurAEnsemble(utilisateurId, ensembleId);
 
-            // 2️⃣ Création de la notification (nouvelle méthode propre)
+            // Création de la notification (nouvelle méthode propre)
             Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
                     .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
@@ -174,7 +173,7 @@ public class InvitationController {
 
             notificationService.notifyRattachement(utilisateur, ensemble);
 
-            // 3️⃣ Réponse HTTP
+            // Réponse HTTP
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Vous êtes maintenant rattaché à l'ensemble.");
 

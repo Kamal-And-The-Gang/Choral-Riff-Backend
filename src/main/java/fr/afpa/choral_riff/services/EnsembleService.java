@@ -269,4 +269,13 @@ public class EnsembleService {
         return (int) utilisateurEnsembleRepository.countByEnsemble_Id(ensembleId);
     }
 
+    /**
+ * Vérifie si un utilisateur fait partie d’un ensemble (quel que soit son rôle)
+ */
+public boolean isMember(Long userId, Long ensembleId) {
+    return utilisateurEnsembleRepository
+            .existsByUtilisateurIdAndEnsembleId(userId, ensembleId);
+}
+
+
 }

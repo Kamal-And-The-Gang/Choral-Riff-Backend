@@ -47,24 +47,32 @@ public class MorceauController {
     /**
      * Créer un nouveau morceau
      */
+    // @PostMapping
+    // public ResponseEntity<MorceauDto> create(@RequestBody MorceauDto dto) {
+    // return ResponseEntity.ok(morceauService.create(dto));
+    // }
+
     @PostMapping
-    public ResponseEntity<MorceauDto> create(@RequestBody MorceauDto dto) {
-        return ResponseEntity.ok(morceauService.create(dto));
+    public ResponseEntity<MorceauDto> create(@RequestBody MorceauDto dto,
+            @RequestParam Long userId) {
+        // Appel au service en passant le userId
+        MorceauDto created = morceauService.create(dto, userId);
+        return ResponseEntity.ok(created);
     }
 
-     /**
+    /**
      * Récupérer le dernier morceau ajouté
      */
     @GetMapping("/ensemble/{ensembleId}/last")
     public ResponseEntity<MorceauDto> getLastMorceauByEnsemble(@PathVariable Long ensembleId) {
         // 1. Appel à la méthode du service qui filtre par ensembleId
-        MorceauDto lastMorceau = morceauService.findLastAddedMorceauByEnsemble(ensembleId); 
+        MorceauDto lastMorceau = morceauService.findLastAddedMorceauByEnsemble(ensembleId);
 
         if (lastMorceau != null) {
             return ResponseEntity.ok(lastMorceau);
         } else {
             // 2. Retourne 404 Not Found si aucun morceau n'est trouvé pour cet ensemble
-            return ResponseEntity.notFound().build(); 
+            return ResponseEntity.notFound().build();
         }
     }
 
