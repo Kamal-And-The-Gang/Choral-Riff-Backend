@@ -303,6 +303,10 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
+                 // Ici tu mets les logs
+        System.out.println("JWT FILTER EXECUTED");
+        System.out.println("AUTH HEADER = " + request.getHeader("Authorization"));
+
         // Exclure les endpoints publics (exemple : `/auth/**` et `/api/users/**`)
         String requestPath = request.getServletPath();
         if (requestPath.startsWith("/api/auth") || requestPath.startsWith("/api/utilisateur")) {

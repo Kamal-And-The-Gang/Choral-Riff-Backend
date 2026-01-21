@@ -4,6 +4,7 @@ import fr.afpa.choral_riff.dto.EnsembleDto;
 
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Role;
+import fr.afpa.choral_riff.entity.TypeEnsemble;
 import fr.afpa.choral_riff.entity.Utilisateur;
 import fr.afpa.choral_riff.entity.UtilisateurEnsemble;
 import fr.afpa.choral_riff.mapper.EnsembleMapper;
@@ -105,6 +106,17 @@ public class EnsembleService {
             // mise à jour de la liste des utilisateurs
             // d'abord on récupére la liste
             Set<UtilisateurEnsemble> userEnsemble = ensemble.getUtilisateurEnsembles();
+
+            // <<< Ici on remplace la création de l'objet UtilisateurEnsemble
+            // rôle par défaut du créateur
+            Role rolePourCreateur = Role.ADMIN;
+
+            // si c'est un groupe restreint (quatuor ou groupe de rock), tous les membres
+            // sont admins
+            if (dto.getTypeEnsemble() == TypeEnsemble.QUATUOR || dto.getTypeEnsemble() == TypeEnsemble.BAND) {
+                rolePourCreateur = Role.ADMIN; // reste ADMIN, logique pour montrer qu'on force admin
+            }
+
             // on la modifie avec un nouvel objet de la classe USerEnsemble
             UtilisateurEnsemble utilisateurEnsemble = new UtilisateurEnsemble(
                     createur.get(),
@@ -116,8 +128,8 @@ public class EnsembleService {
             // On ajoute à la liste des utilisateurs de l'ensemble
 
             userEnsemble.add(utilisateurEnsemble);
-            // ensemble.setDateCreation(userId);
-            // enregistre le créateur
+
+            // on enregistre l'ensemble
 
             Ensemble saved = ensembleRepository.save(ensemble);
             return ensembleMapper.toDto(saved, userId);
@@ -270,12 +282,17 @@ public class EnsembleService {
     }
 
     /**
- * Vérifie si un utilisateur fait partie d’un ensemble (quel que soit son rôle)
- */
-public boolean isMember(Long userId, Long ensembleId) {
-    return utilisateurEnsembleRepository
-            .existsByUtilisateurIdAndEnsembleId(userId, ensembleId);
-}
+     * Vérifie si un utilisateur fait partie d’un ensemble (quel que soit son rôle)
+     */
+    public boolean isMember(Long userId, Long ensembleId) {
+        return utilisateurEnsembleRepository
+                .existsByUtilisateurIdAndEnsembleId(userId, ensembleId);
+    }
 
+    public EnsembleDto getById(Long id) {
+        Ensemble ensemble = ensembleRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Ensemble non trouvé"));
+        return ensembleMapper.toDto(ensemble);
+    }
 
 }

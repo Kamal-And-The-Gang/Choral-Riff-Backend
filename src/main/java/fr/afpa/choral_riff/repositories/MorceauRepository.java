@@ -24,4 +24,6 @@ public interface MorceauRepository extends JpaRepository<Morceau, Long> {
     @Query("DELETE FROM Morceau m WHERE m.ensemble.id = :ensembleId")
     void deleteByEnsembleId(@Param("ensembleId") Long ensembleId);
 
+
+
 }

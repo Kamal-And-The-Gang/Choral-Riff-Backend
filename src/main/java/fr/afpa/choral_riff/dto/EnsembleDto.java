@@ -34,23 +34,22 @@ public class EnsembleDto {
         public EnsembleDto() {
         }
 
-       public EnsembleDto(
-        Long id,
-        String nom,
-        String description,
-        Long createdBy,
-        String createurNom,
-        String createurPrenom,
-        long nombreMembres
-) {
-        this.id = id;
-        this.nom = nom;
-        this.description = description;
-        this.createdBy = createdBy;
-        this.createurNom = createurNom;
-        this.createurPrenom = createurPrenom;
-        this.nombreMembres = (int) nombreMembres;
-}
+        public EnsembleDto(
+                        Long id,
+                        String nom,
+                        String description,
+                        Long createdBy,
+                        String createurNom,
+                        String createurPrenom,
+                        long nombreMembres) {
+                this.id = id;
+                this.nom = nom;
+                this.description = description;
+                this.createdBy = createdBy;
+                this.createurNom = createurNom;
+                this.createurPrenom = createurPrenom;
+                this.nombreMembres = (int) nombreMembres;
+        }
 
         // Nouveau champ
         private int nombreMembres;
@@ -93,16 +92,16 @@ public class EnsembleDto {
         }
 
         @JsonProperty("creator")
-        private boolean isCreator;
+        private boolean creator;
 
         @JsonProperty("creator")
         public boolean isCreator() {
-                return isCreator;
+                return creator;
         }
 
         @JsonProperty("creator")
         public void setIsCreator(boolean isCreator) {
-                this.isCreator = isCreator;
+                this.creator = isCreator;
         }
 
         public void setId(Long id) {

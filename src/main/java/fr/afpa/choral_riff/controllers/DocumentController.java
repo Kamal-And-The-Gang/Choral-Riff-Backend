@@ -3,6 +3,7 @@ package fr.afpa.choral_riff.controllers;
 
 import fr.afpa.choral_riff.dto.DocumentDto;
 import fr.afpa.choral_riff.dto.InstrumentDto;
+import fr.afpa.choral_riff.security.SecurityService;
 import fr.afpa.choral_riff.services.DocumentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,13 +17,20 @@ import java.util.List;
 public class DocumentController {
 
     private final DocumentService documentService;
+    private final SecurityService securityService; // ajoute ceci
 
     /**
      * Injection du service DocumentService via le constructeur.
      * Permet au controller d'appeler la logique métier.
      */
-    public DocumentController(DocumentService documentService) {
+    // public DocumentController(DocumentService documentService) {
+    // this.documentService = documentService;
+    // }
+
+    public DocumentController(DocumentService documentService,
+            SecurityService securityService) { // 👈 injecte ici
         this.documentService = documentService;
+        this.securityService = securityService;
     }
 
     /*
@@ -41,13 +49,28 @@ public class DocumentController {
      * - morceauId : ID du morceau auquel rattacher le document
      * - utilisateurId : ID de l'utilisateur qui upload
      */
+    // @PostMapping("/upload")
+    // public ResponseEntity<DocumentDto> uploadDocument(
+    // @RequestParam("file") MultipartFile file,
+    // @RequestParam("type") String type,
+    // @RequestParam("format") String format,
+    // @RequestParam("morceauId") Long morceauId,
+    // @RequestParam("utilisateurId") Long utilisateurId) throws IOException {
+
+    // DocumentDto created = documentService.upload(file, type, format, morceauId,
+    // utilisateurId);
+    // return ResponseEntity.ok(created);
+    // }
+
     @PostMapping("/upload")
     public ResponseEntity<DocumentDto> uploadDocument(
             @RequestParam("file") MultipartFile file,
             @RequestParam("type") String type,
             @RequestParam("format") String format,
-            @RequestParam("morceauId") Long morceauId,
-            @RequestParam("utilisateurId") Long utilisateurId) throws IOException {
+            @RequestParam("morceauId") Long morceauId) throws IOException {
+
+        // Récupère l'utilisateur connecté via JWT
+        Long utilisateurId = securityService.getCurrentUserId();
 
         DocumentDto created = documentService.upload(file, type, format, morceauId, utilisateurId);
         return ResponseEntity.ok(created);
@@ -136,9 +159,23 @@ public class DocumentController {
      * Supprime un document par son ID.
      * Renvoie HTTP 204 (No Content) si succès.
      */
+    // @DeleteMapping("/{id}")
+    // public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
+    // documentService.delete(id);
+    // return ResponseEntity.noContent().build();
+    // }
+
+    // @DeleteMapping("/{id}")
+    // public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
+    // Long currentUserId = securityService.getCurrentUserId();
+    // documentService.delete(id);
+    // return ResponseEntity.noContent().build();
+    // }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
-        documentService.delete(id);
+        Long currentUserId = securityService.getCurrentUserId();
+        documentService.delete(id, currentUserId); // <- important
         return ResponseEntity.noContent().build();
     }
 

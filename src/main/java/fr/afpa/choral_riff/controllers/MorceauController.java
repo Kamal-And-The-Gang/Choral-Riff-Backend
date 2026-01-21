@@ -5,6 +5,7 @@ import fr.afpa.choral_riff.services.MorceauService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 /**
@@ -87,9 +88,16 @@ public class MorceauController {
     /**
      * Supprimer un morceau par son ID
      */
+    // @DeleteMapping("/{id}")
+    // public ResponseEntity<Void> delete(@PathVariable Long id) {
+    // morceauService.delete(id);
+    // return ResponseEntity.noContent().build();
+    // }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        morceauService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id, @RequestParam Long userId) {
+        morceauService.delete(id, userId);
         return ResponseEntity.noContent().build();
     }
+
 }
