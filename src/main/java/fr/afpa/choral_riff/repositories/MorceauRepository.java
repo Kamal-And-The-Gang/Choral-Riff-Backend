@@ -18,12 +18,11 @@ public interface MorceauRepository extends JpaRepository<Morceau, Long> {
     List<Morceau> findByEnsembleId(Long ensembleId);
 
     Optional<Morceau> findTopByEnsembleIdOrderByIdDesc(Long ensembleId);
+
     // --- AJOUTÉ pour la suppression en cascade ---
     @Modifying
     @Transactional
     @Query("DELETE FROM Morceau m WHERE m.ensemble.id = :ensembleId")
     void deleteByEnsembleId(@Param("ensembleId") Long ensembleId);
-
-
 
 }

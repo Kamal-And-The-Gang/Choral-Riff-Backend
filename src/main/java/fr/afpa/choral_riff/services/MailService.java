@@ -18,12 +18,12 @@ public class MailService {
     }
 
     public void sendInvitationEmail(String to, String token) {
-         System.out.println("Envoi de l'email à : " + to + " avec le token : " + token);
-          // Vérification de l'adresse email
-    if (to == null || to.isBlank()) {
-        logger.warn("Impossible d'envoyer un email : adresse email vide ou nulle");
-        return;
-    }
+        System.out.println("Envoi de l'email à : " + to + " avec le token : " + token);
+        // Vérification de l'adresse email
+        if (to == null || to.isBlank()) {
+            logger.warn("Impossible d'envoyer un email : adresse email vide ou nulle");
+            return;
+        }
 
         if (token == null || token.isEmpty()) {
             logger.warn("Impossible d'envoyer un email : token manquant pour l'adresse {}", to);
@@ -31,7 +31,7 @@ public class MailService {
         }
 
         String link = "http://localhost:5173/Inscription?token=" + token;
-                // String link = "http://localhost:5173/invitations/accept?token=" + token;
+        // String link = "http://localhost:5173/invitations/accept?token=" + token;
 
         String subject = "Invitation à rejoindre un ensemble";
         String text = "Bonjour,\n\nVous avez été invité à rejoindre un ensemble musical. " +

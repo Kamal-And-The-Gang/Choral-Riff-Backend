@@ -5,11 +5,9 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-
-
 @Repository
 public interface InstrumentRepository extends JpaRepository<Instrument, Long> {
 
-      // Méthode pour récupérer un instrument par son nom
-    Optional<Instrument> findByNom(String nom);
+  // Méthode pour récupérer un instrument par son nom
+  Optional<Instrument> findByNom(String nom);
 }

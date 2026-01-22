@@ -17,7 +17,7 @@ public class DocumentInstrumentService {
     private final InstrumentRepository instrumentRepository;
 
     public DocumentInstrumentService(DocumentRepository documentRepository,
-                                     InstrumentRepository instrumentRepository) {
+            InstrumentRepository instrumentRepository) {
         this.documentRepository = documentRepository;
         this.instrumentRepository = instrumentRepository;
     }
@@ -27,10 +27,10 @@ public class DocumentInstrumentService {
      */
     public void addInstrumentToDocument(Long documentId, Long instrumentId) {
         Document document = documentRepository.findById(documentId)
-            .orElseThrow(() -> new RuntimeException("Document non trouvé : " + documentId));
+                .orElseThrow(() -> new RuntimeException("Document non trouvé : " + documentId));
 
         Instrument instrument = instrumentRepository.findById(instrumentId)
-            .orElseThrow(() -> new RuntimeException("Instrument non trouvé : " + instrumentId));
+                .orElseThrow(() -> new RuntimeException("Instrument non trouvé : " + instrumentId));
 
         // Utilise la méthode utilitaire de Document
         document.addInstrument(instrument);
@@ -43,12 +43,12 @@ public class DocumentInstrumentService {
      */
     public Set<InstrumentDto> getInstrumentsByDocument(Long documentId, InstrumentMapper mapper) {
         Document document = documentRepository.findById(documentId)
-            .orElseThrow(() -> new RuntimeException("Document non trouvé : " + documentId));
+                .orElseThrow(() -> new RuntimeException("Document non trouvé : " + documentId));
 
         // Utilise la méthode utilitaire getInstruments() pour récupérer les instruments
         return document.getInstruments().stream()
-            .map(mapper::toDto)
-            .collect(Collectors.toSet());
+                .map(mapper::toDto)
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -56,10 +56,10 @@ public class DocumentInstrumentService {
      */
     public void removeInstrumentFromDocument(Long documentId, Long instrumentId) {
         Document document = documentRepository.findById(documentId)
-            .orElseThrow(() -> new RuntimeException("Document non trouvé : " + documentId));
+                .orElseThrow(() -> new RuntimeException("Document non trouvé : " + documentId));
 
         Instrument instrument = instrumentRepository.findById(instrumentId)
-            .orElseThrow(() -> new RuntimeException("Instrument non trouvé : " + instrumentId));
+                .orElseThrow(() -> new RuntimeException("Instrument non trouvé : " + instrumentId));
 
         document.removeInstrument(instrument);
 

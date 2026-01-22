@@ -165,10 +165,28 @@ public class EnsembleService {
      * @throws EntityNotFoundException si aucun ensemble n’a été trouvé
      */
 
+    // public EnsembleDto getById(Long id, Long userId) {
+    // Ensemble ensemble = ensembleRepository.findById(id)
+    // .orElseThrow(() -> new EntityNotFoundException("Ensemble non trouvé avec l’ID
+    // : " + id));
+    // return ensembleMapper.toDto(ensemble, userId);
+    // }
     public EnsembleDto getById(Long id, Long userId) {
         Ensemble ensemble = ensembleRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ensemble non trouvé avec l’ID : " + id));
-        return ensembleMapper.toDto(ensemble, userId);
+
+        EnsembleDto dto = ensembleMapper.toDto(ensemble, userId);
+
+        // Récupérer la relation utilisateur-ensemble pour remplir les rôles
+        if (userId != null) {
+            utilisateurEnsembleRepository.findByUtilisateur_IdAndEnsemble_Id(userId, id)
+                    .ifPresent(ue -> {
+                        dto.setUserRole(ue.getRoleDansEnsemble().name()); // ADMIN, MODERATEUR, MEMBRE
+                        dto.setIsCreator(ue.isCreator()); // true si créateur
+                    });
+        }
+
+        return dto;
     }
 
     public EnsembleDto getByIdForUser(Long ensembleId, Long userId) {

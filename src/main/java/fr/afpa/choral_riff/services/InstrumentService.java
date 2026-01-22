@@ -120,28 +120,28 @@ public class InstrumentService {
 
     // nouvelle méthode update avec les droits
 
-   public InstrumentDto update(Long userId, Long instrumentId, InstrumentDto dto) {
-    //  Récupère l’instrument
-    Instrument instrument = getInstrumentOrThrow(instrumentId);
+    public InstrumentDto update(Long userId, Long instrumentId, InstrumentDto dto) {
+        // Récupère l’instrument
+        Instrument instrument = getInstrumentOrThrow(instrumentId);
 
-    //  Récupère le document lié à l’instrument
-    Document document = instrument.getDocuments().stream().findFirst()
-            .orElseThrow(() -> new RuntimeException("Instrument non lié à un document"));
+        // Récupère le document lié à l’instrument
+        Document document = instrument.getDocuments().stream().findFirst()
+                .orElseThrow(() -> new RuntimeException("Instrument non lié à un document"));
 
-    //  Récupère l'ensemble du morceau
-    Long ensembleId = document.getMorceau().getEnsemble().getId();
+        // Récupère l'ensemble du morceau
+        Long ensembleId = document.getMorceau().getEnsemble().getId();
 
-    //  Vérifie les droits
-    if (!utilisateurEnsembleService.utilisateurAutorise(userId, ensembleId, List.of("ADMIN", "MODERATEUR"))) {
-        throw new RuntimeException("Vous n'avez pas les droits pour modifier cet instrument");
+        // Vérifie les droits
+        if (!utilisateurEnsembleService.utilisateurAutorise(userId, ensembleId, List.of("ADMIN", "MODERATEUR"))) {
+            throw new RuntimeException("Vous n'avez pas les droits pour modifier cet instrument");
+        }
+
+        // Mettre à jour les champs via le mapper
+        instrumentMapper.updateEntityFromDto(dto, instrument);
+
+        // Sauvegarder et retourner le DTO
+        Instrument updated = instrumentRepository.save(instrument);
+        return instrumentMapper.toDto(updated);
     }
-
-    //  Mettre à jour les champs via le mapper
-    instrumentMapper.updateEntityFromDto(dto, instrument);
-
-    //  Sauvegarder et retourner le DTO
-    Instrument updated = instrumentRepository.save(instrument);
-    return instrumentMapper.toDto(updated);
-}
 
 }

@@ -25,10 +25,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
   @Transactional
   @Query("DELETE FROM Notification n WHERE n.ensembleId = :ensembleId")
   void deleteAllByEnsembleId(@Param("ensembleId") Long ensembleId);
-void deleteAllByInvitationId(Long invitationId);
 
-@Query("SELECT n FROM Notification n WHERE n.utilisateur.id = :utilisateurId")
-List<Notification> findByUtilisateurId(@Param("utilisateurId") Long utilisateurId);
+  void deleteAllByInvitationId(Long invitationId);
 
+  @Query("SELECT n FROM Notification n WHERE n.utilisateur.id = :utilisateurId")
+  List<Notification> findByUtilisateurId(@Param("utilisateurId") Long utilisateurId);
 
 }

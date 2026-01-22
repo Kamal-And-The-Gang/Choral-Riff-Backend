@@ -189,7 +189,8 @@ public class NotificationService {
         Notification notification = new Notification();
         notification.setUtilisateur(managedUser);
         notification.setType(NotificationType.MORCEAU_AJOUTE);
-        notification.setMessage("Nouveau morceau ajouté : \"" + nomMorceau + "\" dans l'ensemble \"" + ensemble.getNom() + "\"");
+        notification.setMessage(
+                "Nouveau morceau ajouté : \"" + nomMorceau + "\" dans l'ensemble \"" + ensemble.getNom() + "\"");
         notification.setIsRead(false);
         notification.setDateCreation(LocalDateTime.now());
         notification.setEnsembleId(ensemble.getId());

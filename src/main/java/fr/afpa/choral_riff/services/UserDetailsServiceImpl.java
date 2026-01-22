@@ -20,30 +20,27 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     // @Override
-    // public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-    //     Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
-    //             .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec email : " + email));
+    // public UserDetails loadUserByUsername(String email) throws
+    // UsernameNotFoundException {
+    // Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
+    // .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec
+    // email : " + email));
 
-    //     // Retourne un UserDetails minimal avec aucune autorité (ROLE)
-    //     return utilisateur;
+    // // Retourne un UserDetails minimal avec aucune autorité (ROLE)
+    // return utilisateur;
     // }
 
-@Override
-public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-    Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé : " + email));
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé : " + email));
 
-    // Retourne un UserDetails minimal avec un rôle
-    return org.springframework.security.core.userdetails.User.builder()
-            .username(utilisateur.getEmail())
-            .password(utilisateur.getPassword()) // mot de passe BCrypt
-            .authorities("ROLE_USER") // <- important
-            .build();
-}
-
-
-
-
-
+        // Retourne un UserDetails minimal avec un rôle
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(utilisateur.getEmail())
+                .password(utilisateur.getPassword()) // mot de passe BCrypt
+                .authorities("ROLE_USER") // <- important
+                .build();
+    }
 
 }

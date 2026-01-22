@@ -23,7 +23,8 @@ public interface InvitationRepository extends JpaRepository<Invitation, Long> {
     boolean existsByEmailInviteAndEnsembleId(String emailInvite, Long ensembleId);
 
     Optional<Invitation> findByEmailInviteAndEnsembleId(String emailInvite, Long ensembleId);
- // --- AJOUTÉ pour la suppression en cascade ---
+
+    // --- AJOUTÉ pour la suppression en cascade ---
     @Modifying
     @Transactional
     @Query("DELETE FROM Invitation i WHERE i.ensemble.id = :ensembleId")
