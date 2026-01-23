@@ -33,26 +33,14 @@ public class EnsembleController {
         return ResponseEntity.ok(ensembleService.getAll());
     }
 
-    // Récupérer un ensemble par ID pour un utilisateur spécifique
     @GetMapping("/{id}")
-    public ResponseEntity<EnsembleDto> getEnsembleById(
-            @PathVariable Long id,
-            @RequestParam Long userId) { // userId obligatoire
+    public ResponseEntity<EnsembleDto> getEnsembleById(@PathVariable Long id) {
         try {
-            return ResponseEntity.ok(ensembleService.getByIdForUser(id, userId));
+            return ResponseEntity.ok(ensembleService.getById(id));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
-
-    // @GetMapping("/{id}")
-    // public ResponseEntity<EnsembleDto> getEnsembleById(@PathVariable Long id) {
-    // try {
-    // return ResponseEntity.ok(ensembleService.getById(id));
-    // } catch (EntityNotFoundException e) {
-    // return ResponseEntity.notFound().build();
-    // }
-    // }
 
     // Créer un nouvel ensemble
     @PostMapping

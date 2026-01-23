@@ -187,9 +187,16 @@ public class MorceauService {
         morceauRepository.delete(morceau);
     }
 
+    // public MorceauDto findLastAddedMorceauByEnsemble(Long ensembleId) {
+    //     return morceauRepository.findTopByEnsembleIdOrderByIdDesc(ensembleId) // <-- Appel au Repository
+    //             .map(morceauMapper::toDto)
+    //             .orElseThrow(() -> new RuntimeException("Aucun morceau trouvé pour l'ensemble " + ensembleId));
+    // }
+
     public MorceauDto findLastAddedMorceauByEnsemble(Long ensembleId) {
-        return morceauRepository.findTopByEnsembleIdOrderByIdDesc(ensembleId) // <-- Appel au Repository
-                .map(morceauMapper::toDto)
-                .orElseThrow(() -> new RuntimeException("Aucun morceau trouvé pour l'ensemble " + ensembleId));
-    }
+    return morceauRepository.findTopByEnsembleIdOrderByIdDesc(ensembleId)
+            .map(morceauMapper::toDto)
+            .orElse(null);
+}
+
 }
