@@ -47,6 +47,14 @@ public class InvitationController {
         this.mailService = mailService; // <--- affectation
     }
 
+    /**
+     * Crée une nouvelle invitation pour un utilisateur.
+     * 
+     * @param createInvitationDTO DTO contenant les informations de l'invitation
+     * @return L'invitation créée avec HTTP 201 ou une erreur HTTP 404 si
+     *         utilisateur/ensemble introuvable
+     */
+
     @PostMapping
     public ResponseEntity<?> creerInvitation(@Valid @RequestBody CreateInvitationDTO createInvitationDTO) {
         try {
@@ -61,7 +69,10 @@ public class InvitationController {
     }
 
     /**
-     * Récupérer toutes les invitations d’un ensemble donné.
+     * Récupère toutes les invitations pour un ensemble donné.
+     * 
+     * @param ensembleId ID de l'ensemble
+     * @return Liste des invitations sous forme de DTO
      */
     @GetMapping("/ensemble/{ensembleId}")
     public ResponseEntity<List<InvitationDTO>> getByEnsemble(@PathVariable Long ensembleId) {
@@ -71,7 +82,10 @@ public class InvitationController {
     }
 
     /**
-     * Accepter une invitation via token.
+     * Accepte une invitation via son token.
+     * 
+     * @param token Token unique de l'invitation
+     * @return DTO de l'invitation mise à jour
      */
     @PostMapping("/accept")
     public ResponseEntity<InvitationDTO> accept(@RequestParam String token) {
@@ -80,7 +94,10 @@ public class InvitationController {
     }
 
     /**
-     * Refuser une invitation via token.
+     * Refuse une invitation via son token.
+     * 
+     * @param token Token unique de l'invitation
+     * @return DTO de l'invitation refusée
      */
     @PostMapping("/refuse")
     public ResponseEntity<InvitationDTO> refuse(@RequestParam String token) {
@@ -89,7 +106,10 @@ public class InvitationController {
     }
 
     /**
-     * Supprimer une invitation par son ID.
+     * Supprime une invitation par son ID.
+     * 
+     * @param id ID de l'invitation à supprimer
+     * @return HTTP 204 si succès
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
@@ -98,14 +118,13 @@ public class InvitationController {
     }
 
     /**
-     * Récupérer une invitation via son token.
+     * Récupère le rôle d'un utilisateur dans l'ensemble via le token de
+     * l'invitation.
+     * 
+     * @param token Token de l'invitation
+     * @return Nom du rôle (ADMIN, MEMBRE, etc.) ou 404 si l'utilisateur n'existe
+     *         pas encore
      */
-    // @GetMapping("/token/{token}")
-    // public ResponseEntity<InvitationDTO> getByToken(@PathVariable String token) {
-    // InvitationDTO dto = invitationService.getByToken(token);
-    // return ResponseEntity.ok(dto);
-    // }
-
     @GetMapping("/role/{token}")
     public ResponseEntity<String> getRoleViaToken(@PathVariable String token) {
         try {
@@ -128,6 +147,14 @@ public class InvitationController {
         }
     }
 
+    /**
+     * Rattache un nouvel utilisateur à une invitation après inscription.
+     * 
+     * @param token             Token de l'invitation
+     * @param nouvelUtilisateur L'utilisateur fraîchement créé
+     * @return DTO de l'invitation mise à jour
+     */
+
     @PostMapping("/rattacher-apres-inscription")
     public ResponseEntity<InvitationDTO> rattacherApresInscription(
             @RequestParam String token,
@@ -140,6 +167,13 @@ public class InvitationController {
 
         return ResponseEntity.ok(invitationDTO);
     }
+
+    /**
+     * Renvoie l'email d'invitation.
+     * 
+     * @param id ID de l'invitation
+     * @return Message de succès ou erreur si non trouvée ou échec d'envoi
+     */
 
     @PostMapping("/resend/{id}")
     public ResponseEntity<?> resendInvitation(@PathVariable Long id) {
@@ -199,11 +233,15 @@ public class InvitationController {
      * l'utilisateur
      * qu'il a bien été rattaché à l'ensemble.
      *
-     * @param ensembleId     ID de l'ensemble concerné
-     * @param utilisateurId  ID de l'utilisateur à rattacher
-     * @param notificationId ID de la notification DEMANDE_RATTACHEMENT à supprimer
-     *                       (optionnel)
-     * @return ResponseEntity avec message de succès ou erreur
+     * 
+     * 
+     * 
+     * /**
+     * Rattache un utilisateur à un ensemble suite à une demande de rattachement.
+     * Flux :
+     * 1) Rattache l'utilisateur à l'ensemble.
+     * 2) Supprime la notification de demande (si fournie).
+     * 3) Crée une notification finale pour informer l'utilisateur.
      */
 
     @PostMapping("/rattacher")
@@ -230,11 +268,21 @@ public class InvitationController {
 
             notificationService.notifyRattachement(utilisateur, ensemble);
 
-            return ResponseEntity.ok(Map.of("message", "Vous êtes maintenant rattaché à l'ensemble."));
+            // return ResponseEntity.ok(Map.of("message", "Vous êtes maintenant rattaché à
+            // l'ensemble."));
+            return ResponseEntity.ok(Map.of(
+                    "message", "Vous êtes maintenant rattaché à l'ensemble \"" + ensemble.getNom() + "\"."));
+
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+
+    /**
+     * Demande le rattachement d'un utilisateur à un ensemble.
+     * Vérifie d'abord que l'utilisateur n'est pas déjà membre.
+     * Crée ensuite une notification de demande de rattachement.
+     */
 
     @PostMapping("/demanderRattachement")
     public ResponseEntity<?> demanderRattachement(
@@ -267,6 +315,18 @@ public class InvitationController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
+    }
+
+    /**
+     * Refuse une demande de rattachement.
+     * Supprime simplement la notification correspondante.
+     * 
+     * @param notificationId ID de la notification à supprimer
+     */
+
+    @PostMapping("/refuser")
+    public void refuser(@RequestParam Long notificationId) {
+        notificationService.deleteNotification(notificationId);
     }
 
 }
