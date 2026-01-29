@@ -41,7 +41,7 @@
 // //                 .csrf(csrf -> csrf.disable())
 // //                 // Autorise tout pour le moment (tu pourras restreindre plus tard)
 // //                 .authorizeHttpRequests(auth -> auth
-                    
+
 // //                         .requestMatchers("/api/auth/**").permitAll()
 // //                         .requestMatchers("/api/invitations/token/**").permitAll() // accès libre pour récupération du
 // //                         .requestMatchers("/api/utilisateur/**").permitAll() // accès libre temporaire // token
@@ -140,7 +140,7 @@
 //                 .authorizeHttpRequests(auth -> auth
 //                         .requestMatchers("/api/auth/**").permitAll()
 //                         .requestMatchers("/api/ensembles/**").permitAll() // <-- autorise DELETE sans token
-                        
+
 //                         .anyRequest().permitAll())
 
 //                 // (Optionnel) politique de sécurité de contenu
@@ -236,20 +236,37 @@ public class SecurityConfig {
         this.jwtFilter = jwtFilter;
     }
 
+    // @Bean
+    // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws
+    // Exception {
+    // http
+    // .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+    // .csrf(csrf -> csrf.disable())
+    // .authorizeHttpRequests(auth -> auth
+    // .anyRequest().permitAll() // on laisse tout ouvert pour le test
+    // )
+    // // ICI : on remet le filtre JWT
+    // .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+    // return http.build();
+    // }
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll() // on laisse tout ouvert pour le test
-            )
-            // ✅ ICI : on remet le filtre JWT
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+            // règles spécifiques D’ABORD
+            .requestMatchers("/api/documents/upload").permitAll()
 
-        return http.build();
-    }
+            // règle générale TOUJOURS EN DERNIER
+            .anyRequest().permitAll()
+        );
 
+    // .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+    return http.build();
+}
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
@@ -279,5 +296,3 @@ public class SecurityConfig {
         return source;
     }
 }
-
-

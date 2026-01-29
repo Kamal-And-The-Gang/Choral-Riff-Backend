@@ -33,14 +33,35 @@ public class EnsembleController {
         return ResponseEntity.ok(ensembleService.getAll());
     }
 
+    // @GetMapping("/{id}")
+    // public ResponseEntity<EnsembleDto> getEnsembleById(@PathVariable Long id) {
+    // try {
+    // return ResponseEntity.ok(ensembleService.getById(id));
+    // } catch (EntityNotFoundException e) {
+    // return ResponseEntity.notFound().build();
+    // }
+    // }
+
     @GetMapping("/{id}")
-    public ResponseEntity<EnsembleDto> getEnsembleById(@PathVariable Long id) {
+    public ResponseEntity<EnsembleDto> getEnsembleById(
+            @PathVariable Long id,
+            @RequestParam Long userId) { // <-- ajouter userId
         try {
-            return ResponseEntity.ok(ensembleService.getById(id));
+            EnsembleDto dto = ensembleService.getByIdForUser(id, userId); // méthode qui inclut les rôles
+            return ResponseEntity.ok(dto);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
+
+    // @GetMapping("/{id}")
+    // public ResponseEntity<EnsembleDto> getEnsembleById(@PathVariable Long id) {
+    // try {
+    // return ResponseEntity.ok(ensembleService.getById(id));
+    // } catch (EntityNotFoundException e) {
+    // return ResponseEntity.notFound().build();
+    // }
+    // }
 
     // Créer un nouvel ensemble
     @PostMapping

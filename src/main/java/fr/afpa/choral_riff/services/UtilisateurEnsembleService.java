@@ -31,6 +31,11 @@ public class UtilisateurEnsembleService {
         this.ensembleRepository = ensembleRepository;
     }
 
+    // Vérifie si un utilisateur est déjà membre d'un ensemble
+    public boolean estMembreDeLensemble(Long utilisateurId, Long ensembleId) {
+        return utilisateurEnsembleRepository.existsByUtilisateurIdAndEnsembleId(utilisateurId, ensembleId);
+    }
+
     /**
      * Vérifie si un utilisateur a un rôle autorisé dans un ensemble.
      * 
@@ -57,17 +62,49 @@ public class UtilisateurEnsembleService {
                 .getRoleDansEnsemble();
     }
 
+    // @Transactional
+    // public void rattacherUtilisateurAEnsemble(Long utilisateurId, Long
+    // ensembleId) {
+    // // Vérifie si l'utilisateur existe
+    // Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+    // .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+    // // Vérifie si l'ensemble existe
+    // Ensemble ensemble = ensembleRepository.findById(ensembleId)
+    // .orElseThrow(() -> new RuntimeException("Ensemble introuvable"));
+
+    // // Vérifie si l'utilisateur est déjà membre
+    // boolean dejaMembre = utilisateurEnsembleRepository
+    // .existsByUtilisateurIdAndEnsembleId(utilisateurId, ensembleId);
+
+    // if (!dejaMembre) {
+    // UtilisateurEnsemble ue = new UtilisateurEnsemble();
+    // ue.setUtilisateur(utilisateur);
+    // ue.setEnsemble(ensemble);
+    // ue.setRoleDansEnsemble(Role.MEMBRE);
+    // ue.setDateAdhesion(LocalDateTime.now());
+    // // Ajouter le nom complet
+    // ue.setNomComplet(utilisateur.getPrenom() + " " + utilisateur.getNom());
+    // utilisateurEnsembleRepository.saveAndFlush(ue);
+    // } else {
+    // throw new RuntimeException("L'utilisateur est déjà membre de cet ensemble");
+    // }
+    // }
+
+    // public boolean estMembreDeLensemble(Long utilisateurId, Long ensembleId) {
+    // return
+    // utilisateurEnsembleRepository.existsByUtilisateurIdAndEnsembleId(utilisateurId,
+    // ensembleId);
+    // }
+
     @Transactional
     public void rattacherUtilisateurAEnsemble(Long utilisateurId, Long ensembleId) {
-        // Vérifie si l'utilisateur existe
         Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-        // Vérifie si l'ensemble existe
         Ensemble ensemble = ensembleRepository.findById(ensembleId)
                 .orElseThrow(() -> new RuntimeException("Ensemble introuvable"));
 
-        // Vérifie si l'utilisateur est déjà membre
         boolean dejaMembre = utilisateurEnsembleRepository
                 .existsByUtilisateurIdAndEnsembleId(utilisateurId, ensembleId);
 
@@ -77,12 +114,10 @@ public class UtilisateurEnsembleService {
             ue.setEnsemble(ensemble);
             ue.setRoleDansEnsemble(Role.MEMBRE);
             ue.setDateAdhesion(LocalDateTime.now());
-            // Ajouter le nom complet
             ue.setNomComplet(utilisateur.getPrenom() + " " + utilisateur.getNom());
             utilisateurEnsembleRepository.saveAndFlush(ue);
-        } else {
-            throw new RuntimeException("L'utilisateur est déjà membre de cet ensemble");
         }
+        // Sinon ne rien faire, juste continuer
     }
 
 }

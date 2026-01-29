@@ -56,34 +56,38 @@ public class NotificationService {
      * @param invitationId  ID de l'invitation si applicable, sinon null
      * @return NotificationDto correspondant à la notification créée
      */
+
     @Transactional
-    public NotificationDto createNotification(Long utilisateurId, String type, String message, Long invitationId) {
-        // Étape 1 : récupérer l'utilisateur depuis la base (managed)
+    public NotificationDto createNotification(Long utilisateurId, String type, String message, Long invitationId,
+            Long ensembleId) {
         Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
-        // Étape 2 : récupérer l'invitation si elle existe
+
         Invitation invitation = null;
         if (invitationId != null) {
             invitation = invitationRepository.findById(invitationId)
                     .orElseThrow(() -> new IllegalArgumentException("Invitation non trouvée"));
-            System.out.println("Invitation MANAGED id=" + invitation.getId());
         }
-        // Étape 3 : convertir le type en enum NotificationType
+
         NotificationType notificationType = NotificationType.valueOf(type);
-        // Étape 4 : créer l'objet Notification
+
         Notification notification = new Notification();
         notification.setUtilisateur(utilisateur);
         notification.setType(notificationType);
         notification.setMessage(message);
         notification.setDateCreation(LocalDateTime.now());
-
-        // Lier l'invitation si elle existe
         notification.setInvitation(invitation);
+        notification.setEnsembleId(ensembleId); // <-- important !
 
-        // Étape 5 : sauvegarder immédiatement en base
         notificationRepository.saveAndFlush(notification);
-        // Étape 6 : convertir l'entité en DTO pour le front
+
         return notificationMapper.toDTO(notification);
+    }
+
+    // Surcharge pour notifications générales (sans invitation)
+    @Transactional
+    public NotificationDto createNotification(Long utilisateurId, String type, String message, Long ensembleId) {
+        return createNotification(utilisateurId, type, message, null, ensembleId);
     }
 
     // ==========================
@@ -163,13 +167,9 @@ public class NotificationService {
      */
 
     public void notifyRattachement(Utilisateur utilisateur, Ensemble ensemble) {
-        // Étape 1 : récupérer l'utilisateur MANAGED
-        Utilisateur managedUser = utilisateurRepository.findById(utilisateur.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
-
-        // Étape 2 : créer la notification
+        // Créer une notification de type RATTACHEMENT pour l'utilisateur
         Notification notification = new Notification();
-        notification.setUtilisateur(managedUser); // utiliser managedUser ici
+        notification.setUtilisateur(utilisateur); // Assure que l'utilisateur est bien lié
         notification.setType(NotificationType.RATTACHEMENT);
         notification.setMessage(
                 "Vous avez été rattaché à l’ensemble \"" + ensemble.getNom() + "\"");
@@ -177,7 +177,7 @@ public class NotificationService {
         notification.setDateCreation(LocalDateTime.now());
         notification.setEnsembleId(ensemble.getId());
 
-        // Étape 3 : sauvegarder
+        // Sauvegarder la notification
         notificationRepository.saveAndFlush(notification);
     }
 

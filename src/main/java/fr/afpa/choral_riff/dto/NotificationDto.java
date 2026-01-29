@@ -13,16 +13,16 @@ public class NotificationDto {
     // Contexte
     private Long ensembleId;
     private String ensembleNom;
-private String morceauTitre;
+    private String morceauTitre;
 
     // Spécifique à l'invitation
     private Long invitationId;
-    private String status; 
+    private String status;
     private String senderName;
 
     // Pour accepter/refuser via backend
     private String token;
- // ← NOUVEAU CHAMP
+    // ← NOUVEAU CHAMP
     private Long utilisateurId;
 
     // Getters et setters
@@ -115,14 +115,19 @@ private String morceauTitre;
     }
 
     public String getMorceauTitre() {
-    return morceauTitre;
-}
+        return morceauTitre;
+    }
 
-public void setMorceauTitre(String morceauTitre) {
-    this.morceauTitre = morceauTitre;
-}
+    public void setMorceauTitre(String morceauTitre) {
+        this.morceauTitre = morceauTitre;
+    }
 
     // ← GETTER/SETTER pour utilisateurId
-    public Long getUtilisateurId() { return utilisateurId; }
-    public void setUtilisateurId(Long utilisateurId) { this.utilisateurId = utilisateurId; }
+    public Long getUtilisateurId() {
+        return utilisateurId;
+    }
+
+    public void setUtilisateurId(Long utilisateurId) {
+        this.utilisateurId = utilisateurId;
+    }
 }

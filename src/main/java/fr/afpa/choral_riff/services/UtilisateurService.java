@@ -12,17 +12,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.NoSuchElementException;
-
-// import jakarta.persistence.criteria.Path;
-
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
