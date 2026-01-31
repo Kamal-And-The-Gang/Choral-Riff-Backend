@@ -36,9 +36,10 @@ public class NotificationService {
     private final UtilisateurRepository utilisateurRepository;
     private final InvitationRepository invitationRepository;
     private final NotificationMapper notificationMapper;
-     private final UtilisateurEnsembleRepository utilisateurEnsembleRepository;
+    private final UtilisateurEnsembleRepository utilisateurEnsembleRepository;
 
-    public NotificationService(UtilisateurEnsembleRepository utilisateurEnsembleRepository,NotificationRepository notificationRepository,
+    public NotificationService(UtilisateurEnsembleRepository utilisateurEnsembleRepository,
+            NotificationRepository notificationRepository,
             UtilisateurRepository utilisateurRepository,
             InvitationRepository invitationRepository,
             NotificationMapper notificationMapper) {
@@ -187,53 +188,34 @@ public class NotificationService {
         notificationRepository.saveAndFlush(notification);
     }
 
-    // @Transactional
-    // public void notifyMorceauAjoute(Utilisateur utilisateur, Ensemble ensemble, String nomMorceau) {
-    //     Utilisateur managedUser = utilisateurRepository.findById(utilisateur.getId())
-    //             .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
+    @Transactional
+    public void notifyMorceauAjoute(Morceau morceau) {
+        Ensemble ensemble = morceau.getEnsemble();
+        Utilisateur createur = morceau.getCreateur();
 
-    //     Notification notification = new Notification();
-    //     notification.setUtilisateur(managedUser);
-    //     notification.setType(NotificationType.MORCEAU_AJOUTE);
-    //     notification.setMessage(
-    //             "Nouveau morceau ajouté : \"" + nomMorceau + "\" dans l'ensemble \"" + ensemble.getNom() + "\"");
-    //     notification.setIsRead(false);
-    //     notification.setDateCreation(LocalDateTime.now());
-    //     notification.setEnsembleId(ensemble.getId());
+        // Construire le nom du créateur
+        String nomCreateur = createur.getPrenom() + " " + createur.getNom();
 
-    //     notificationRepository.saveAndFlush(notification);
-    // }
+        // Récupérer tous les membres de l'ensemble
+        List<UtilisateurEnsemble> membresEnsemble = utilisateurEnsembleRepository.findByEnsembleId(ensemble.getId());
 
-  @Transactional
-public void notifyMorceauAjoute(Morceau morceau) {
-    Ensemble ensemble = morceau.getEnsemble();
-    Utilisateur createur = morceau.getCreateur();
+        List<Notification> notifications = new ArrayList<>();
 
-    // Construire le nom du créateur
-    String nomCreateur = createur.getPrenom() + " " + createur.getNom();
+        for (UtilisateurEnsemble ue : membresEnsemble) {
+            Notification notification = new Notification();
+            notification.setUtilisateur(ue.getUtilisateur());
+            notification.setType(NotificationType.MORCEAU_AJOUTE);
+            notification.setMessage(
+                    "L'utilisateur \"" + nomCreateur + "\" a ajouté le morceau \"" + morceau.getTitre()
+                            + "\" dans l'ensemble \"" + ensemble.getNom() + "\"");
+            notification.setIsRead(false);
+            notification.setDateCreation(LocalDateTime.now());
+            notification.setEnsembleId(ensemble.getId());
 
-    // Récupérer tous les membres de l'ensemble
-    List<UtilisateurEnsemble> membresEnsemble = utilisateurEnsembleRepository.findByEnsembleId(ensemble.getId());
+            notifications.add(notification);
+        }
 
-    List<Notification> notifications = new ArrayList<>();
-
-    for (UtilisateurEnsemble ue : membresEnsemble) {
-        Notification notification = new Notification();
-        notification.setUtilisateur(ue.getUtilisateur());
-        notification.setType(NotificationType.MORCEAU_AJOUTE);
-        notification.setMessage(
-            "L'utilisateur \"" + nomCreateur + "\" a ajouté le morceau \"" + morceau.getTitre() + "\" dans l'ensemble \"" + ensemble.getNom() + "\""
-        );
-        notification.setIsRead(false);
-        notification.setDateCreation(LocalDateTime.now());
-        notification.setEnsembleId(ensemble.getId());
-
-        notifications.add(notification);
+        notificationRepository.saveAll(notifications);
     }
-
-    notificationRepository.saveAll(notifications);
-}
-
-
 
 }

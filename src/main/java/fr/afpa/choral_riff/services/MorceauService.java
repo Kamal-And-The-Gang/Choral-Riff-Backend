@@ -58,20 +58,6 @@ public class MorceauService {
                 .map(morceauMapper::toDto)
                 .toList();
     }
-    // Mauvaise méthode pas sécurisée
-
-    // public MorceauDto create(MorceauDto dto) {
-    // // Avant : on récupérait le créateur depuis le DTO
-    // Utilisateur createur = utilisateurRepository.findById(dto.createurId())
-    // .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-
-    // Morceau morceau = morceauMapper.toEntity(dto);
-    // morceau.setCreateur(createur);
-
-    // // Sauvegarde et retour
-    // Morceau saved = morceauRepository.save(morceau);
-    // return morceauMapper.toDto(saved);
-    // }
 
     // Récupérer un morceau par son ID
     public MorceauDto getById(Long id) {
@@ -115,7 +101,6 @@ public class MorceauService {
 
         // --- Notification (optionnel selon ton besoin) ---
         notificationService.notifyMorceauAjoute(saved);
-
 
         // --- Retourner le DTO pour le front ---
         return morceauMapper.toDto(saved);
@@ -186,15 +171,17 @@ public class MorceauService {
     }
 
     // public MorceauDto findLastAddedMorceauByEnsemble(Long ensembleId) {
-    //     return morceauRepository.findTopByEnsembleIdOrderByIdDesc(ensembleId) // <-- Appel au Repository
-    //             .map(morceauMapper::toDto)
-    //             .orElseThrow(() -> new RuntimeException("Aucun morceau trouvé pour l'ensemble " + ensembleId));
+    // return morceauRepository.findTopByEnsembleIdOrderByIdDesc(ensembleId) // <--
+    // Appel au Repository
+    // .map(morceauMapper::toDto)
+    // .orElseThrow(() -> new RuntimeException("Aucun morceau trouvé pour l'ensemble
+    // " + ensembleId));
     // }
 
     public MorceauDto findLastAddedMorceauByEnsemble(Long ensembleId) {
-    return morceauRepository.findTopByEnsembleIdOrderByIdDesc(ensembleId)
-            .map(morceauMapper::toDto)
-            .orElse(null);
-}
+        return morceauRepository.findTopByEnsembleIdOrderByIdDesc(ensembleId)
+                .map(morceauMapper::toDto)
+                .orElse(null);
+    }
 
 }
