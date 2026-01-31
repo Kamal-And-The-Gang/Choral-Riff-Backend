@@ -49,29 +49,16 @@ public class DocumentController {
      * - morceauId : ID du morceau auquel rattacher le document
      * - utilisateurId : ID de l'utilisateur qui upload
      */
-    // @PostMapping("/upload")
-    // public ResponseEntity<DocumentDto> uploadDocument(
-    // @RequestParam("file") MultipartFile file,
-    // @RequestParam("type") String type,
-    // @RequestParam("format") String format,
-    // @RequestParam("morceauId") Long morceauId,
-    // @RequestParam("utilisateurId") Long utilisateurId) throws IOException {
-
-    // DocumentDto created = documentService.upload(file, type, format, morceauId,
-    // utilisateurId);
-    // return ResponseEntity.ok(created);
-    // }
 
     @PostMapping("/upload")
     public ResponseEntity<DocumentDto> uploadDocument(
             @RequestParam("file") MultipartFile file,
             @RequestParam("type") String type,
             @RequestParam("format") String format,
-            @RequestParam("morceauId") Long morceauId) throws IOException {
+            @RequestParam("morceauId") Long morceauId,
+            @RequestParam(value = "utilisateurId", required = false) Long utilisateurId) throws IOException {
 
-        // Récupère l'utilisateur connecté via JWT
-        Long utilisateurId = securityService.getCurrentUserId();
-
+        // On utilise l'ID fourni en paramètre ou null si absent
         DocumentDto created = documentService.upload(file, type, format, morceauId, utilisateurId);
         return ResponseEntity.ok(created);
     }
@@ -154,28 +141,9 @@ public class DocumentController {
      * ============================================================
      */
 
-    /**
-     * DELETE /api/documents/{id}
-     * Supprime un document par son ID.
-     * Renvoie HTTP 204 (No Content) si succès.
-     */
-    // @DeleteMapping("/{id}")
-    // public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
-    // documentService.delete(id);
-    // return ResponseEntity.noContent().build();
-    // }
-
-    // @DeleteMapping("/{id}")
-    // public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
-    // Long currentUserId = securityService.getCurrentUserId();
-    // documentService.delete(id);
-    // return ResponseEntity.noContent().build();
-    // }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
-        Long currentUserId = securityService.getCurrentUserId();
-        documentService.delete(id, currentUserId); // <- important
+        documentService.delete(id);
         return ResponseEntity.noContent().build();
     }
 

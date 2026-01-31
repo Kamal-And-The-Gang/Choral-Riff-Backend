@@ -4,16 +4,20 @@ package fr.afpa.choral_riff.services;
 import fr.afpa.choral_riff.dto.NotificationDto;
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Invitation;
+import fr.afpa.choral_riff.entity.Morceau;
 import fr.afpa.choral_riff.entity.Notification;
 import fr.afpa.choral_riff.entity.NotificationType;
 import fr.afpa.choral_riff.entity.Utilisateur;
+import fr.afpa.choral_riff.entity.UtilisateurEnsemble;
 import fr.afpa.choral_riff.mapper.NotificationMapper;
 import fr.afpa.choral_riff.repositories.InvitationRepository;
 import fr.afpa.choral_riff.repositories.NotificationRepository;
+import fr.afpa.choral_riff.repositories.UtilisateurEnsembleRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,8 +36,9 @@ public class NotificationService {
     private final UtilisateurRepository utilisateurRepository;
     private final InvitationRepository invitationRepository;
     private final NotificationMapper notificationMapper;
+     private final UtilisateurEnsembleRepository utilisateurEnsembleRepository;
 
-    public NotificationService(NotificationRepository notificationRepository,
+    public NotificationService(UtilisateurEnsembleRepository utilisateurEnsembleRepository,NotificationRepository notificationRepository,
             UtilisateurRepository utilisateurRepository,
             InvitationRepository invitationRepository,
             NotificationMapper notificationMapper) {
@@ -41,6 +46,7 @@ public class NotificationService {
         this.utilisateurRepository = utilisateurRepository;
         this.invitationRepository = invitationRepository;
         this.notificationMapper = notificationMapper;
+        this.utilisateurEnsembleRepository = utilisateurEnsembleRepository;
     }
 
     // ==========================
@@ -181,21 +187,53 @@ public class NotificationService {
         notificationRepository.saveAndFlush(notification);
     }
 
-    @Transactional
-    public void notifyMorceauAjoute(Utilisateur utilisateur, Ensemble ensemble, String nomMorceau) {
-        Utilisateur managedUser = utilisateurRepository.findById(utilisateur.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
+    // @Transactional
+    // public void notifyMorceauAjoute(Utilisateur utilisateur, Ensemble ensemble, String nomMorceau) {
+    //     Utilisateur managedUser = utilisateurRepository.findById(utilisateur.getId())
+    //             .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
 
+    //     Notification notification = new Notification();
+    //     notification.setUtilisateur(managedUser);
+    //     notification.setType(NotificationType.MORCEAU_AJOUTE);
+    //     notification.setMessage(
+    //             "Nouveau morceau ajouté : \"" + nomMorceau + "\" dans l'ensemble \"" + ensemble.getNom() + "\"");
+    //     notification.setIsRead(false);
+    //     notification.setDateCreation(LocalDateTime.now());
+    //     notification.setEnsembleId(ensemble.getId());
+
+    //     notificationRepository.saveAndFlush(notification);
+    // }
+
+  @Transactional
+public void notifyMorceauAjoute(Morceau morceau) {
+    Ensemble ensemble = morceau.getEnsemble();
+    Utilisateur createur = morceau.getCreateur();
+
+    // Construire le nom du créateur
+    String nomCreateur = createur.getPrenom() + " " + createur.getNom();
+
+    // Récupérer tous les membres de l'ensemble
+    List<UtilisateurEnsemble> membresEnsemble = utilisateurEnsembleRepository.findByEnsembleId(ensemble.getId());
+
+    List<Notification> notifications = new ArrayList<>();
+
+    for (UtilisateurEnsemble ue : membresEnsemble) {
         Notification notification = new Notification();
-        notification.setUtilisateur(managedUser);
+        notification.setUtilisateur(ue.getUtilisateur());
         notification.setType(NotificationType.MORCEAU_AJOUTE);
         notification.setMessage(
-                "Nouveau morceau ajouté : \"" + nomMorceau + "\" dans l'ensemble \"" + ensemble.getNom() + "\"");
+            "L'utilisateur \"" + nomCreateur + "\" a ajouté le morceau \"" + morceau.getTitre() + "\" dans l'ensemble \"" + ensemble.getNom() + "\""
+        );
         notification.setIsRead(false);
         notification.setDateCreation(LocalDateTime.now());
         notification.setEnsembleId(ensemble.getId());
 
-        notificationRepository.saveAndFlush(notification);
+        notifications.add(notification);
     }
+
+    notificationRepository.saveAll(notifications);
+}
+
+
 
 }

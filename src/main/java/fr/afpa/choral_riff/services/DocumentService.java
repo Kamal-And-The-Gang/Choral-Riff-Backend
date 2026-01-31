@@ -77,36 +77,6 @@ public class DocumentService {
      * @throws IOException Si une erreur survient lors de l'écriture du fichier
      */
 
-    // public DocumentDto upload(MultipartFile file, String type, String format,
-    // Long morceauId, Long utilisateurId)
-    // throws IOException {
-
-    // Files.createDirectories(Paths.get(UPLOAD_DIR));
-
-    // String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-    // Path filePath = Paths.get(UPLOAD_DIR, fileName);
-    // Files.copy(file.getInputStream(), filePath);
-
-    // Morceau morceau = morceauRepository.findById(morceauId)
-    // .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID : " +
-    // morceauId));
-
-    // Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
-    // .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID : "
-    // + utilisateurId));
-
-    // Document document = new Document();
-    // document.setType(type);
-    // document.setFormat(format);
-    // document.setDateAjout(LocalDate.now());
-    // document.setUrlFichier("/" + UPLOAD_DIR + fileName);
-    // document.setMorceau(morceau);
-    // document.setUtilisateur(utilisateur);
-
-    // Document saved = documentRepository.save(document);
-    // return documentMapper.toDto(saved);
-    // }
-
     public DocumentDto upload(MultipartFile file, String type, String format, Long morceauId, Long utilisateurId)
             throws IOException {
 
@@ -220,30 +190,12 @@ public class DocumentService {
                 .collect(Collectors.toList());
     }
 
-    // // Méthode DELETE ajoutée correctement ici
-    // public void delete(Long id) {
-    // if (!documentRepository.existsById(id)) {
-    // throw new EntityNotFoundException("Document not found with id: " + id);
-    // }
-    // documentRepository.deleteById(id);
-    // }
-
-    public void delete(Long documentId, Long utilisateurId) {
+    public void delete(Long documentId) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new EntityNotFoundException("Document not found with id: " + documentId));
 
-        if (!document.getUtilisateur().getId().equals(utilisateurId)) {
-            throw new AccessDeniedException("Vous n'avez pas le droit de supprimer ce document");
-        }
-
         documentRepository.delete(document);
     }
-
-    // public void addInstrument(Long documentId, Long instrumentId) {
-    // // TODO Auto-generated method stub
-    // throw new UnsupportedOperationException("Unimplemented method
-    // 'addInstrument'");
-    // }
 
     public List<InstrumentDto> getInstrumentsByDocument(Long documentId) {
         // TODO Auto-generated method stub

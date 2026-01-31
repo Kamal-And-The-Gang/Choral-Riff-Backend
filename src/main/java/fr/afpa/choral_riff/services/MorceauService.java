@@ -114,10 +114,8 @@ public class MorceauService {
         Morceau saved = morceauRepository.save(morceau);
 
         // --- Notification (optionnel selon ton besoin) ---
-        notificationService.notifyMorceauAjoute(
-                createur,
-                ensemble,
-                saved.getTitre());
+        notificationService.notifyMorceauAjoute(saved);
+
 
         // --- Retourner le DTO pour le front ---
         return morceauMapper.toDto(saved);
