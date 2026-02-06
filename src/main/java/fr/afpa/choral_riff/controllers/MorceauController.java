@@ -5,7 +5,7 @@ import fr.afpa.choral_riff.services.MorceauService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
+// import java.security.Principal;
 import java.util.List;
 
 /**

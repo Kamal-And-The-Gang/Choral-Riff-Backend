@@ -4,7 +4,7 @@ import fr.afpa.choral_riff.dto.NotificationDto;
 import fr.afpa.choral_riff.entity.Notification;
 import fr.afpa.choral_riff.entity.NotificationType;
 import org.springframework.stereotype.Component;
-import java.time.LocalDateTime;
+
 
 @Component
 public class NotificationMapper {

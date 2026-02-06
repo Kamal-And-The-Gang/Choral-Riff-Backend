@@ -77,7 +77,7 @@ public class UtilisateurController {
         // Rattacher l'utilisateur à l'invitation si token présent
         String token = dto.getToken();
         if (token != null && !token.isEmpty()) {
-            // 🔹 Correction : récupérer l'invitation et passer l'utilisateur et
+            //  Correction : récupérer l'invitation et passer l'utilisateur et
             // l'invitation
             Invitation invitation = invitationService.getByTokenEntity(token);
             invitationService.rattacherUtilisateurApresInscription(nouvelUtilisateur, invitation);

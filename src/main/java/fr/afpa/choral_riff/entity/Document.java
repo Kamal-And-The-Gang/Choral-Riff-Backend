@@ -47,6 +47,9 @@ public class Document {
     @OneToMany(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<DocumentInstrument> documentInstruments = new HashSet<>();
 
+    @Column(name = "est_original", nullable = false)
+    private boolean original;
+
     /** Constructeur par défaut. */
     public Document() {
     }
@@ -63,13 +66,22 @@ public class Document {
      */
 
     public Document(String type, String format, LocalDate dateAjout, String urlFichier,
-            Utilisateur utilisateur, Morceau morceau) {
+            Utilisateur utilisateur, Morceau morceau, boolean original) {
         this.type = type;
         this.format = format;
         this.dateAjout = dateAjout;
         this.urlFichier = urlFichier;
         this.utilisateur = utilisateur;
         this.morceau = morceau;
+        this.original = original;
+    }
+
+    public boolean isOriginal() {
+        return original;
+    }
+
+    public void setOriginal(boolean original) {
+        this.original = original;
     }
 
     // Getters et Setters
