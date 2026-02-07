@@ -133,4 +133,22 @@ public class Invitation {
         this.dateExpiration = dateExpiration;
     }
 
+    // Champ pour savoir si le token a déjà été utilisé
+    private LocalDateTime dateUtilisation;
+
+    // Méthode utilitaire simple (optionnel mais pratique)
+    public boolean isUsed() {
+        return dateUtilisation != null;
+    }
+
+
+    public LocalDateTime getDateUtilisation() {
+    return dateUtilisation;
+}
+
+public void setDateUtilisation(LocalDateTime dateUtilisation) {
+    this.dateUtilisation = dateUtilisation;
+}
+
+
 }

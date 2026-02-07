@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -151,7 +151,9 @@ public class UtilisateurService {
                 .orElseThrow(() -> new RuntimeException("Utilisateur de test non trouvé"));
     }
 
-    public UtilisateurDto updatePhotoProfil(@RequestParam("photoProfil") MultipartFile file) {
+    // public UtilisateurDto updatePhotoProfil(@RequestParam("photoProfil") MultipartFile file) {
+    public UtilisateurDto updatePhotoProfil(MultipartFile file){
+
         Utilisateur utilisateur = getCurrentUser();
         if (file == null || file.isEmpty())
             throw new RuntimeException("Fichier vide");

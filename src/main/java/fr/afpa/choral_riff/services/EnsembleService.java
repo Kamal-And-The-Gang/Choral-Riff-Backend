@@ -242,6 +242,46 @@ public class EnsembleService {
                 .orElse(false);
     }
 
+    // @Transactional
+    // public void delete(Long ensembleId, Long userId) {
+    // if (!hasRights(userId, ensembleId)) {
+    // throw new RuntimeException("Vous n'avez pas les droits pour supprimer cet
+    // ensemble");
+    // }
+
+    // Ensemble ensemble = ensembleRepository.findById(ensembleId)
+    // .orElseThrow(() -> new EntityNotFoundException(
+    // "Impossible de supprimer : ensemble avec ID " + ensembleId + "
+    // introuvable"));
+
+    // // Vider explicitement les collections (optionnel)
+    // ensemble.getInvitations().clear();
+    // ensemble.getMorceaux().clear();
+    // ensemble.getUtilisateurEnsembles().clear();
+
+    // ensembleRepository.delete(ensemble);
+    // }
+
+    // @Transactional
+    // public void delete(Long ensembleId, Long userId) {
+    // if (!hasRights(userId, ensembleId)) {
+    // throw new RuntimeException("Vous n'avez pas les droits pour supprimer cet
+    // ensemble");
+    // }
+
+    // // Supprime les relations utilisateur-ensemble
+    // utilisateurEnsembleRepository.deleteByEnsemble_Id(ensembleId);
+
+    // // Supprime les morceaux
+    // morceauRepository.deleteByEnsembleId(ensembleId);
+
+    // // Supprime les invitations
+    // invitationRepository.deleteByEnsembleId(ensembleId);
+
+    // // Supprime l'ensemble lui-même
+    // ensembleRepository.deleteById(ensembleId);
+    // }
+
     @Transactional
     public void delete(Long ensembleId, Long userId) {
         if (!hasRights(userId, ensembleId)) {
@@ -249,14 +289,9 @@ public class EnsembleService {
         }
 
         Ensemble ensemble = ensembleRepository.findById(ensembleId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Impossible de supprimer : ensemble avec ID " + ensembleId + " introuvable"));
+                .orElseThrow(() -> new RuntimeException("Ensemble non trouvé"));
 
-        // Vider explicitement les collections (optionnel)
-        ensemble.getInvitations().clear();
-        ensemble.getMorceaux().clear();
-        ensemble.getUtilisateurEnsembles().clear();
-
+        // Hibernate supprime tout ce qui est lié grâce aux cascades
         ensembleRepository.delete(ensemble);
     }
 

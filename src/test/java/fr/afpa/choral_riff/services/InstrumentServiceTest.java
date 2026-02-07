@@ -1,164 +1,194 @@
-// package fr.afpa.choral_riff.services;
+package fr.afpa.choral_riff.services;
 
-// import fr.afpa.choral_riff.dto.InstrumentDto;
-// import fr.afpa.choral_riff.entity.Ensemble;
-// import fr.afpa.choral_riff.entity.Instrument;
-// import fr.afpa.choral_riff.mapper.InstrumentMapper;
-// import fr.afpa.choral_riff.repositories.EnsembleRepository;
-// import fr.afpa.choral_riff.repositories.InstrumentRepository;
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.Test;
+import fr.afpa.choral_riff.dto.InstrumentDto;
+import fr.afpa.choral_riff.entity.Document;
+import fr.afpa.choral_riff.entity.Instrument;
+import fr.afpa.choral_riff.entity.Morceau;
+import fr.afpa.choral_riff.entity.Ensemble;
+import fr.afpa.choral_riff.mapper.InstrumentMapper;
+import fr.afpa.choral_riff.repositories.DocumentRepository;
+import fr.afpa.choral_riff.repositories.InstrumentRepository;
+import fr.afpa.choral_riff.repositories.MorceauRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-// import java.util.List;
-// import java.util.Optional;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-// import static org.junit.jupiter.api.Assertions.*;
-// import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-// public class InstrumentServiceTest {
+@ExtendWith(MockitoExtension.class)
+class InstrumentServiceTest {
 
-//     private InstrumentRepository instrumentRepository;
-//     private EnsembleRepository ensembleRepository;
-//     private InstrumentMapper instrumentMapper;
-//     private InstrumentService instrumentService;
+    @Mock
+    private InstrumentRepository instrumentRepository;
 
-//     @BeforeEach
-//     public void setUp() {
-//         instrumentRepository = mock(InstrumentRepository.class);
-//         ensembleRepository = mock(EnsembleRepository.class);
-//         instrumentMapper = mock(InstrumentMapper.class);
-//         instrumentService = new InstrumentService(instrumentRepository, ensembleRepository, instrumentMapper);
-//     }
+    @Mock
+    private MorceauRepository morceauRepository;
 
-//     @Test
-//     public void testGetAll() {
-//         Instrument instrument = new Instrument();
-//         instrument.setId(1L);
-//         instrument.setNom("Guitare");
+    @Mock
+    private DocumentRepository documentRepository;
 
-//         InstrumentDto dto = new InstrumentDto(1L, "Guitare", null);
+    @Mock
+    private InstrumentMapper instrumentMapper;
 
-//         when(instrumentRepository.findAll()).thenReturn(List.of(instrument));
-//         when(instrumentMapper.toDto(instrument)).thenReturn(dto);
+    @Mock
+    private UtilisateurEnsembleService utilisateurEnsembleService;
 
-//         List<InstrumentDto> result = instrumentService.getAll();
+    @InjectMocks
+    private InstrumentService instrumentService;
 
-//         assertEquals(1, result.size());
-//         assertEquals("Guitare", result.get(0).nom());
-//         verify(instrumentRepository).findAll();
-//         verify(instrumentMapper).toDto(instrument);
-//     }
+    private Instrument instrument;
+    private Morceau morceau;
+    private Document document;
+    private Ensemble ensemble;
+    private InstrumentDto instrumentDto;
 
-//     @Test
-//     public void testGetById_Found() {
-//         Instrument instrument = new Instrument();
-//         instrument.setId(2L);
-//         instrument.setNom("Piano");
+    @BeforeEach
+    void setUp() {
+        // Création de l'ensemble
+        ensemble = new Ensemble();
+        ensemble.setId(100L);
 
-//         InstrumentDto dto = new InstrumentDto(2L, "Piano", null);
+        // Création du morceau
+        morceau = new Morceau();
+        morceau.setId(10L);
+        morceau.setEnsemble(ensemble);
 
-//         when(instrumentRepository.findById(2L)).thenReturn(Optional.of(instrument));
-//         when(instrumentMapper.toDto(instrument)).thenReturn(dto);
+        // Création du document
+        document = new Document();
+        document.setId(1L);
+        document.setMorceau(morceau);
 
-//         InstrumentDto result = instrumentService.getById(2L);
+        // Création de l’instrument
+        instrument = new Instrument();
+        instrument.setId(5L);
+        instrument.setNom("Piano");
 
-//         assertNotNull(result);
-//         assertEquals(2L, result.id());
-//         assertEquals("Piano", result.nom());
-//     }
+        // Simuler relation Many-to-Many via getDocuments()
+        Set<Document> docs = new HashSet<>();
+        docs.add(document);
+        instrument = spy(instrument);
+        lenient().doReturn(docs).when(instrument).getDocuments();
 
-//     @Test
-//     public void testGetById_NotFound() {
-//         when(instrumentRepository.findById(99L)).thenReturn(Optional.empty());
+        // DTO correspondant
+        instrumentDto = new InstrumentDto(5L, "Piano", Set.of(1L));
 
-//         RuntimeException exception = assertThrows(RuntimeException.class, () -> instrumentService.getById(99L));
-//         assertTrue(exception.getMessage().contains("Instrument non trouvé"));
-//     }
+        // Mapper stubs
+        lenient().when(instrumentMapper.toDto(any(Instrument.class))).thenAnswer(invocation -> {
+            Instrument inst = invocation.getArgument(0);
+            Set<Long> documentIds = new HashSet<>();
+            if (inst.getDocuments() != null) {
+                inst.getDocuments().forEach(d -> documentIds.add(d.getId()));
+            }
+            return new InstrumentDto(inst.getId(), inst.getNom(), documentIds);
+        });
 
-//     @Test
-//     public void testCreate_WithEnsemble() {
-//         InstrumentDto dto = new InstrumentDto(null, "Violoncelle", null);
-//         Ensemble ensemble = new Ensemble();
-//         ensemble.setId(5L);
+        lenient().doAnswer(invocation -> {
+            InstrumentDto dto = invocation.getArgument(0);
+            Instrument inst = invocation.getArgument(1);
+            inst.setNom(dto.nom());
+            return null;
+        }).when(instrumentMapper).updateEntityFromDto(any(InstrumentDto.class), any(Instrument.class));
+    }
 
-//         Instrument instrumentEntity = new Instrument();
-//         Instrument savedInstrument = new Instrument();
-//         savedInstrument.setId(10L);
-//         savedInstrument.setNom("Violoncelle");
-//         savedInstrument.setEnsemble(ensemble);
+    @Test
+    void shouldReturnAllInstruments() {
+        when(instrumentRepository.findAll()).thenReturn(List.of(instrument));
 
-//         InstrumentDto savedDto = new InstrumentDto(10L, "Violoncelle", null);
+        List<InstrumentDto> result = instrumentService.getAll();
 
-//         when(instrumentMapper.toEntity(dto)).thenReturn(instrumentEntity);
-//         when(ensembleRepository.findById(5L)).thenReturn(Optional.of(ensemble));
-//         when(instrumentRepository.save(any(Instrument.class))).thenReturn(savedInstrument);
-//         when(instrumentMapper.toDto(savedInstrument)).thenReturn(savedDto);
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Piano", result.get(0).nom());
+    }
 
-//         InstrumentDto result = instrumentService.create(dto, 5L);
+    @Test
+    void shouldReturnInstrumentById() {
+        when(instrumentRepository.findById(5L)).thenReturn(Optional.of(instrument));
 
-//         assertNotNull(result);
-//         assertEquals(10L, result.id());
-//         assertEquals("Violoncelle", result.nom());
-//         verify(instrumentMapper).toEntity(dto);
-//         verify(ensembleRepository).findById(5L);
-//         verify(instrumentRepository).save(any());
-//         verify(instrumentMapper).toDto(savedInstrument);
-//     }
+        InstrumentDto dto = instrumentService.getById(5L);
 
-//     @Test
-//     public void testUpdate_WithEnsemble() {
-//         InstrumentDto dto = new InstrumentDto(null, "Flûte traversière", null);
-//         Ensemble ensemble = new Ensemble();
-//         ensemble.setId(7L);
+        assertNotNull(dto);
+        assertEquals("Piano", dto.nom());
+    }
 
-//         Instrument existingInstrument = new Instrument();
-//         existingInstrument.setId(20L);
-//         existingInstrument.setNom("Flûte");
+    @Test
+    void shouldThrowWhenInstrumentNotFound() {
+        when(instrumentRepository.findById(99L)).thenReturn(Optional.empty());
 
-//         Instrument updatedInstrument = new Instrument();
-//         updatedInstrument.setId(20L);
-//         updatedInstrument.setNom("Flûte traversière");
-//         updatedInstrument.setEnsemble(ensemble);
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> instrumentService.getById(99L));
+        assertEquals("Instrument non trouvé avec l'ID: 99", exception.getMessage());
+    }
 
-//         InstrumentDto updatedDto = new InstrumentDto(20L, "Flûte traversière", null);
+    @Test
+    void shouldDeleteInstrument() {
+        when(instrumentRepository.existsById(5L)).thenReturn(true);
 
-//         when(instrumentRepository.findById(20L)).thenReturn(Optional.of(existingInstrument));
-//         doNothing().when(instrumentMapper).updateEntityFromDto(dto, existingInstrument);
-//         when(ensembleRepository.findById(7L)).thenReturn(Optional.of(ensemble));
-//         when(instrumentRepository.save(existingInstrument)).thenReturn(updatedInstrument);
-//         when(instrumentMapper.toDto(updatedInstrument)).thenReturn(updatedDto);
+        instrumentService.delete(5L);
 
-//         InstrumentDto result = instrumentService.update(20L, dto, 7L);
+        verify(instrumentRepository).deleteById(5L);
+    }
 
-//         assertNotNull(result);
-//         assertEquals(20L, result.id());
-//         assertEquals("Flûte traversière", result.nom());
-//         verify(instrumentRepository).findById(20L);
-//         verify(instrumentMapper).updateEntityFromDto(dto, existingInstrument);
-//         verify(ensembleRepository).findById(7L);
-//         verify(instrumentRepository).save(existingInstrument);
-//         verify(instrumentMapper).toDto(updatedInstrument);
-//     }
+    @Test
+    void shouldThrowWhenDeletingNonExistingInstrument() {
+        when(instrumentRepository.existsById(99L)).thenReturn(false);
 
-//     @Test
-//     public void testDelete_Exists() {
-//         when(instrumentRepository.existsById(15L)).thenReturn(true);
-//         doNothing().when(instrumentRepository).deleteById(15L);
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> instrumentService.delete(99L));
+        assertEquals("Instrument non trouvé avec l'ID: 99", exception.getMessage());
+    }
 
-//         instrumentService.delete(15L);
+    @Test
+    void shouldAddInstrumentToMorceau() {
+        when(morceauRepository.findById(10L)).thenReturn(Optional.of(morceau));
+        when(instrumentRepository.findById(5L)).thenReturn(Optional.of(instrument));
 
-//         verify(instrumentRepository).existsById(15L);
-//         verify(instrumentRepository).deleteById(15L);
-//     }
+        InstrumentDto dto = instrumentService.addInstrumentToMorceau(10L, 5L);
 
-//     @Test
-//     public void testDelete_NotExists() {
-//         when(instrumentRepository.existsById(999L)).thenReturn(false);
+        assertNotNull(dto);
+        assertEquals("Piano", dto.nom());
+    }
 
-//         RuntimeException exception = assertThrows(RuntimeException.class, () -> instrumentService.delete(999L));
-//         assertTrue(exception.getMessage().contains("Instrument non trouvé"));
+    @Test
+    void shouldUpdateInstrumentWithoutRightsCheck() {
+        when(instrumentRepository.findById(5L)).thenReturn(Optional.of(instrument));
+        when(instrumentRepository.save(any())).thenReturn(instrument);
 
-//         verify(instrumentRepository).existsById(999L);
-//         verify(instrumentRepository, never()).deleteById(anyLong());
-//     }
-// }
+        InstrumentDto dto = instrumentService.update(5L, instrumentDto);
+
+        assertNotNull(dto);
+        assertEquals("Piano", dto.nom());
+        verify(instrumentRepository).save(instrument);
+    }
+
+    @Test
+    void shouldUpdateInstrumentWithRightsCheckWhenAuthorized() {
+        when(instrumentRepository.findById(5L)).thenReturn(Optional.of(instrument));
+        when(instrumentRepository.save(any())).thenReturn(instrument);
+        when(utilisateurEnsembleService.utilisateurAutorise(1L, 100L, List.of("ADMIN", "MODERATEUR"))).thenReturn(true);
+
+        InstrumentDto dto = instrumentService.update(1L, 5L, instrumentDto);
+
+        assertNotNull(dto);
+        assertEquals("Piano", dto.nom());
+    }
+
+    @Test
+    void shouldThrowUpdateInstrumentWithRightsCheckWhenNotAuthorized() {
+        when(instrumentRepository.findById(5L)).thenReturn(Optional.of(instrument));
+        when(utilisateurEnsembleService.utilisateurAutorise(1L, 100L, List.of("ADMIN", "MODERATEUR"))).thenReturn(false);
+
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> instrumentService.update(1L, 5L, instrumentDto));
+        assertEquals("Vous n'avez pas les droits pour modifier cet instrument", exception.getMessage());
+    }
+}

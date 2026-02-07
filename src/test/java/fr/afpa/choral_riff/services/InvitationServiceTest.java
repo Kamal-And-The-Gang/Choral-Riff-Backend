@@ -1,104 +1,185 @@
+package fr.afpa.choral_riff.services;
 
-// package fr.afpa.choral_riff.services;
+import fr.afpa.choral_riff.dto.CreateInvitationDTO;
+import fr.afpa.choral_riff.dto.InvitationDTO;
+import fr.afpa.choral_riff.entity.*;
+import fr.afpa.choral_riff.mapper.InvitationMapper;
+import fr.afpa.choral_riff.repositories.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-// import fr.afpa.choral_riff.dto.CreateInvitationDTO;
-// import fr.afpa.choral_riff.dto.InvitationDTO;
-// import fr.afpa.choral_riff.entity.Ensemble;
-// import fr.afpa.choral_riff.entity.Invitation;
-// import fr.afpa.choral_riff.mapper.CreateInvitationMapper;
-// import fr.afpa.choral_riff.mapper.InvitationMapper;
-// import fr.afpa.choral_riff.repositories.*;
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.Test;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
-// import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-// import static org.junit.jupiter.api.Assertions.*;
-// import static org.mockito.Mockito.*;
+@ExtendWith(MockitoExtension.class)
+class InvitationServiceTest {
 
-// public class InvitationServiceTest {
+    @Mock
+    private InvitationRepository invitationRepository;
 
-//         private InvitationRepository invitationRepository;
-//         private InvitationMapper invitationMapper;
-//         private EnsembleRepository ensembleRepository;
-//         private UtilisateurRepository utilisateurRepository;
-//         private MailService mailService;
-//         private CreateInvitationMapper createInvitationMapper;
-//         private UtilisateurEnsembleRepository utilisateurEnsembleRepository;
-//         private NotificationRepository notificationRepository;
-//         private NotificationService notificationService;
+    @Mock
+    private InvitationMapper invitationMapper;
 
-//         private InvitationService invitationService;
+    @Mock
+    private EnsembleRepository ensembleRepository;
 
-//         @BeforeEach
-//         public void setUp() {
-//                 invitationRepository = mock(InvitationRepository.class);
-//                 invitationMapper = mock(InvitationMapper.class);
-//                 ensembleRepository = mock(EnsembleRepository.class);
-//                 utilisateurRepository = mock(UtilisateurRepository.class);
-//                 mailService = mock(MailService.class);
-//                 createInvitationMapper = mock(CreateInvitationMapper.class);
-//                 utilisateurEnsembleRepository = mock(UtilisateurEnsembleRepository.class);
-//                 notificationRepository = mock(NotificationRepository.class);
-//                 notificationService = mock(NotificationService.class);
+    @Mock
+    private UtilisateurRepository utilisateurRepository;
 
-//                 invitationService = new InvitationService(
-//                                 invitationRepository,
-//                                 invitationMapper,
-//                                 ensembleRepository,
-//                                 utilisateurRepository,
-//                                 mailService,
-//                                 createInvitationMapper,
-//                                 utilisateurEnsembleRepository,
-//                                 notificationRepository,
-//                                 notificationService);
-//         }
+    @Mock
+    private UtilisateurEnsembleRepository utilisateurEnsembleRepository;
 
-//         @Test
-//         public void testCreerInvitationUtilisateurExiste() {
-//                 CreateInvitationDTO dto = new CreateInvitationDTO();
-//                 dto.setEmailInvite("test@test.com");
-//                 dto.setEnsembleId(1L);
+    @Mock
+    private MailService mailService;
 
-//                 // Mock utilisateur existant
-//                 when(utilisateurRepository.findByEmail("test@test.com"))
-//                                 .thenReturn(Optional.of(new fr.afpa.choral_riff.entity.Utilisateur()));
+    @Mock
+    private NotificationService notificationService;
 
-//                 InvitationDTO result = invitationService.creerInvitation(dto);
+    @Mock
+    private NotificationRepository notificationRepository;
 
-//                 assertTrue(result.isExistant());
-//                 assertFalse(result.isDejaMembre());
-//         }
+    @InjectMocks
+    private InvitationService invitationService;
 
-//         @Test
-//         public void testCreerInvitationUtilisateurNonExistant() {
-//                 CreateInvitationDTO dto = new CreateInvitationDTO();
-//                 dto.setEmailInvite("nouveau@test.com");
-//                 dto.setEnsembleId(1L);
+    // ==================================================
+    // Envoi d’invitation
+    // ==================================================
 
-//                 // utilisateur non existant
-//                 when(utilisateurRepository.findByEmail("nouveau@test.com"))
-//                                 .thenReturn(Optional.empty());
+    @Test
+    void envoyerInvitation_utilisateurDejaMembre_aucunEmailEnvoye() {
+        CreateInvitationDTO dto = new CreateInvitationDTO();
+        dto.setEmailInvite("test@mail.com");
+        dto.setEnsembleId(1L);
 
-//                 Ensemble ensemble = new Ensemble();
-//                 ensemble.setId(1L);
-//                 ensemble.setNom("Chorale");
+        Utilisateur utilisateur = new Utilisateur();
+        utilisateur.setId(10L);
 
-//                 when(ensembleRepository.findById(1L))
-//                                 .thenReturn(Optional.of(ensemble));
+        when(utilisateurRepository.findByEmail("test@mail.com"))
+                .thenReturn(Optional.of(utilisateur));
 
-//                 Invitation invitation = new Invitation();
-//                 invitation.setEmailInvite("nouveau@test.com");
-//                 invitation.setEnsemble(ensemble);
+        when(utilisateurEnsembleRepository
+                .existsByUtilisateurIdAndEnsembleId(10L, 1L))
+                .thenReturn(true);
 
-//                 when(invitationRepository.save(any(Invitation.class)))
-//                                 .thenReturn(invitation);
+        InvitationDTO result = invitationService.creerInvitation(dto);
 
-//                 when(invitationMapper.toDto(any(Invitation.class)))
-//                                 .thenReturn(new InvitationDTO());
+        assertTrue(result.isExistant());
+        assertTrue(result.isDejaMembre());
+        assertEquals(10L, result.getUtilisateurId());
 
-//                 InvitationDTO result = invitationService.creerInvitation(dto);
+        verify(invitationRepository, never()).save(any());
+        verify(mailService, never()).sendInvitationEmail(any(), any());
+    }
 
-//                 assertNotNull(result);
-//         }
-// }
+    @Test
+    void envoyerInvitation_nouvelEmail_invitationCreeeEtEmailEnvoye() {
+        CreateInvitationDTO dto = new CreateInvitationDTO();
+        dto.setEmailInvite("new@mail.com");
+        dto.setEnsembleId(1L);
+
+        Ensemble ensemble = new Ensemble();
+        ensemble.setId(1L);
+
+        Invitation invitationSauvegardee = new Invitation();
+        invitationSauvegardee.setId(100L);
+        invitationSauvegardee.setEmailInvite("new@mail.com");
+        invitationSauvegardee.setEnsemble(ensemble);
+
+        InvitationDTO dtoRetour = new InvitationDTO();
+        dtoRetour.setEmailInvite("new@mail.com");
+
+        when(utilisateurRepository.findByEmail("new@mail.com"))
+                .thenReturn(Optional.empty());
+
+        when(ensembleRepository.findById(1L))
+                .thenReturn(Optional.of(ensemble));
+
+        when(invitationRepository.save(any(Invitation.class)))
+                .thenReturn(invitationSauvegardee);
+
+        when(invitationMapper.toDto(any(Invitation.class)))
+                .thenReturn(dtoRetour);
+
+        InvitationDTO result = invitationService.creerInvitation(dto);
+
+        assertNotNull(result);
+        assertEquals("new@mail.com", result.getEmailInvite());
+
+        verify(invitationRepository).save(any());
+        verify(mailService).sendInvitationEmail(eq("new@mail.com"), anyString());
+    }
+
+    // ==================================================
+    // Clic sur lien d’invitation
+    // ==================================================
+
+    @Test
+    void clicLienInvitation_valide_rattacheUtilisateurALensemble() {
+        Utilisateur utilisateur = new Utilisateur();
+        utilisateur.setId(5L);
+
+        Ensemble ensemble = new Ensemble();
+        ensemble.setId(2L);
+        ensemble.setNom("Chorale Test");
+
+        Invitation invitation = new Invitation();
+        invitation.setId(42L);
+        invitation.setEmailInvite("user@mail.com");
+        invitation.setEnsemble(ensemble);
+        invitation.setDateExpiration(LocalDateTime.now().plusDays(1));
+
+        InvitationDTO dto = new InvitationDTO();
+
+        when(utilisateurRepository.findByEmail("user@mail.com"))
+                .thenReturn(Optional.of(utilisateur));
+
+        when(utilisateurEnsembleRepository
+                .existsByUtilisateurIdAndEnsembleId(5L, 2L))
+                .thenReturn(false);
+
+        when(invitationMapper.toDto(any(Invitation.class)))
+                .thenReturn(dto);
+
+        InvitationDTO result =
+                invitationService.rattacherUtilisateurApresInscription(utilisateur, invitation);
+
+        assertNotNull(result);
+        assertNotNull(invitation.getDateUtilisation());
+        assertEquals(StatusInvitation.ACCEPTEE, invitation.getEtat());
+
+        verify(notificationService).createNotification(
+                eq(5L),
+                eq("INVITATION"),
+                contains("Chorale Test"),
+                eq(42L)
+        );
+
+        verify(utilisateurEnsembleRepository)
+                .saveAndFlush(any(UtilisateurEnsemble.class));
+    }
+
+    @Test
+    void clicLienInvitation_dejaUtilise_refuseLeRattachement() {
+        Invitation invitation = new Invitation();
+        invitation.setDateUtilisation(LocalDateTime.now());
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> invitationService.rattacherUtilisateurApresInscription(
+                        new Utilisateur(),
+                        invitation
+                )
+        );
+
+        assertEquals("Cette invitation a déjà été utilisée.", exception.getMessage());
+
+        verifyNoInteractions(notificationService);
+        verify(utilisateurEnsembleRepository, never()).saveAndFlush(any());
+    }
+}

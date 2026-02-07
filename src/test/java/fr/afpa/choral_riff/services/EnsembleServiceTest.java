@@ -1,163 +1,214 @@
-// package fr.afpa.choral_riff.services;
+package fr.afpa.choral_riff.services;
 
-// import fr.afpa.choral_riff.dto.EnsembleDto;
-// import fr.afpa.choral_riff.entity.Ensemble;
-// import fr.afpa.choral_riff.mapper.EnsembleMapper;
-// import fr.afpa.choral_riff.repositories.EnsembleRepository;
-// import jakarta.persistence.EntityNotFoundException;
-// import org.junit.jupiter.api.BeforeEach;
-// import org.junit.jupiter.api.Test;
-// import org.mockito.*;
+import fr.afpa.choral_riff.dto.EnsembleDto;
+import fr.afpa.choral_riff.entity.Ensemble;
+import fr.afpa.choral_riff.entity.Role;
+import fr.afpa.choral_riff.entity.TypeEnsemble;
+import fr.afpa.choral_riff.entity.Utilisateur;
+import fr.afpa.choral_riff.entity.UtilisateurEnsemble;
+import fr.afpa.choral_riff.mapper.EnsembleMapper;
+import fr.afpa.choral_riff.repositories.EnsembleRepository;
+import fr.afpa.choral_riff.repositories.InvitationRepository;
+import fr.afpa.choral_riff.repositories.MorceauRepository;
+import fr.afpa.choral_riff.repositories.NotificationRepository;
+import fr.afpa.choral_riff.repositories.UtilisateurEnsembleRepository;
+import fr.afpa.choral_riff.repositories.UtilisateurRepository;
+import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-// import java.util.List;
-// import java.util.Optional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 
-// import static org.junit.jupiter.api.Assertions.*;
-// import static org.mockito.ArgumentMatchers.anyLong;
-// import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-// class EnsembleServiceTest {
+@ExtendWith(MockitoExtension.class)
+class EnsembleServiceTest {
 
-//     @Mock
-//     private EnsembleRepository ensembleRepository;
+    @Mock
+    private EnsembleRepository ensembleRepository;
 
-//     @Mock
-//     private EnsembleMapper ensembleMapper;
+    @Mock
+    private UtilisateurRepository utilisateurRepository;
 
-//     @InjectMocks
-//     private EnsembleService ensembleService;
+    @Mock
+    private UtilisateurEnsembleRepository utilisateurEnsembleRepository;
 
-//     private Ensemble ensembleEntity;
-//     private EnsembleDto ensembleDto;
+    @Mock
+    private EnsembleMapper ensembleMapper;
 
-//     @BeforeEach
-//     void setUp() {
-//         MockitoAnnotations.openMocks(this);
+    @Mock
+    private NotificationRepository notificationRepository;
 
-//         // Exemple d'entité et DTO
-//         ensembleEntity = new Ensemble();
-//         ensembleEntity.setId(1L);
-//         ensembleEntity.setNom("Ensemble Test");
+    @Mock
+    private InvitationRepository invitationRepository;
 
-//         // DTO avec record(pas de setters)
-//         ensembleDto = new EnsembleDto(1L, "Ensemble Test", null, null);
-//     }
+    @Mock
+    private MorceauRepository morceauRepository;
 
-//     @Test
-//     void testGetAll() {
-//         when(ensembleRepository.findAll()).thenReturn(List.of(ensembleEntity));
-//         when(ensembleMapper.toDto(ensembleEntity)).thenReturn(ensembleDto);
+    @InjectMocks
+    private EnsembleService ensembleService;
 
-//         List<EnsembleDto> result = ensembleService.getAll();
+    private Utilisateur utilisateur;
+    private Ensemble ensemble;
+    private EnsembleDto ensembleDto;
 
-//         assertNotNull(result);
-//         assertEquals(1, result.size());
-//         assertEquals("Ensemble Test", result.get(0).getNom());
+    @BeforeEach
+    void setUp() {
+        utilisateur = new Utilisateur();
+        utilisateur.setId(1L);
+        utilisateur.setNom("Dupont");
+        utilisateur.setPrenom("Jean");
 
-//         verify(ensembleRepository, times(1)).findAll();
-//         verify(ensembleMapper, times(1)).toDto(ensembleEntity);
-//     }
+        ensemble = new Ensemble();
+        ensemble.setId(10L);
+        ensemble.setNom("Chorale test");
+        ensemble.setDescription("Description test");
+        ensemble.setTypeEnsemble(TypeEnsemble.CHOEUR);
+        ensemble.setDateCreation(LocalDate.now());
+        ensemble.setUtilisateurEnsembles(new HashSet<>());
 
-//     @Test
-//     void testCreate() {
-//         Long userId = 42L; // exemple d'utilisateur
+        ensembleDto = new EnsembleDto();
+        ensembleDto.setId(10L);
+        ensembleDto.setNom("Chorale test");
+        ensembleDto.setDescription("Description test");
+        ensembleDto.setTypeEnsemble(TypeEnsemble.CHOEUR);
+        ensembleDto.setDateCreation(LocalDate.now());
+        ensembleDto.setUserRole(null);
+        ensembleDto.setIsCreator(false);
+    }
 
-//         when(ensembleMapper.toEntity(ensembleDto)).thenReturn(ensembleEntity);
-//         when(ensembleRepository.save(ensembleEntity)).thenReturn(ensembleEntity);
-//         when(ensembleMapper.toDto(ensembleEntity)).thenReturn(ensembleDto);
+    @Test
+    void shouldCreateEnsembleWhenCreatorExists() {
+        when(ensembleMapper.toEntity(ensembleDto)).thenReturn(ensemble);
+        when(utilisateurRepository.findById(1L)).thenReturn(Optional.of(utilisateur));
+        when(ensembleRepository.save(any(Ensemble.class))).thenReturn(ensemble);
+        when(ensembleMapper.toDto(ensemble, 1L)).thenReturn(ensembleDto);
 
-//         EnsembleDto result = ensembleService.create(ensembleDto, userId);
+        EnsembleDto result = ensembleService.create(ensembleDto, 1L);
 
-//         assertNotNull(result);
-//         assertEquals(ensembleDto.getNom(), result.getNom());
+        assertNotNull(result);
+        verify(utilisateurRepository).findById(1L);
+        verify(ensembleRepository).save(ensemble);
+        verify(ensembleMapper).toDto(ensemble, 1L);
+    }
 
-//         verify(ensembleMapper).toEntity(ensembleDto);
-//         verify(ensembleRepository).save(ensembleEntity);
-//         verify(ensembleMapper).toDto(ensembleEntity);
-//     }
+    @Test
+    void shouldThrowExceptionWhenCreatorNotFound() {
+        when(utilisateurRepository.findById(1L)).thenReturn(Optional.empty());
 
-//     @Test
-//     void testGetByIdFound() {
-//         when(ensembleRepository.findById(1L)).thenReturn(Optional.of(ensembleEntity));
-//         when(ensembleMapper.toDto(ensembleEntity)).thenReturn(ensembleDto);
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> ensembleService.create(ensembleDto, 1L));
 
-//         EnsembleDto result = ensembleService.getById(1L);
+        assertEquals("Création ensemble - id créateur non retrouvé", exception.getMessage());
+    }
 
-//         assertNotNull(result);
-//         assertEquals("Ensemble Test", result.getNom());
+    @Test
+    void shouldReturnEnsembleDtoWithUserRoleAndCreatorFlag() {
+        UtilisateurEnsemble utilisateurEnsemble = new UtilisateurEnsemble(
+                utilisateur,
+                ensemble,
+                Role.ADMIN,
+                LocalDateTime.now()
+        );
+        utilisateurEnsemble.setCreator(true);
 
-//         verify(ensembleRepository).findById(1L);
-//         verify(ensembleMapper).toDto(ensembleEntity);
-//     }
+        when(ensembleRepository.findById(10L)).thenReturn(Optional.of(ensemble));
+        when(ensembleMapper.toDto(ensemble, 1L)).thenReturn(ensembleDto);
+        when(utilisateurEnsembleRepository.findByUtilisateur_IdAndEnsemble_Id(1L, 10L))
+                .thenReturn(Optional.of(utilisateurEnsemble));
 
-//     @Test
-//     void testGetByIdNotFound() {
-//         when(ensembleRepository.findById(1L)).thenReturn(Optional.empty());
+        EnsembleDto result = ensembleService.getById(10L, 1L);
 
-//         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-//                 () -> ensembleService.getById(1L));
+        assertEquals("ADMIN", result.getUserRole());
+        assertTrue(result.isCreator());
+    }
 
-//         assertEquals("Ensemble non trouvé avec l’ID : 1", exception.getMessage());
+    @Test
+    void shouldThrowExceptionWhenEnsembleNotFound() {
+        when(ensembleRepository.findById(99L)).thenReturn(Optional.empty());
 
-//         verify(ensembleRepository).findById(1L);
-//         verifyNoMoreInteractions(ensembleMapper);
-//     }
+        assertThrows(EntityNotFoundException.class,
+                () -> ensembleService.getById(99L, 1L));
+    }
 
-//     @Test
-//     void testUpdateSuccess() {
-//         when(ensembleRepository.findById(1L)).thenReturn(Optional.of(ensembleEntity));
+    @Test
+    void shouldUpdateEnsembleWhenUserHasRights() {
+        when(ensembleRepository.findById(10L)).thenReturn(Optional.of(ensemble));
+        when(utilisateurEnsembleRepository.findByUtilisateur_IdAndEnsemble_Id(1L, 10L))
+                .thenReturn(Optional.of(new UtilisateurEnsemble(
+                        utilisateur, ensemble, Role.ADMIN, LocalDateTime.now()
+                )));
+        when(ensembleRepository.save(any(Ensemble.class))).thenReturn(ensemble);
+        when(ensembleMapper.toDto(ensemble, 1L)).thenReturn(ensembleDto);
 
-//         // Pas besoin de stub pour updateEntityFromDto car void, on vérifie appel
-//         doNothing().when(ensembleMapper).updateEntityFromDto(ensembleDto, ensembleEntity);
+        EnsembleDto result = ensembleService.update(10L, ensembleDto, 1L);
 
-//         when(ensembleRepository.save(ensembleEntity)).thenReturn(ensembleEntity);
-//         when(ensembleMapper.toDto(ensembleEntity)).thenReturn(ensembleDto);
+        assertEquals("Chorale test", result.getNom());
+        verify(ensembleRepository).save(ensemble);
+    }
 
-//         EnsembleDto updated = ensembleService.update(1L, ensembleDto);
+    @Test
+    void shouldThrowExceptionWhenUpdatingWithoutRights() {
+        when(ensembleRepository.findById(10L)).thenReturn(Optional.of(ensemble));
+        when(utilisateurEnsembleRepository.findByUtilisateur_IdAndEnsemble_Id(1L, 10L))
+                .thenReturn(Optional.empty());
 
-//         assertNotNull(updated);
-//         assertEquals("Ensemble Test", updated.getNom());
+        assertThrows(RuntimeException.class,
+                () -> ensembleService.update(10L, ensembleDto, 1L));
+    }
 
-//         verify(ensembleRepository).findById(1L);
-//         verify(ensembleMapper).updateEntityFromDto(ensembleDto, ensembleEntity);
-//         verify(ensembleRepository).save(ensembleEntity);
-//         verify(ensembleMapper).toDto(ensembleEntity);
-//     }
+    @Test
+    void shouldDeleteEnsembleWhenUserHasRights() {
+        UtilisateurEnsemble ue = new UtilisateurEnsemble(
+                utilisateur,
+                ensemble,
+                Role.ADMIN,
+                LocalDateTime.now()
+        );
+        ue.setCreator(true);
 
-//     @Test
-//     void testUpdateNotFound() {
-//         when(ensembleRepository.findById(1L)).thenReturn(Optional.empty());
+        when(utilisateurEnsembleRepository.findByUtilisateur_IdAndEnsemble_Id(1L, 10L))
+                .thenReturn(Optional.of(ue));
+        when(ensembleRepository.findById(10L)).thenReturn(Optional.of(ensemble));
 
-//         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-//                 () -> ensembleService.update(1L, ensembleDto));
+        ensembleService.delete(10L, 1L);
 
-//         assertEquals("Impossible de mettre à jour : ID 1 introuvable", exception.getMessage());
+        verify(ensembleRepository).delete(ensemble);
+    }
 
-//         verify(ensembleRepository).findById(1L);
-//         verifyNoMoreInteractions(ensembleMapper);
-//     }
+    @Test
+    void shouldThrowExceptionWhenDeletingWithoutRights() {
+        when(utilisateurEnsembleRepository.findByUtilisateur_IdAndEnsemble_Id(1L, 10L))
+                .thenReturn(Optional.empty());
 
-//     @Test
-//     void testDeleteSuccess() {
-//         when(ensembleRepository.existsById(1L)).thenReturn(true);
-//         doNothing().when(ensembleRepository).deleteById(1L);
+        assertThrows(RuntimeException.class,
+                () -> ensembleService.delete(10L, 1L));
+    }
 
-//         assertDoesNotThrow(() -> ensembleService.delete(1L));
+    @Test
+    void shouldReturnTrueWhenUserIsAdmin() {
+        when(utilisateurEnsembleRepository.findByUtilisateur_IdAndEnsemble_Id(1L, 10L))
+                .thenReturn(Optional.of(new UtilisateurEnsemble(
+                        utilisateur, ensemble, Role.ADMIN, LocalDateTime.now()
+                )));
 
-//         verify(ensembleRepository).existsById(1L);
-//         verify(ensembleRepository).deleteById(1L);
-//     }
+        assertTrue(ensembleService.hasRights(1L, 10L));
+    }
 
-//     @Test
-//     void testDeleteNotFound() {
-//         when(ensembleRepository.existsById(1L)).thenReturn(false);
+    @Test
+    void shouldReturnFalseWhenUserIsMember() {
+        when(utilisateurEnsembleRepository.findByUtilisateur_IdAndEnsemble_Id(1L, 10L))
+                .thenReturn(Optional.of(new UtilisateurEnsemble(
+                        utilisateur, ensemble, Role.MEMBRE, LocalDateTime.now()
+                )));
 
-//         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-//                 () -> ensembleService.delete(1L));
-
-//         assertEquals("Impossible de supprimer : ensemble avec ID 1 introuvable", exception.getMessage());
-
-//         verify(ensembleRepository).existsById(1L);
-//         verify(ensembleRepository, never()).deleteById(anyLong());
-//     }
-// }
+        assertFalse(ensembleService.hasRights(1L, 10L));
+    }
+}
