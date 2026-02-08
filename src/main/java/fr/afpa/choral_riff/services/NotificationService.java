@@ -122,7 +122,7 @@ public class NotificationService {
      */
 
     public List<NotificationDto> getNotificationsByUtilisateur(Long utilisateurId) {
-        List<Notification> notifications = notificationRepository.findByUtilisateurId(utilisateurId);
+        List<Notification> notifications = notificationRepository.findValidByUtilisateurIdWithInvitation(utilisateurId);
 
         for (Notification n : notifications) {
             System.out.println("=== NOTIFICATION ===");

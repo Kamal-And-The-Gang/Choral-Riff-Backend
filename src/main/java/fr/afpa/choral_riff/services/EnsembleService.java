@@ -1,7 +1,6 @@
 package fr.afpa.choral_riff.services;
 
 import fr.afpa.choral_riff.dto.EnsembleDto;
-
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Role;
 import fr.afpa.choral_riff.entity.TypeEnsemble;
@@ -21,6 +20,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+
 
 /**
  * Service métier pour gérer les opérations liées aux ensembles musicaux.
@@ -242,91 +243,22 @@ public class EnsembleService {
                 .orElse(false);
     }
 
-    // @Transactional
-    // public void delete(Long ensembleId, Long userId) {
-    // if (!hasRights(userId, ensembleId)) {
-    // throw new RuntimeException("Vous n'avez pas les droits pour supprimer cet
-    // ensemble");
-    // }
+    @Transactional
+    public void delete(Long ensembleId, Long userId) {
+        if (!hasRights(userId, ensembleId)) {
+            throw new RuntimeException("Vous n'avez pas les droits pour supprimer cet ensemble");
+        }
 
-    // Ensemble ensemble = ensembleRepository.findById(ensembleId)
-    // .orElseThrow(() -> new EntityNotFoundException(
-    // "Impossible de supprimer : ensemble avec ID " + ensembleId + "
-    // introuvable"));
+        Ensemble ensemble = ensembleRepository.findById(ensembleId)
+                .orElseThrow(() -> new RuntimeException("Ensemble non trouvé"));
 
-    // // Vider explicitement les collections (optionnel)
-    // ensemble.getInvitations().clear();
-    // ensemble.getMorceaux().clear();
-    // ensemble.getUtilisateurEnsembles().clear();
+        // Marquer notifications liées à l'ensemble comme invalides
+        notificationRepository.markAsInvalidByEnsembleId(ensembleId);
 
-    // ensembleRepository.delete(ensemble);
-    // }
-
-    // @Transactional
-    // public void delete(Long ensembleId, Long userId) {
-    // if (!hasRights(userId, ensembleId)) {
-    // throw new RuntimeException("Vous n'avez pas les droits pour supprimer cet
-    // ensemble");
-    // }
-
-    // // Supprime les relations utilisateur-ensemble
-    // utilisateurEnsembleRepository.deleteByEnsemble_Id(ensembleId);
-
-    // // Supprime les morceaux
-    // morceauRepository.deleteByEnsembleId(ensembleId);
-
-    // // Supprime les invitations
-    // invitationRepository.deleteByEnsembleId(ensembleId);
-
-    // // Supprime l'ensemble lui-même
-    // ensembleRepository.deleteById(ensembleId);
-    // }
-
-    // @Transactional
-    // public void delete(Long ensembleId, Long userId) {
-    //     if (!hasRights(userId, ensembleId)) {
-    //         throw new RuntimeException("Vous n'avez pas les droits pour supprimer cet ensemble");
-    //     }
-
-    //     Ensemble ensemble = ensembleRepository.findById(ensembleId)
-    //             .orElseThrow(() -> new RuntimeException("Ensemble non trouvé"));
-
-    //     // Hibernate supprime tout ce qui est lié grâce aux cascades
-    //     ensembleRepository.delete(ensemble);
-    // }
-
-
-@Transactional
-public void delete(Long ensembleId, Long userId) {
-    if (!hasRights(userId, ensembleId)) {
-        throw new RuntimeException("Vous n'avez pas les droits pour supprimer cet ensemble");
+        // Supprimer l'ensemble (Hibernate s'occupe de cascades pour morceaux →
+        // documents)
+        ensembleRepository.delete(ensemble);
     }
-
-    Ensemble ensemble = ensembleRepository.findById(ensembleId)
-            .orElseThrow(() -> new RuntimeException("Ensemble non trouvé"));
-
-    // ✅ Marquer notifications liées à l'ensemble comme invalides
-    notificationRepository.markAsInvalidByEnsembleId(ensembleId);
-
-    // Supprimer relations utilisateur-ensemble
-    utilisateurEnsembleRepository.deleteByEnsemble_Id(ensembleId);
-
-    // Supprimer les morceaux
-    morceauRepository.deleteByEnsembleId(ensembleId);
-
-    // Supprimer les invitations
-    invitationRepository.deleteByEnsembleId(ensembleId);
-
-    // Supprimer l'ensemble lui-même
-    ensembleRepository.delete(ensemble);
-}
-
-
-
-
-
-
-    
 
     /**
      * Récupère tous les ensembles enregistrés, sans information spécifique à un

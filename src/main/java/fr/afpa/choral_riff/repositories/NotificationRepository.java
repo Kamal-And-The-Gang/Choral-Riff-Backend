@@ -17,27 +17,25 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
           LEFT JOIN FETCH n.invitation i
           LEFT JOIN FETCH i.utilisateur
           WHERE n.utilisateur.id = :utilisateurId
+          AND n.valid = true
+          ORDER BY n.dateCreation DESC
       """)
-  List<Notification> findByUtilisateurIdWithInvitation(@Param("utilisateurId") Long utilisateurId);
+  List<Notification> findValidByUtilisateurIdWithInvitation(
+      @Param("utilisateurId") Long utilisateurId);
 
-  // Supprimer toutes les notifications liées à un ensemble
-  // @Modifying
-  // @Transactional
-  // @Query("DELETE FROM Notification n WHERE n.ensembleId = :ensembleId")
-  // void deleteAllByEnsembleId(@Param("ensembleId") Long ensembleId);
-
-@Modifying
-@Transactional
-@Query("UPDATE Notification n SET n.valid = false WHERE n.ensembleId = :ensembleId")
-void markAsInvalidByEnsembleId(@Param("ensembleId") Long ensembleId);
-
-
-
-
+  @Modifying
+  @Transactional
+  @Query("UPDATE Notification n SET n.valid = false WHERE n.ensembleId = :ensembleId")
+  void markAsInvalidByEnsembleId(@Param("ensembleId") Long ensembleId);
 
   void deleteAllByInvitationId(Long invitationId);
 
-  @Query("SELECT n FROM Notification n WHERE n.utilisateur.id = :utilisateurId")
-  List<Notification> findByUtilisateurId(@Param("utilisateurId") Long utilisateurId);
+  @Query("""
+          SELECT n FROM Notification n
+          WHERE n.utilisateur.id = :utilisateurId
+          AND n.valid = true
+          ORDER BY n.dateCreation DESC
+      """)
+  List<Notification> findValidByUtilisateurId(@Param("utilisateurId") Long utilisateurId);
 
 }
