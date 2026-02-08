@@ -282,18 +282,51 @@ public class EnsembleService {
     // ensembleRepository.deleteById(ensembleId);
     // }
 
-    @Transactional
-    public void delete(Long ensembleId, Long userId) {
-        if (!hasRights(userId, ensembleId)) {
-            throw new RuntimeException("Vous n'avez pas les droits pour supprimer cet ensemble");
-        }
+    // @Transactional
+    // public void delete(Long ensembleId, Long userId) {
+    //     if (!hasRights(userId, ensembleId)) {
+    //         throw new RuntimeException("Vous n'avez pas les droits pour supprimer cet ensemble");
+    //     }
 
-        Ensemble ensemble = ensembleRepository.findById(ensembleId)
-                .orElseThrow(() -> new RuntimeException("Ensemble non trouvé"));
+    //     Ensemble ensemble = ensembleRepository.findById(ensembleId)
+    //             .orElseThrow(() -> new RuntimeException("Ensemble non trouvé"));
 
-        // Hibernate supprime tout ce qui est lié grâce aux cascades
-        ensembleRepository.delete(ensemble);
+    //     // Hibernate supprime tout ce qui est lié grâce aux cascades
+    //     ensembleRepository.delete(ensemble);
+    // }
+
+
+@Transactional
+public void delete(Long ensembleId, Long userId) {
+    if (!hasRights(userId, ensembleId)) {
+        throw new RuntimeException("Vous n'avez pas les droits pour supprimer cet ensemble");
     }
+
+    Ensemble ensemble = ensembleRepository.findById(ensembleId)
+            .orElseThrow(() -> new RuntimeException("Ensemble non trouvé"));
+
+    // ✅ Marquer notifications liées à l'ensemble comme invalides
+    notificationRepository.markAsInvalidByEnsembleId(ensembleId);
+
+    // Supprimer relations utilisateur-ensemble
+    utilisateurEnsembleRepository.deleteByEnsemble_Id(ensembleId);
+
+    // Supprimer les morceaux
+    morceauRepository.deleteByEnsembleId(ensembleId);
+
+    // Supprimer les invitations
+    invitationRepository.deleteByEnsembleId(ensembleId);
+
+    // Supprimer l'ensemble lui-même
+    ensembleRepository.delete(ensemble);
+}
+
+
+
+
+
+
+    
 
     /**
      * Récupère tous les ensembles enregistrés, sans information spécifique à un

@@ -28,13 +28,13 @@ public class Morceau {
 
     private String descriptif;
 
-    // @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "ensembleId", nullable = false)
+    private Ensemble ensemble;
+
+    // @ManyToOne
     // @JoinColumn(name = "ensembleId")
     // private Ensemble ensemble;
-
-    @ManyToOne
-    @JoinColumn(name = "ensembleId")
-    private Ensemble ensemble;
 
     @ManyToOne
     @JoinColumn(name = "id_createur")

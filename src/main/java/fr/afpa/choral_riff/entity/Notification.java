@@ -55,7 +55,16 @@ public class Notification {
     @Column(name = "ensemble_id")
     private Long ensembleId;
 
-    // ===== Getters/Setters =====
+    @Column(nullable = false)
+    private Boolean valid = true; // true = notification active, false = invalide
+
+    public Boolean getValid() {
+        return valid;
+    }
+
+    public void setValid(Boolean valid) {
+        this.valid = valid;
+    }
 
     // ======= Getters & Setters =======
 

@@ -25,7 +25,19 @@ public class NotificationDto {
     // ← NOUVEAU CHAMP
     private Long utilisateurId;
 
+    // <-- Nouveau champ
+    private Boolean valid;
+
     // Getters et setters
+
+    public Boolean getValid() {
+        return valid;
+    }
+
+    public void setValid(Boolean valid) {
+        this.valid = valid;
+    }
+
     public Long getId() {
         return id;
     }

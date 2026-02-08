@@ -5,7 +5,6 @@ import fr.afpa.choral_riff.entity.Notification;
 import fr.afpa.choral_riff.entity.NotificationType;
 import org.springframework.stereotype.Component;
 
-
 @Component
 public class NotificationMapper {
 
@@ -49,6 +48,8 @@ public class NotificationMapper {
         else if (notification.getType() == NotificationType.RATTACHEMENT) {
             dto.setStatus("ACCEPTEE");
         }
+        // ← AJOUT : remplir valid pour toutes les notifications
+        dto.setValid(true);
 
         return dto;
     }
