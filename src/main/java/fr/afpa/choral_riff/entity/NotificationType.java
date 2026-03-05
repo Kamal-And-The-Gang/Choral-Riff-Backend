@@ -12,7 +12,8 @@ public enum NotificationType {
     INVITATION,
     MORCEAU_AJOUTE,
     RATTACHEMENT,
-    DEMANDE_RATTACHEMENT, // <-- nouveau type
+    DEMANDE_RATTACHEMENT,
+    INSTRUMENT_AJOUTE, // <-- nouveau type
     GENERAL
 
 }

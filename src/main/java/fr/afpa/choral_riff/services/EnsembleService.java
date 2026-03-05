@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-
-
 /**
  * Service métier pour gérer les opérations liées aux ensembles musicaux.
  * 
@@ -92,28 +90,45 @@ public class EnsembleService {
     }
 
     /**
-     * Crée un nouvel ensemble à partir d’un DTO.
+     * Crée un nouvel ensemble musical à partir d'un DTO et assigne le créateur.
      *
-     * @param dto le DTO contenant les données du nouvel ensemble
-     * @return le DTO de l’ensemble créé
+     * <p>
+     * Cette méthode réalise les étapes suivantes :
+     * <ol>
+     * <li>Convertit le {@link EnsembleDto} en entité {@link Ensemble} via
+     * {@link EnsembleMapper}.</li>
+     * <li>Récupère l'utilisateur créateur à partir de son identifiant
+     * {@code userId}.</li>
+     * <li>Crée une relation {@link UtilisateurEnsemble} liant le créateur à
+     * l'ensemble
+     * avec le rôle ADMIN et marque l'utilisateur comme créateur.</li>
+     * <li>Pour les types restreints d'ensemble (QUATUOR ou BAND), le créateur est
+     * systématiquement ADMIN.</li>
+     * <li>Ajoute la relation créateur à l'ensemble.</li>
+     * <li>Enregistre l'ensemble en base de données avec la relation utilisateur
+     * (cascade automatique).</li>
+     * <li>Retourne un {@link EnsembleDto} représentant l'ensemble créé, incluant le
+     * rôle de l'utilisateur créateur.</li>
+     * </ol>
+     * </p>
+     *
+     * @param dto    le DTO contenant les informations de l'ensemble à créer
+     * @param userId l'identifiant de l'utilisateur créateur
+     * @return le {@link EnsembleDto} correspondant à l'ensemble créé
+     * @throws RuntimeException si l'identifiant du créateur n'est pas trouvé dans
+     *                          la base de données
      */
     public EnsembleDto create(EnsembleDto dto, Long userId) {
         Ensemble ensemble = ensembleMapper.toEntity(dto);
 
-        // récupération du créateur à la partir de la base de données
         Optional<Utilisateur> createur = utilisateurRepository.findById(userId);
-        // si on a bien retrouvé le créateur
+
         if (createur.isPresent()) {
-            // mise à jour de la liste des utilisateurs
-            // d'abord on récupére la liste
+
             Set<UtilisateurEnsemble> userEnsemble = ensemble.getUtilisateurEnsembles();
 
-            // <<< Ici on remplace la création de l'objet UtilisateurEnsemble
-            // rôle par défaut du créateur
             Role rolePourCreateur = Role.ADMIN;
 
-            // si c'est un groupe restreint (quatuor ou groupe de rock), tous les membres
-            // sont admins
             if (dto.getTypeEnsemble() == TypeEnsemble.QUATUOR || dto.getTypeEnsemble() == TypeEnsemble.BAND) {
                 rolePourCreateur = Role.ADMIN; // reste ADMIN, logique pour montrer qu'on force admin
             }
@@ -166,12 +181,6 @@ public class EnsembleService {
      * @throws EntityNotFoundException si aucun ensemble n’a été trouvé
      */
 
-    // public EnsembleDto getById(Long id, Long userId) {
-    // Ensemble ensemble = ensembleRepository.findById(id)
-    // .orElseThrow(() -> new EntityNotFoundException("Ensemble non trouvé avec l’ID
-    // : " + id));
-    // return ensembleMapper.toDto(ensemble, userId);
-    // }
     public EnsembleDto getById(Long id, Long userId) {
         Ensemble ensemble = ensembleRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ensemble non trouvé avec l’ID : " + id));
@@ -249,7 +258,7 @@ public class EnsembleService {
             throw new RuntimeException("Vous n'avez pas les droits pour supprimer cet ensemble");
         }
 
-        Ensemble ensemble = ensembleRepository.findById(ensembleId)
+        Ensemble ensemble = ensembleRepository.findByIdWithRelations(ensembleId)
                 .orElseThrow(() -> new RuntimeException("Ensemble non trouvé"));
 
         // Marquer notifications liées à l'ensemble comme invalides
@@ -261,11 +270,36 @@ public class EnsembleService {
     }
 
     /**
-     * Récupère tous les ensembles enregistrés, sans information spécifique à un
-     * utilisateur.
+     * Récupère tous les ensembles musicaux avec leurs relations principales et les
+     * convertit en DTO pour l'affichage.
+     *
+     * <p>
+     * Cette méthode utilise une requête avec <code>JOIN FETCH</code> pour charger
+     * simultanément les utilisateurs associés et les morceaux de chaque ensemble,
+     * afin d'éviter les problèmes de LazyInitializationException.
+     * </p>
+     *
+     * <p>
+     * Pour chaque ensemble :
+     * <ul>
+     * <li>Les informations de base (id, nom, description, type, date de création)
+     * sont copiées dans un {@link EnsembleDto}.</li>
+     * <li>Le créateur (utilisateur avec le rôle ADMIN) est identifié et ses
+     * informations (id, nom, prénom) sont ajoutées.</li>
+     * <li>Le nombre total de membres dans l'ensemble est calculé.</li>
+     * <li>Le rôle spécifique de l'utilisateur courant et le flag de créateur
+     * sont laissés à <code>null</code> / <code>false</code> car cette
+     * méthode n'est pas filtrée par utilisateur.</li>
+     * </ul>
+     * </p>
+     *
+     * @return une liste de {@link EnsembleDto} représentant tous les ensembles
+     *         existants
+     *         avec leurs relations chargées (utilisateurs et morceaux)
      */
+
     public List<EnsembleDto> getAll() {
-        return ensembleRepository.findAll().stream()
+        return ensembleRepository.findAllWithRelations().stream() // <- fetch join
                 .map(ensemble -> {
                     EnsembleDto dto = new EnsembleDto();
                     dto.setId(ensemble.getId());

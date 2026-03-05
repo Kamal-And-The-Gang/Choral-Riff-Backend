@@ -11,6 +11,7 @@ import fr.afpa.choral_riff.entity.Utilisateur;
 import fr.afpa.choral_riff.entity.UtilisateurEnsemble;
 import fr.afpa.choral_riff.mapper.NotificationMapper;
 import fr.afpa.choral_riff.repositories.InvitationRepository;
+import fr.afpa.choral_riff.repositories.MorceauRepository;
 import fr.afpa.choral_riff.repositories.NotificationRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurEnsembleRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
@@ -37,17 +38,21 @@ public class NotificationService {
     private final InvitationRepository invitationRepository;
     private final NotificationMapper notificationMapper;
     private final UtilisateurEnsembleRepository utilisateurEnsembleRepository;
+    private final MorceauRepository morceauRepository; // <-- Déclaration de morceauRepository
 
-    public NotificationService(UtilisateurEnsembleRepository utilisateurEnsembleRepository,
+    public NotificationService(
+            UtilisateurEnsembleRepository utilisateurEnsembleRepository,
             NotificationRepository notificationRepository,
             UtilisateurRepository utilisateurRepository,
             InvitationRepository invitationRepository,
-            NotificationMapper notificationMapper) {
+            NotificationMapper notificationMapper,
+            MorceauRepository morceauRepository) { // <-- Ajout de morceauRepository
         this.notificationRepository = notificationRepository;
         this.utilisateurRepository = utilisateurRepository;
         this.invitationRepository = invitationRepository;
         this.notificationMapper = notificationMapper;
         this.utilisateurEnsembleRepository = utilisateurEnsembleRepository;
+        this.morceauRepository = morceauRepository; // <-- Initialisation du morceauRepository
     }
 
     // ==========================
@@ -217,5 +222,54 @@ public class NotificationService {
 
         notificationRepository.saveAll(notifications);
     }
+
+    // @Transactional
+    // public void notifyInstrumentAjoute(Long utilisateurId, Long instrumentId, Long morceauId, String instrumentNom) {
+    //     Morceau morceau = morceauRepository.findById(morceauId)
+    //             .orElseThrow(() -> new RuntimeException("Morceau non trouvé"));
+
+    //     Ensemble ensemble = morceau.getEnsemble();
+    //     List<UtilisateurEnsemble> membresEnsemble = utilisateurEnsembleRepository.findByEnsembleId(ensemble.getId());
+    //     String nomUtilisateur = utilisateurRepository.findById(utilisateurId)
+    //             .map(u -> u.getPrenom() + " " + u.getNom())
+    //             .orElse("Utilisateur inconnu");
+
+    //     List<Notification> notifications = new ArrayList<>();
+    //     for (UtilisateurEnsemble ue : membresEnsemble) {
+    //         Notification notification = new Notification();
+    //         notification.setUtilisateur(ue.getUtilisateur());
+    //         notification.setType(NotificationType.INSTRUMENT_AJOUTE);
+    //         notification.setMessage(
+    //                 "L'utilisateur \"" + nomUtilisateur + "\" a ajouté l'instrument \"" + instrumentNom
+    //                         + "\" au morceau \"" + morceau.getTitre() + "\"");
+    //         notification.setIsRead(false);
+    //         notification.setDateCreation(LocalDateTime.now());
+    //         notification.setEnsembleId(ensemble.getId());
+    //         notifications.add(notification);
+    //     }
+
+    //     notificationRepository.saveAll(notifications);
+    // }
+
+ public void notifierInstrumentAjoute(
+            Utilisateur utilisateur,
+            String nomInstrument,
+            Long documentId
+    ) {
+        Notification notification = new Notification();
+        notification.setUtilisateur(utilisateur);
+        notification.setType(NotificationType.INSTRUMENT_AJOUTE);
+        notification.setMessage(
+            "L’instrument \"" + nomInstrument + "\" a été ajouté au document #" + documentId
+        );
+        notification.setIsRead(false);
+        notification.setValid(true);
+
+        notificationRepository.save(notification);
+    }
+
+
+
+
 
 }

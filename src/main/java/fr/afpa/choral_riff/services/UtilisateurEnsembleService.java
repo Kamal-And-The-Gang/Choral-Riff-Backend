@@ -3,17 +3,42 @@ package fr.afpa.choral_riff.services;
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Role;
 import fr.afpa.choral_riff.entity.Utilisateur;
-
 import fr.afpa.choral_riff.entity.UtilisateurEnsemble;
 import fr.afpa.choral_riff.repositories.EnsembleRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurEnsembleRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import jakarta.transaction.Transactional;
-
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
+
+/**
+ * Service métier permettant de gérer les relations entre un {@link Utilisateur}
+ * et un {@link Ensemble}.
+ *
+ * <p>
+ * Cette classe centralise la logique liée :
+ * <ul>
+ *     <li>à l’adhésion d’un utilisateur à un ensemble,</li>
+ *     <li>à la vérification d’appartenance,</li>
+ *     <li>à la gestion des rôles d’un utilisateur au sein d’un ensemble.</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * Elle s’appuie sur les repositories :
+ * <ul>
+ *     <li>{@link UtilisateurEnsembleRepository}</li>
+ *     <li>{@link UtilisateurRepository}</li>
+ *     <li>{@link EnsembleRepository}</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * Les opérations d’écriture sont exécutées dans un contexte transactionnel.
+ * </p>
+ */
+
 
 @Service
 public class UtilisateurEnsembleService {

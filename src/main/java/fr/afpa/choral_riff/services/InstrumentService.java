@@ -12,6 +12,7 @@ import fr.afpa.choral_riff.repositories.InstrumentRepository;
 import fr.afpa.choral_riff.repositories.MorceauRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import fr.afpa.choral_riff.services.NotificationService;  // Ajoute cette ligne en haut
 
 @Service
 public class InstrumentService {
@@ -22,24 +23,28 @@ public class InstrumentService {
     private final UtilisateurEnsembleService utilisateurEnsembleService;
 
     private final MorceauRepository morceauRepository;
+     private final NotificationService notificationService;  // Ajoute cette ligne
 
     /**
      * Injection des dépendances du service.
      * On injecte tout ce dont on a besoin : repository, mapper, service
      * utilisateur-ensemble…
      */
-    public InstrumentService(InstrumentRepository instrumentRepository,
-            InstrumentMapper instrumentMapper,
-            UtilisateurEnsembleService utilisateurEnsembleService,
-            MorceauRepository morceauRepository,
-            EnsembleRepository ensembleRepository,
-            DocumentRepository documentRepository) {
+     public InstrumentService(InstrumentRepository instrumentRepository,
+                            InstrumentMapper instrumentMapper,
+                            UtilisateurEnsembleService utilisateurEnsembleService,
+                            MorceauRepository morceauRepository,
+                            EnsembleRepository ensembleRepository,
+                            DocumentRepository documentRepository,
+                            NotificationService notificationService) {  // Ajout de la dépendance
         this.instrumentRepository = instrumentRepository;
         this.instrumentMapper = instrumentMapper;
-        this.utilisateurEnsembleService = utilisateurEnsembleService; // <-- important
+        this.utilisateurEnsembleService = utilisateurEnsembleService;
         this.morceauRepository = morceauRepository;
         this.documentRepository = documentRepository;
+        this.notificationService = notificationService;  // Initialisation du service
     }
+
 
     /*
      * ============================================================
@@ -84,22 +89,24 @@ public class InstrumentService {
      * (Pour l'instant ta méthode n'a pas la relation Many-to-Many mais elle est
      * prête)
      */
-    public InstrumentDto addInstrumentToMorceau(Long morceauId, Long instrumentId) {
+    // public InstrumentDto addInstrumentToMorceau(Long utilisateurId, Long morceauId, Long instrumentId) {
 
-        // 1 — Récupère le morceau
-        Morceau morceau = morceauRepository.findById(morceauId)
-                .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID: " + morceauId));
+    //     // 1 — Récupère le morceau
+    //     Morceau morceau = morceauRepository.findById(morceauId)
+    //             .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID: " + morceauId));
 
-        // 2 — Récupère l’instrument
-        Instrument instrument = getInstrumentOrThrow(instrumentId);
+    //     // 2 — Récupère l’instrument
+    //     Instrument instrument = getInstrumentOrThrow(instrumentId);
 
-        // Ici on pourrait faire morceau.getInstruments().add(instrument);
+    //     // Ici on pourrait faire morceau.getInstruments().add(instrument);
 
-        // 3 — Sauvegarde
-        morceauRepository.save(morceau);
+    //     // 3 — Sauvegarde
+    //     morceauRepository.save(morceau);
+    //     // 4 — Appel à la méthode de notification pour informer de l'ajout de l'instrument
+    // notificationService.notifyInstrumentAjoute(utilisateurId, instrumentId, morceauId, instrument.getNom());
 
-        return instrumentMapper.toDto(instrument);
-    }
+    //     return instrumentMapper.toDto(instrument);
+    // }
 
     /**
      * Ajoute un instrument à un ensemble AVEC contrôle de rôle.

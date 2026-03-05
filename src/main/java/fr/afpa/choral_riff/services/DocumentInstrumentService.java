@@ -9,34 +9,72 @@ import fr.afpa.choral_riff.repositories.InstrumentRepository;
 import org.springframework.stereotype.Service;
 import java.util.Set;
 import java.util.stream.Collectors;
+import fr.afpa.choral_riff.services.NotificationService;
+import fr.afpa.choral_riff.entity.Utilisateur;
 
 @Service
 public class DocumentInstrumentService {
 
     private final DocumentRepository documentRepository;
     private final InstrumentRepository instrumentRepository;
+    private final NotificationService notificationService; 
 
-    public DocumentInstrumentService(DocumentRepository documentRepository,
-            InstrumentRepository instrumentRepository) {
-        this.documentRepository = documentRepository;
-        this.instrumentRepository = instrumentRepository;
-    }
+   public DocumentInstrumentService(
+        DocumentRepository documentRepository,
+        InstrumentRepository instrumentRepository,
+        NotificationService notificationService // 👈 ajout
+) {
+    this.documentRepository = documentRepository;
+    this.instrumentRepository = instrumentRepository;
+    this.notificationService = notificationService;
+}
+
 
     /**
      * Ajoute un instrument à un document
      */
-    public void addInstrumentToDocument(Long documentId, Long instrumentId) {
-        Document document = documentRepository.findById(documentId)
-                .orElseThrow(() -> new RuntimeException("Document non trouvé : " + documentId));
+//     public void addInstrumentToDocument(Long documentId, Long instrumentId) {
+//         Document document = documentRepository.findById(documentId)
+//                 .orElseThrow(() -> new RuntimeException("Document non trouvé : " + documentId));
 
-        Instrument instrument = instrumentRepository.findById(instrumentId)
-                .orElseThrow(() -> new RuntimeException("Instrument non trouvé : " + instrumentId));
+//         Instrument instrument = instrumentRepository.findById(instrumentId)
+//                 .orElseThrow(() -> new RuntimeException("Instrument non trouvé : " + instrumentId));
 
-        // Utilise la méthode utilitaire de Document
-        document.addInstrument(instrument);
+//         // Utilise la méthode utilitaire de Document
+//         document.addInstrument(instrument);
 
-        documentRepository.save(document);
-    }
+//         documentRepository.save(document);
+//     }
+
+
+public void addInstrumentToDocument(
+        Long documentId,
+        Long instrumentId,
+        Utilisateur utilisateur 
+) {
+    Document document = documentRepository.findById(documentId)
+            .orElseThrow(() -> new RuntimeException("Document non trouvé : " + documentId));
+
+    Instrument instrument = instrumentRepository.findById(instrumentId)
+            .orElseThrow(() -> new RuntimeException("Instrument non trouvé : " + instrumentId));
+
+    document.addInstrument(instrument);
+    documentRepository.save(document);
+
+    //  Création de la notification
+    notificationService.notifierInstrumentAjoute(
+            utilisateur,
+            instrument.getNom(),
+            documentId
+    );
+}
+
+
+
+
+
+
+
 
     /**
      * Récupère les instruments liés à un document sous forme de DTO
