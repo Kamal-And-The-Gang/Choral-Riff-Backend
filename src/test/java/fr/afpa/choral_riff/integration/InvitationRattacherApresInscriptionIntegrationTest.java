@@ -182,7 +182,6 @@
 package fr.afpa.choral_riff.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.afpa.choral_riff.dto.UtilisateurDto;
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Invitation;
 import fr.afpa.choral_riff.entity.StatusInvitation;
@@ -226,6 +225,7 @@ public class InvitationRattacherApresInscriptionIntegrationTest {
     private ObjectMapper objectMapper;
 
     private Invitation invitation;
+
     private Utilisateur utilisateur;
 
     @BeforeEach
@@ -235,12 +235,12 @@ public class InvitationRattacherApresInscriptionIntegrationTest {
         ensemble.setNom("Ensemble Test");
         ensemble = ensembleRepository.save(ensemble);
 
-        // 2️⃣ Crée un utilisateur réel avec mot de passe (obligatoire)
+        // 2️⃣ Crée un utilisateur existant avec mot de passe (pour la base)
         utilisateur = new Utilisateur();
         utilisateur.setNom("New");
         utilisateur.setPrenom("User");
         utilisateur.setEmail("newuser+" + UUID.randomUUID() + "@example.com"); // email unique
-        utilisateur.setMotDePasse("Password123!"); // obligatoire pour passer NOT NULL
+        utilisateur.setMotDePasse("Password123!"); // obligatoire
         utilisateur = utilisateurRepository.save(utilisateur);
 
         // 3️⃣ Crée une invitation associée à cet utilisateur
@@ -256,15 +256,18 @@ public class InvitationRattacherApresInscriptionIntegrationTest {
 
     @Test
     public void testRattacherApresInscription() throws Exception {
-        // 4️⃣ Prépare le DTO côté front (juste l'email)
-        UtilisateurDto dto = new UtilisateurDto();
-        dto.setEmail(utilisateur.getEmail());
+        // 4️⃣ Prépare l'objet Utilisateur complet (comme attendu par le controller)
+        Utilisateur nouvelUtilisateur = new Utilisateur();
+        nouvelUtilisateur.setNom("New");
+        nouvelUtilisateur.setPrenom("User");
+        nouvelUtilisateur.setEmail(utilisateur.getEmail());
+        nouvelUtilisateur.setMotDePasse("Password123!"); // obligatoire NOT NULL
 
         // 5️⃣ Appel MockMvc du endpoint /rattacher-apres-inscription
         mockMvc.perform(post("/api/invitations/rattacher-apres-inscription")
                         .param("token", invitation.getToken())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk()); // ✅ Vérifie que la réponse est OK
+                        .content(objectMapper.writeValueAsString(nouvelUtilisateur)))
+                .andExpect(status().isOk()); // ✅ Vérifie OK
     }
 }

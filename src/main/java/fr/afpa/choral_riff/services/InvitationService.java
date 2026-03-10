@@ -155,128 +155,122 @@ public class InvitationService {
     // On renvoie un DTO au frontend
 
     // @Transactional
-    // public InvitationDTO rattacherUtilisateurApresInscription(Utilisateur nouvelUtilisateur, Invitation invitation) {
+    // public InvitationDTO rattacherUtilisateurApresInscription(Utilisateur
+    // nouvelUtilisateur, Invitation invitation) {
 
-    //     // Vérifier si l'utilisateur existe déjà
-    //     Utilisateur utilisateurFinal = utilisateurRepository.findByEmail(invitation.getEmailInvite())
-    //             .orElse(nouvelUtilisateur);
+    // // Vérifier si l'utilisateur existe déjà
+    // Utilisateur utilisateurFinal =
+    // utilisateurRepository.findByEmail(invitation.getEmailInvite())
+    // .orElse(nouvelUtilisateur);
 
-    //     // Vérifier si l'utilisateur est déjà membre de cet ensemble
-    //     boolean dejaMembre = utilisateurEnsembleRepository
-    //             .existsByUtilisateurIdAndEnsembleId(utilisateurFinal.getId(), invitation.getEnsemble().getId());
+    // // Vérifier si l'utilisateur est déjà membre de cet ensemble
+    // boolean dejaMembre = utilisateurEnsembleRepository
+    // .existsByUtilisateurIdAndEnsembleId(utilisateurFinal.getId(),
+    // invitation.getEnsemble().getId());
 
-    //     InvitationDTO dto = invitationMapper.toDto(invitation);
+    // InvitationDTO dto = invitationMapper.toDto(invitation);
 
-    //     if (dejaMembre) {
-    //         dto.setExistant(true);
-    //         dto.setUtilisateurId(utilisateurFinal.getId());
-    //         dto.setDejaMembre(true);
-    //         return dto;
-    //     }
-
-    //     // Sauvegarder l'utilisateur si c'est un nouvel utilisateur
-    //     if (utilisateurFinal.getId() == null) {
-    //         utilisateurFinal = utilisateurRepository.save(utilisateurFinal);
-    //     }
-
-    //     // Rattacher l'utilisateur à l'invitation et accepter
-    //     invitation.setUtilisateur(utilisateurFinal);
-    //     invitation.setEtat(StatusInvitation.ACCEPTEE);
-    //     invitationRepository.saveAndFlush(invitation);
-
-    //     System.out.println("Invitation saved: id=" + invitation.getId());
-
-    //     // Créer la notification
-    //     notificationService.createNotification(
-    //             utilisateurFinal.getId(),
-    //             "INVITATION",
-    //             "Vous avez été ajouté à l'ensemble " + invitation.getEnsemble().getNom(),
-    //             invitation.getId() // <-- on passe juste l'ID pour rester compatible
-    //     );
-
-    //     // Ajouter l'utilisateur à l'ensemble
-    //     UtilisateurEnsemble ue = new UtilisateurEnsemble();
-    //     ue.setUtilisateur(utilisateurFinal);
-    //     ue.setEnsemble(invitation.getEnsemble());
-    //     ue.setRoleDansEnsemble(Role.MEMBRE);
-    //     ue.setDateAdhesion(LocalDateTime.now());
-    //     utilisateurEnsembleRepository.saveAndFlush(ue);
-
-    //     // Retourner le DTO mis à jour
-    //     return invitationMapper.toDto(invitation);
+    // if (dejaMembre) {
+    // dto.setExistant(true);
+    // dto.setUtilisateurId(utilisateurFinal.getId());
+    // dto.setDejaMembre(true);
+    // return dto;
     // }
 
+    // // Sauvegarder l'utilisateur si c'est un nouvel utilisateur
+    // if (utilisateurFinal.getId() == null) {
+    // utilisateurFinal = utilisateurRepository.save(utilisateurFinal);
+    // }
 
+    // // Rattacher l'utilisateur à l'invitation et accepter
+    // invitation.setUtilisateur(utilisateurFinal);
+    // invitation.setEtat(StatusInvitation.ACCEPTEE);
+    // invitationRepository.saveAndFlush(invitation);
 
+    // System.out.println("Invitation saved: id=" + invitation.getId());
 
+    // // Créer la notification
+    // notificationService.createNotification(
+    // utilisateurFinal.getId(),
+    // "INVITATION",
+    // "Vous avez été ajouté à l'ensemble " + invitation.getEnsemble().getNom(),
+    // invitation.getId() // <-- on passe juste l'ID pour rester compatible
+    // );
 
+    // // Ajouter l'utilisateur à l'ensemble
+    // UtilisateurEnsemble ue = new UtilisateurEnsemble();
+    // ue.setUtilisateur(utilisateurFinal);
+    // ue.setEnsemble(invitation.getEnsemble());
+    // ue.setRoleDansEnsemble(Role.MEMBRE);
+    // ue.setDateAdhesion(LocalDateTime.now());
+    // utilisateurEnsembleRepository.saveAndFlush(ue);
 
-
+    // // Retourner le DTO mis à jour
+    // return invitationMapper.toDto(invitation);
+    // }
 
     @Transactional
-public InvitationDTO rattacherUtilisateurApresInscription(Utilisateur nouvelUtilisateur, Invitation invitation) {
+    public InvitationDTO rattacherUtilisateurApresInscription(Utilisateur nouvelUtilisateur, Invitation invitation) {
 
-    // --- Étape 1 : vérifier si le token a déjà été utilisé ---
-    if (invitation.getDateUtilisation() != null) {
-        throw new RuntimeException("Cette invitation a déjà été utilisée.");
+        // --- Étape 1 : vérifier si le token a déjà été utilisé ---
+        if (invitation.getDateUtilisation() != null) {
+            throw new RuntimeException("Cette invitation a déjà été utilisée.");
+        }
+
+        // --- Étape 2 : vérifier si le token est expiré ---
+        if (invitation.getDateExpiration() != null &&
+                invitation.getDateExpiration().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Le lien d'invitation a expiré.");
+        }
+
+        // Vérifier si l'utilisateur existe déjà
+        Utilisateur utilisateurFinal = utilisateurRepository.findByEmail(invitation.getEmailInvite())
+                .orElse(nouvelUtilisateur);
+
+        // Vérifier si l'utilisateur est déjà membre de cet ensemble
+        boolean dejaMembre = utilisateurEnsembleRepository
+                .existsByUtilisateurIdAndEnsembleId(utilisateurFinal.getId(), invitation.getEnsemble().getId());
+
+        InvitationDTO dto = invitationMapper.toDto(invitation);
+
+        if (dejaMembre) {
+            dto.setExistant(true);
+            dto.setUtilisateurId(utilisateurFinal.getId());
+            dto.setDejaMembre(true);
+            return dto;
+        }
+
+        // Sauvegarder l'utilisateur si c'est un nouvel utilisateur
+        if (utilisateurFinal.getId() == null) {
+            utilisateurFinal = utilisateurRepository.save(utilisateurFinal);
+        }
+
+        // --- Étape 3 : rattacher l'utilisateur et marquer le token comme utilisé ---
+        invitation.setUtilisateur(utilisateurFinal);
+        invitation.setEtat(StatusInvitation.ACCEPTEE);
+        invitation.setDateUtilisation(LocalDateTime.now()); // <-- token maintenant utilisé
+        invitationRepository.saveAndFlush(invitation);
+
+        System.out.println("Invitation saved: id=" + invitation.getId());
+
+        // --- Étape 4 : créer la notification ---
+        notificationService.createNotification(
+                utilisateurFinal.getId(),
+                "INVITATION",
+                "Vous avez été ajouté à l'ensemble " + invitation.getEnsemble().getNom(),
+                invitation.getId());
+
+        // --- Étape 5 : ajouter l'utilisateur à l'ensemble ---
+        UtilisateurEnsemble ue = new UtilisateurEnsemble();
+        ue.setUtilisateur(utilisateurFinal);
+        ue.setEnsemble(invitation.getEnsemble());
+        ue.setRoleDansEnsemble(Role.MEMBRE);
+        ue.setDateAdhesion(LocalDateTime.now());
+        utilisateurEnsembleRepository.saveAndFlush(ue);
+
+        // Retourner le DTO mis à jour
+        return invitationMapper.toDto(invitation);
     }
-
-    // --- Étape 2 : vérifier si le token est expiré ---
-    if (invitation.getDateExpiration() != null &&
-        invitation.getDateExpiration().isBefore(LocalDateTime.now())) {
-        throw new RuntimeException("Le lien d'invitation a expiré.");
-    }
-
-    // Vérifier si l'utilisateur existe déjà
-    Utilisateur utilisateurFinal = utilisateurRepository.findByEmail(invitation.getEmailInvite())
-            .orElse(nouvelUtilisateur);
-
-    // Vérifier si l'utilisateur est déjà membre de cet ensemble
-    boolean dejaMembre = utilisateurEnsembleRepository
-            .existsByUtilisateurIdAndEnsembleId(utilisateurFinal.getId(), invitation.getEnsemble().getId());
-
-    InvitationDTO dto = invitationMapper.toDto(invitation);
-
-    if (dejaMembre) {
-        dto.setExistant(true);
-        dto.setUtilisateurId(utilisateurFinal.getId());
-        dto.setDejaMembre(true);
-        return dto;
-    }
-
-    // Sauvegarder l'utilisateur si c'est un nouvel utilisateur
-    if (utilisateurFinal.getId() == null) {
-        utilisateurFinal = utilisateurRepository.save(utilisateurFinal);
-    }
-
-    // --- Étape 3 : rattacher l'utilisateur et marquer le token comme utilisé ---
-    invitation.setUtilisateur(utilisateurFinal);
-    invitation.setEtat(StatusInvitation.ACCEPTEE);
-    invitation.setDateUtilisation(LocalDateTime.now()); // <-- token maintenant utilisé
-    invitationRepository.saveAndFlush(invitation);
-
-    System.out.println("Invitation saved: id=" + invitation.getId());
-
-    // --- Étape 4 : créer la notification ---
-    notificationService.createNotification(
-            utilisateurFinal.getId(),
-            "INVITATION",
-            "Vous avez été ajouté à l'ensemble " + invitation.getEnsemble().getNom(),
-            invitation.getId()
-    );
-
-    // --- Étape 5 : ajouter l'utilisateur à l'ensemble ---
-    UtilisateurEnsemble ue = new UtilisateurEnsemble();
-    ue.setUtilisateur(utilisateurFinal);
-    ue.setEnsemble(invitation.getEnsemble());
-    ue.setRoleDansEnsemble(Role.MEMBRE);
-    ue.setDateAdhesion(LocalDateTime.now());
-    utilisateurEnsembleRepository.saveAndFlush(ue);
-
-    // Retourner le DTO mis à jour
-    return invitationMapper.toDto(invitation);
-}
-
 
     public Invitation getByTokenEntity(String token) {
         Invitation invitation = invitationRepository.findByToken(token)

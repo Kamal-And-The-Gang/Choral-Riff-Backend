@@ -157,38 +157,38 @@ public class InvitationController {
      * @return DTO de l'invitation mise à jour
      */
 
-    // @PostMapping("/rattacher-apres-inscription")
-    // public ResponseEntity<InvitationDTO> rattacherApresInscription(
-    //         @RequestParam String token,
-    //         @RequestBody Utilisateur nouvelUtilisateur) {
+    @PostMapping("/rattacher-apres-inscription")
+    public ResponseEntity<InvitationDTO> rattacherApresInscription(
+            @RequestParam String token,
+            @RequestBody Utilisateur nouvelUtilisateur) {
 
-    //     // Appelle le service pour rattacher l'utilisateur à l'invitation
-    //     InvitationDTO invitationDTO = invitationService.rattacherUtilisateurApresInscription(
-    //             nouvelUtilisateur,
-    //             invitationService.getByTokenEntity(token));
+        // Appelle le service pour rattacher l'utilisateur à l'invitation
+        InvitationDTO invitationDTO = invitationService.rattacherUtilisateurApresInscription(
+                nouvelUtilisateur,
+                invitationService.getByTokenEntity(token));
 
-    //     return ResponseEntity.ok(invitationDTO);
-    // }
+        return ResponseEntity.ok(invitationDTO);
+    }
 
- @PostMapping("/rattacher-apres-inscription")
-public ResponseEntity<InvitationDTO> rattacherApresInscription(
-        @RequestParam String token,
-        @RequestBody UtilisateurDto dto) {
+//  @PostMapping("/rattacher-apres-inscription")
+// public ResponseEntity<InvitationDTO> rattacherApresInscription(
+//         @RequestParam String token,
+//         @RequestBody UtilisateurDto dto) {
 
-    // Recherche l'utilisateur existant par email
-    Utilisateur utilisateur = utilisateurRepository
-            .findByEmail(dto.getEmail())
-            .orElseThrow(() -> new RuntimeException(
-                    "L'utilisateur doit être créé avant de rattacher l'invitation."));
+//     // Recherche l'utilisateur existant par email
+//     Utilisateur utilisateur = utilisateurRepository
+//             .findByEmail(dto.getEmail())
+//             .orElseThrow(() -> new RuntimeException(
+//                     "L'utilisateur doit être créé avant de rattacher l'invitation."));
 
-    // Appelle le service pour rattacher l'utilisateur à l'invitation
-    Invitation invitation = invitationService.getByTokenEntity(token);
-    InvitationDTO invitationDTO = invitationService.rattacherUtilisateurApresInscription(
-            utilisateur,
-            invitation);
+//     // Appelle le service pour rattacher l'utilisateur à l'invitation
+//     Invitation invitation = invitationService.getByTokenEntity(token);
+//     InvitationDTO invitationDTO = invitationService.rattacherUtilisateurApresInscription(
+//             utilisateur,
+//             invitation);
 
-    return ResponseEntity.ok(invitationDTO);
-}
+//     return ResponseEntity.ok(invitationDTO);
+// }
 
     /**
      * Renvoie l'email d'invitation.
