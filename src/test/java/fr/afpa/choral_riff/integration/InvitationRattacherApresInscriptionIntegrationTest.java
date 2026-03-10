@@ -1,3 +1,5 @@
+
+
 package fr.afpa.choral_riff.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,11 +31,12 @@ public class InvitationRattacherApresInscriptionIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
-    @Autowired
-    private EnsembleRepository ensembleRepository; // ← ajouté
 
     @Autowired
-private UtilisateurRepository utilisateurRepository;
+    private EnsembleRepository ensembleRepository;
+
+    @Autowired
+    private UtilisateurRepository utilisateurRepository;
 
     @Autowired
     private InvitationRepository invitationRepository;
@@ -43,43 +46,47 @@ private UtilisateurRepository utilisateurRepository;
 
     private Invitation invitation;
 
-   @BeforeEach
-public void setUp() {
-    // 1️⃣ Nettoyage des invitations
-    invitationRepository.deleteAll();
+    private Utilisateur utilisateur;
 
-    // 2️⃣ Crée un ensemble fictif
-    Ensemble ensemble = new Ensemble();
-    ensemble.setNom("Ensemble Test");
-    ensemble = ensembleRepository.save(ensemble); // persister pour avoir un ID
+    @BeforeEach
+    public void setUp() {
+        //  Nettoyage des tables pour éviter conflit GitHub Actions
+        invitationRepository.deleteAll();
+        utilisateurRepository.deleteAll();
+        ensembleRepository.deleteAll();
 
-    // 3️⃣ Crée un utilisateur fictif minimal avec mot de passe obligatoire
-    Utilisateur utilisateur = new Utilisateur();
-    utilisateur.setNom("New");
-    utilisateur.setPrenom("User");
-    utilisateur.setEmail("newuser@example.com");
-    utilisateur.setMotDePasse("Password123!"); // ⚡ obligatoire pour la base
-    utilisateur = utilisateurRepository.save(utilisateur); // persister pour avoir un ID
+        //  Crée un ensemble fictif
+        Ensemble ensemble = new Ensemble();
+        ensemble.setNom("Ensemble Test");
+        ensemble = ensembleRepository.save(ensemble);
 
-    // 4️⃣ Crée une invitation fictive
-    invitation = new Invitation();
-    invitation.setEmailInvite(utilisateur.getEmail());
-    invitation.setToken(UUID.randomUUID().toString());
-    invitation.setDateEnvoi(LocalDateTime.now());
-    invitation.setDateExpiration(LocalDateTime.now().plusDays(7));
-    invitation.setEtat(fr.afpa.choral_riff.entity.StatusInvitation.EN_ATTENTE);
-    invitation.setEnsemble(ensemble); // ⚡ très important
-    invitationRepository.save(invitation);
-}
+        //  Crée un utilisateur existant avec mot de passe obligatoire
+        utilisateur = new Utilisateur();
+        utilisateur.setNom("New");
+        utilisateur.setPrenom("User");
+        utilisateur.setEmail("newuser@example.com");
+        utilisateur.setMotDePasse("Password123!"); // ✅ obligatoire
+        utilisateur = utilisateurRepository.save(utilisateur);
+
+        //  Crée une invitation fictive associée à cet utilisateur
+        invitation = new Invitation();
+        invitation.setEmailInvite(utilisateur.getEmail());
+        invitation.setToken(UUID.randomUUID().toString());
+        invitation.setDateEnvoi(LocalDateTime.now());
+        invitation.setDateExpiration(LocalDateTime.now().plusDays(7));
+        invitation.setEtat(fr.afpa.choral_riff.entity.StatusInvitation.EN_ATTENTE);
+        invitation.setEnsemble(ensemble);
+        invitationRepository.save(invitation);
+    }
 
     @Test
     public void testRattacherApresInscription() throws Exception {
 
-        // Création d'un utilisateur fictif minimal (DTO)
+        //  On utilise le DTO correspondant à l'utilisateur existant
         UtilisateurDto fakeUser = new UtilisateurDto();
-        fakeUser.setNom("New");
-        fakeUser.setPrenom("User");
-        fakeUser.setEmail("newuser@example.com");
+        fakeUser.setNom(utilisateur.getNom());
+        fakeUser.setPrenom(utilisateur.getPrenom());
+        fakeUser.setEmail(utilisateur.getEmail());
         fakeUser.setPhotoProfil(null);
 
         mockMvc.perform(post("/api/invitations/rattacher-apres-inscription")
