@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/invitations")
@@ -169,24 +170,22 @@ public class InvitationController {
     //     return ResponseEntity.ok(invitationDTO);
     // }
 
-    @PostMapping("/rattacher-apres-inscription")
+ @PostMapping("/rattacher-apres-inscription")
 public ResponseEntity<InvitationDTO> rattacherApresInscription(
         @RequestParam String token,
         @RequestBody UtilisateurDto dto) {
 
+    // Recherche l'utilisateur existant par email
     Utilisateur utilisateur = utilisateurRepository
             .findByEmail(dto.getEmail())
-            .orElseGet(() -> {
-                Utilisateur u = new Utilisateur();
-                u.setNom(dto.getNom());
-                u.setPrenom(dto.getPrenom());
-                u.setEmail(dto.getEmail());
-                return u;
-            });
+            .orElseThrow(() -> new RuntimeException(
+                    "L'utilisateur doit être créé avant de rattacher l'invitation."));
 
+    // Appelle le service pour rattacher l'utilisateur à l'invitation
+    Invitation invitation = invitationService.getByTokenEntity(token);
     InvitationDTO invitationDTO = invitationService.rattacherUtilisateurApresInscription(
             utilisateur,
-            invitationService.getByTokenEntity(token));
+            invitation);
 
     return ResponseEntity.ok(invitationDTO);
 }
