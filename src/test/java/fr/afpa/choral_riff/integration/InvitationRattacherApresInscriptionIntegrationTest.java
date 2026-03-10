@@ -10,6 +10,7 @@ import fr.afpa.choral_riff.entity.Utilisateur;
 import fr.afpa.choral_riff.repositories.EnsembleRepository;
 import fr.afpa.choral_riff.repositories.InvitationRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
+import jakarta.transaction.Transactional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 public class InvitationRattacherApresInscriptionIntegrationTest {
 
     @Autowired
@@ -77,12 +79,8 @@ public void setUp() {
     public void testRattacherApresInscription() throws Exception {
 
         //  On utilise le DTO correspondant à l'utilisateur existant
-        UtilisateurDto fakeUser = new UtilisateurDto();
-        fakeUser.setNom(utilisateur.getNom());
-        fakeUser.setPrenom(utilisateur.getPrenom());
-        fakeUser.setEmail(utilisateur.getEmail());
-        fakeUser.setPhotoProfil(null);
-   
+      UtilisateurDto fakeUser = new UtilisateurDto();
+fakeUser.setEmail(utilisateur.getEmail());
 
         mockMvc.perform(post("/api/invitations/rattacher-apres-inscription")
                         .param("token", invitation.getToken())
