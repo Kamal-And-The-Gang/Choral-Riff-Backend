@@ -47,38 +47,32 @@ public class InvitationRattacherApresInscriptionIntegrationTest {
     private Invitation invitation;
 
     private Utilisateur utilisateur;
+@BeforeEach
+public void setUp() {
+    // Crée un ensemble fictif
+    Ensemble ensemble = new Ensemble();
+    ensemble.setNom("Ensemble Test");
+    ensemble = ensembleRepository.save(ensemble);
 
-    @BeforeEach
-    public void setUp() {
-        //  Nettoyage des tables pour éviter conflit GitHub Actions
-        invitationRepository.deleteAll();
-        utilisateurRepository.deleteAll();
-        ensembleRepository.deleteAll();
+    // Crée un utilisateur existant avec mot de passe obligatoire
+    utilisateur = new Utilisateur();
+    utilisateur.setNom("New");
+    utilisateur.setPrenom("User");
+    utilisateur.setEmail("newuser+" + UUID.randomUUID() + "@example.com"); // <- unique
+    utilisateur.setMotDePasse("Password123!");
+    utilisateur = utilisateurRepository.save(utilisateur);
 
-        //  Crée un ensemble fictif
-        Ensemble ensemble = new Ensemble();
-        ensemble.setNom("Ensemble Test");
-        ensemble = ensembleRepository.save(ensemble);
-
-        //  Crée un utilisateur existant avec mot de passe obligatoire
-        utilisateur = new Utilisateur();
-        utilisateur.setNom("New");
-        utilisateur.setPrenom("User");
-        utilisateur.setEmail("newuser@example.com");
-        utilisateur.setMotDePasse("Password123!"); // ✅ obligatoire
-        utilisateur = utilisateurRepository.save(utilisateur);
-
-        //  Crée une invitation fictive associée à cet utilisateur
-        invitation = new Invitation();
-        invitation.setEmailInvite(utilisateur.getEmail());
-        invitation.setToken(UUID.randomUUID().toString());
-        invitation.setDateEnvoi(LocalDateTime.now());
-        invitation.setDateExpiration(LocalDateTime.now().plusDays(7));
-        invitation.setEtat(fr.afpa.choral_riff.entity.StatusInvitation.EN_ATTENTE);
-        invitation.setEnsemble(ensemble);
-        invitationRepository.save(invitation);
-    }
-
+    // Crée une invitation fictive associée à cet utilisateur
+    invitation = new Invitation();
+    invitation.setEmailInvite(utilisateur.getEmail());
+    invitation.setToken(UUID.randomUUID().toString());
+    invitation.setDateEnvoi(LocalDateTime.now());
+    invitation.setDateExpiration(LocalDateTime.now().plusDays(7));
+    invitation.setEtat(fr.afpa.choral_riff.entity.StatusInvitation.EN_ATTENTE);
+    invitation.setEnsemble(ensemble);
+    invitationRepository.save(invitation);
+}
+   
     @Test
     public void testRattacherApresInscription() throws Exception {
 
@@ -88,6 +82,7 @@ public class InvitationRattacherApresInscriptionIntegrationTest {
         fakeUser.setPrenom(utilisateur.getPrenom());
         fakeUser.setEmail(utilisateur.getEmail());
         fakeUser.setPhotoProfil(null);
+   
 
         mockMvc.perform(post("/api/invitations/rattacher-apres-inscription")
                         .param("token", invitation.getToken())

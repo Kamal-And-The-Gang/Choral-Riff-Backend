@@ -1,6 +1,7 @@
 package fr.afpa.choral_riff.controllers;
 
 import fr.afpa.choral_riff.dto.InvitationDTO;
+import fr.afpa.choral_riff.dto.UtilisateurDto;
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Invitation;
 import fr.afpa.choral_riff.entity.Notification;
@@ -155,18 +156,40 @@ public class InvitationController {
      * @return DTO de l'invitation mise à jour
      */
 
+    // @PostMapping("/rattacher-apres-inscription")
+    // public ResponseEntity<InvitationDTO> rattacherApresInscription(
+    //         @RequestParam String token,
+    //         @RequestBody Utilisateur nouvelUtilisateur) {
+
+    //     // Appelle le service pour rattacher l'utilisateur à l'invitation
+    //     InvitationDTO invitationDTO = invitationService.rattacherUtilisateurApresInscription(
+    //             nouvelUtilisateur,
+    //             invitationService.getByTokenEntity(token));
+
+    //     return ResponseEntity.ok(invitationDTO);
+    // }
+
     @PostMapping("/rattacher-apres-inscription")
-    public ResponseEntity<InvitationDTO> rattacherApresInscription(
-            @RequestParam String token,
-            @RequestBody Utilisateur nouvelUtilisateur) {
+public ResponseEntity<InvitationDTO> rattacherApresInscription(
+        @RequestParam String token,
+        @RequestBody UtilisateurDto dto) {
 
-        // Appelle le service pour rattacher l'utilisateur à l'invitation
-        InvitationDTO invitationDTO = invitationService.rattacherUtilisateurApresInscription(
-                nouvelUtilisateur,
-                invitationService.getByTokenEntity(token));
+    Utilisateur utilisateur = utilisateurRepository
+            .findByEmail(dto.getEmail())
+            .orElseGet(() -> {
+                Utilisateur u = new Utilisateur();
+                u.setNom(dto.getNom());
+                u.setPrenom(dto.getPrenom());
+                u.setEmail(dto.getEmail());
+                return u;
+            });
 
-        return ResponseEntity.ok(invitationDTO);
-    }
+    InvitationDTO invitationDTO = invitationService.rattacherUtilisateurApresInscription(
+            utilisateur,
+            invitationService.getByTokenEntity(token));
+
+    return ResponseEntity.ok(invitationDTO);
+}
 
     /**
      * Renvoie l'email d'invitation.
