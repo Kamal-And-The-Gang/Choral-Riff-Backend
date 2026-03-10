@@ -170,6 +170,12 @@ jobs:
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: B@nLgU4qz*9?D~3n83
 
+          - name: Show test reports
+  if: failure()
+  run: |
+    echo "=== TEST REPORTS ==="
+    cat target/surefire-reports/*.txt || true
+
       #  Afficher les rapports de tests si échec
       - name: Show Surefire test reports
         if: failure()
