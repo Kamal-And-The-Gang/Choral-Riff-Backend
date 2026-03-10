@@ -155,14 +155,14 @@ jobs:
         env:
           PGPASSWORD: B@nLgU4qz*9?D~3n83
 
-      # 4️⃣ Tester la connexion à la DB (optionnel mais utile)
+      #  Tester la connexion à la DB (optionnel mais utile)
       - name: Test DB connection
         run: |
           psql -h postgresdb -U postgres -d choralriffdb -c '\l'
         env:
           PGPASSWORD: B@nLgU4qz*9?D~3n83
 
-      # 5️⃣ Compiler et exécuter les tests
+      #  Compiler et exécuter les tests
       - name: Compile and run tests
         run: mvn clean verify
         env:
@@ -170,7 +170,7 @@ jobs:
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: B@nLgU4qz*9?D~3n83
 
-      # 6️⃣ Afficher les rapports de tests si échec
+      #  Afficher les rapports de tests si échec
       - name: Show Surefire test reports
         if: failure()
         run: |
