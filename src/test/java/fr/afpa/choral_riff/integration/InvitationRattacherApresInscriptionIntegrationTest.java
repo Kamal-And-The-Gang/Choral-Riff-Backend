@@ -4,8 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.afpa.choral_riff.dto.UtilisateurDto;
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Invitation;
+import fr.afpa.choral_riff.entity.Utilisateur;
 import fr.afpa.choral_riff.repositories.EnsembleRepository;
 import fr.afpa.choral_riff.repositories.InvitationRepository;
+import fr.afpa.choral_riff.repositories.UtilisateurRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +33,9 @@ public class InvitationRattacherApresInscriptionIntegrationTest {
     private EnsembleRepository ensembleRepository; // ← ajouté
 
     @Autowired
+private UtilisateurRepository utilisateurRepository;
+
+    @Autowired
     private InvitationRepository invitationRepository;
 
     @Autowired
@@ -39,21 +45,29 @@ public class InvitationRattacherApresInscriptionIntegrationTest {
 
    @BeforeEach
 public void setUp() {
+    // 1️⃣ Nettoyage des invitations
     invitationRepository.deleteAll();
 
-    // 1️⃣ Crée un ensemble fictif
+    // 2️⃣ Crée un ensemble fictif
     Ensemble ensemble = new Ensemble();
     ensemble.setNom("Ensemble Test");
     ensemble = ensembleRepository.save(ensemble); // persister pour avoir un ID
 
-    // 2️⃣ Crée une invitation fictive
+    // 3️⃣ Crée un utilisateur fictif minimal avec mot de passe obligatoire
+    Utilisateur utilisateur = new Utilisateur();
+    utilisateur.setNom("New");
+    utilisateur.setPrenom("User");
+    utilisateur.setEmail("newuser@example.com");
+    utilisateur.setMotDePasse("Password123!"); // ⚡ obligatoire pour la base
+    utilisateur = utilisateurRepository.save(utilisateur); // persister pour avoir un ID
+
+    // 4️⃣ Crée une invitation fictive
     invitation = new Invitation();
-    invitation.setEmailInvite("newuser@example.com");
+    invitation.setEmailInvite(utilisateur.getEmail());
     invitation.setToken(UUID.randomUUID().toString());
     invitation.setDateEnvoi(LocalDateTime.now());
     invitation.setDateExpiration(LocalDateTime.now().plusDays(7));
     invitation.setEtat(fr.afpa.choral_riff.entity.StatusInvitation.EN_ATTENTE);
-
     invitation.setEnsemble(ensemble); // ⚡ très important
     invitationRepository.save(invitation);
 }
