@@ -134,10 +134,10 @@ jobs:
           --health-retries=5
 
     steps:
-      #  Récupérer le code
+      # 1️⃣ Récupérer le code
       - uses: actions/checkout@v3
 
-      #  Installer Java 21 et activer cache Maven
+      # 2️⃣ Installer Java 21 et activer le cache Maven
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
@@ -145,27 +145,42 @@ jobs:
           java-version: '21'
           cache: maven
 
-      #  Attendre que PostgreSQL soit prêt
+      # 3️⃣ Attendre que PostgreSQL soit prêt
       - name: Wait for Postgres to be ready
         run: |
-          until pg_isready -h localhost -p 5432 -U postgres; do
+          until pg_isready -h postgresdb -p 5432 -U postgres; do
             echo "Waiting for Postgres..."
             sleep 5
           done
         env:
           PGPASSWORD: B@nLgU4qz*9?D~3n83
 
-      #  Compiler et exécuter les tests
+      # 4️⃣ Tester la connexion à la DB (optionnel mais utile)
+      - name: Test DB connection
+        run: |
+          psql -h postgresdb -U postgres -d choralriffdb -c '\l'
+        env:
+          PGPASSWORD: B@nLgU4qz*9?D~3n83
+
+      # 5️⃣ Compiler et exécuter les tests
       - name: Compile and run tests
         run: mvn clean verify
         env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/choralriffdb
+          SPRING_DATASOURCE_URL: jdbc:postgresql://postgresdb:5432/choralriffdb
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: B@nLgU4qz*9?D~3n83
 
-      #  Afficher les rapports de tests si échec
+      # 6️⃣ Afficher les rapports de tests si échec
       - name: Show Surefire test reports
         if: failure()
         run: |
           echo "=== Surefire reports ==="
           cat target/surefire-reports/*.txt || true
+
+          Tous les accès PostgreSQL utilisent maintenant le nom du service postgresdb, pas localhost.
+
+# Les variables d’environnement Spring Boot pointent vers jdbc:postgresql://postgresdb:5432/....
+
+# Test optionnel psql pour vérifier que la DB est bien disponible.
+
+# Affichage des rapports Surefire si un test échoue pour faciliter le debug.
