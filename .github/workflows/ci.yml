@@ -1,14 +1,14 @@
 # # Ce fichier de configuration Yaml est librement inspiré de la ressource suivante
 # # https://qaautomation.expert/2023/06/26/how-to-run-springboot-tests-with-github-actions/
 # name: Compilation et test d'une application Web API Springboot
- 
+
 # # Déclaration des actions après lesquelles les "jobs" vont se déclencher
 # on:
 #   push:
 #     branches: [ "main" ]
 #   pull_request:
 #     branches: [ "main" ]
- 
+
 # jobs:
 #   build:
 #     environment: K-andTheGang
@@ -27,7 +27,7 @@
 #           - 5432:5432
 #         # needed because the postgres container does not provide a healthcheck
 #         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-    
+
 #     steps:
 #       # Récupération du code, utilisation de l'action "checkout"
 #       - uses: actions/checkout@v3
@@ -141,8 +141,8 @@ jobs:
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '21'
+          distribution: "temurin"
+          java-version: "21"
           cache: maven
 
       # 3️⃣ Attendre que PostgreSQL soit prêt
@@ -161,8 +161,7 @@ jobs:
           psql -h postgresdb -U postgres -d choralriffdb -c '\l'
         env:
           PGPASSWORD: B@nLgU4qz*9?D~3n83
-
-      #  Compiler et exécuter les tests
+      # Compiler et exécuter les tests
       - name: Compile and run tests
         run: mvn clean verify
         env:
@@ -170,11 +169,12 @@ jobs:
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: B@nLgU4qz*9?D~3n83
 
-          - name: Show test reports
-  if: failure()
-  run: |
-    echo "=== TEST REPORTS ==="
-    cat target/surefire-reports/*.txt || true
+      # Afficher les rapports de tests si échec
+      - name: Show Surefire test reports
+        if: failure()
+        run: |
+          echo "=== Surefire reports ==="
+          cat target/surefire-reports/*.txt || true
 
       #  Afficher les rapports de tests si échec
       - name: Show Surefire test reports
@@ -183,7 +183,7 @@ jobs:
           echo "=== Surefire reports ==="
           cat target/surefire-reports/*.txt || true
 
-          Tous les accès PostgreSQL utilisent maintenant le nom du service postgresdb, pas localhost.
+# Tous les accès PostgreSQL utilisent maintenant le nom du service postgresdb, pas localhost.      
 
 # Les variables d’environnement Spring Boot pointent vers jdbc:postgresql://postgresdb:5432/....
 
