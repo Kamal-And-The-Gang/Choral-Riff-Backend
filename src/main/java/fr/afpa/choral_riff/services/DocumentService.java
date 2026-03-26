@@ -116,8 +116,12 @@ public class DocumentService {
         document.setFormat(format);
         document.setDateAjout(LocalDate.now());
         document.setUrlFichier("/" + UPLOAD_DIR + fileName);
+        document.setNomOriginal(file.getOriginalFilename()); // <-- ici le vrai nom
         document.setMorceau(morceau);
         document.setUtilisateur(utilisateur);
+
+        // <-- ICI on met le nom original
+document.setNomOriginal(file.getOriginalFilename());
 
         Document saved = documentRepository.save(document);
         return documentMapper.toDto(saved);
@@ -135,26 +139,59 @@ public class DocumentService {
         return documentMapper.toDto(document);
     }
 
-    public DocumentDto create(DocumentDto documentDto) {
-        Document document = documentMapper.toEntity(documentDto);
+//     public DocumentDto create(DocumentDto documentDto) {
+//         Document document = documentMapper.toEntity(documentDto);
 
-        if (documentDto.morceauId() != null) {
-            Morceau morceau = morceauRepository.findById(documentDto.morceauId())
-                    .orElseThrow(
-                            () -> new RuntimeException("Morceau non trouvé avec l'ID : " + documentDto.morceauId()));
-            document.setMorceau(morceau);
-        }
+//         if (documentDto.morceauId() != null) {
+//             Morceau morceau = morceauRepository.findById(documentDto.morceauId())
+//                     .orElseThrow(
+//                             () -> new RuntimeException("Morceau non trouvé avec l'ID : " + documentDto.morceauId()));
+//             document.setMorceau(morceau);
+//         }
 
-        if (documentDto.utilisateurId() != null) {
-            Utilisateur utilisateur = utilisateurRepository.findById(documentDto.utilisateurId())
-                    .orElseThrow(() -> new RuntimeException(
-                            "Utilisateur non trouvé avec l'ID : " + documentDto.utilisateurId()));
-            document.setUtilisateur(utilisateur);
-        }
+//         if (documentDto.utilisateurId() != null) {
+//             Utilisateur utilisateur = utilisateurRepository.findById(documentDto.utilisateurId())
+//                     .orElseThrow(() -> new RuntimeException(
+//                             "Utilisateur non trouvé avec l'ID : " + documentDto.utilisateurId()));
+//             document.setUtilisateur(utilisateur);
+//         }
 
-        Document savedDocument = documentRepository.save(document);
-        return documentMapper.toDto(savedDocument);
+//         Document savedDocument = documentRepository.save(document);
+//         return documentMapper.toDto(savedDocument);
+//     }
+
+public DocumentDto create(DocumentDto documentDto) {
+
+    Morceau morceau = morceauRepository.findById(documentDto.morceauId())
+            .orElseThrow(() ->
+                    new RuntimeException("Morceau non trouvé avec l'ID : " + documentDto.morceauId()));
+
+    Long ensembleId = morceau.getEnsemble().getId();
+
+    boolean adminOuModerateur = utilisateurEnsembleService.utilisateurAutorise(
+            documentDto.utilisateurId(),
+            ensembleId,
+            List.of("ADMIN", "MODERATEUR"));
+
+    if (!adminOuModerateur) {
+        throw new AccessDeniedException(
+                "Vous n'avez pas le droit d'ajouter un document");
     }
+
+    Document document = documentMapper.toEntity(documentDto);
+
+    document.setMorceau(morceau);
+
+    Utilisateur utilisateur = utilisateurRepository.findById(documentDto.utilisateurId())
+            .orElseThrow(() ->
+                    new RuntimeException("Utilisateur non trouvé avec l'ID : " + documentDto.utilisateurId()));
+
+    document.setUtilisateur(utilisateur);
+
+    Document savedDocument = documentRepository.save(document);
+
+    return documentMapper.toDto(savedDocument);
+}
 
     public List<DocumentDto> getDocumentsByMorceauId(Long morceauId) {
         Morceau morceau = morceauRepository.findById(morceauId)
@@ -190,12 +227,36 @@ public class DocumentService {
                 .collect(Collectors.toList());
     }
 
-    public void delete(Long documentId) {
-        Document document = documentRepository.findById(documentId)
-                .orElseThrow(() -> new EntityNotFoundException("Document not found with id: " + documentId));
+//     public void delete(Long documentId) {
+//         Document document = documentRepository.findById(documentId)
+//                 .orElseThrow(() -> new EntityNotFoundException("Document not found with id: " + documentId));
 
-        documentRepository.delete(document);
+//         documentRepository.delete(document);
+//     }
+
+public void delete(Long documentId, Long userId) {
+
+    Document document = documentRepository.findById(documentId)
+            .orElseThrow(() -> new EntityNotFoundException(
+                    "Document not found with id: " + documentId));
+
+    Morceau morceau = document.getMorceau();
+    Long ensembleId = morceau.getEnsemble().getId();
+
+    boolean adminOuModerateur = utilisateurEnsembleService.utilisateurAutorise(
+            userId,
+            ensembleId,
+            List.of("ADMIN", "MODERATEUR"));
+
+    boolean createur = document.getUtilisateur().getId().equals(userId);
+
+    if (!adminOuModerateur && !createur) {
+        throw new AccessDeniedException(
+                "Vous n'avez pas le droit de supprimer ce document");
     }
+
+    documentRepository.delete(document);
+}
 
     public List<InstrumentDto> getInstrumentsByDocument(Long documentId) {
         // TODO Auto-generated method stub

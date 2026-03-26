@@ -20,10 +20,10 @@ public class DocumentInstrumentController {
 
     public DocumentInstrumentController(DocumentInstrumentService documentInstrumentService,
             InstrumentMapper instrumentMapper,
-            UtilisateurRepository utilisateurRepository) { // 👈 ajouté
+            UtilisateurRepository utilisateurRepository) { 
         this.documentInstrumentService = documentInstrumentService;
         this.instrumentMapper = instrumentMapper;
-        this.utilisateurRepository = utilisateurRepository; // 👈 initialisation
+        this.utilisateurRepository = utilisateurRepository; 
     }
 
     /**
@@ -38,21 +38,37 @@ public class DocumentInstrumentController {
     // return ResponseEntity.ok().build();
     // }
 
-    @PostMapping("/add")
-    public ResponseEntity<Void> addInstrumentToDocument(
-            @RequestParam Long documentId,
-            @RequestParam Long instrumentId) {
+    // @PostMapping("/add")
+    // public ResponseEntity<Void> addInstrumentToDocument(
+    //         @RequestParam Long documentId,
+    //         @RequestParam Long instrumentId) {
 
-        // 🔹 Récupérer un utilisateur de test
-        // Par exemple, le premier utilisateur de la base (ou ID fixe)
-        Utilisateur utilisateur = utilisateurRepository.findById(1L)
-                .orElseThrow(() -> new RuntimeException("Utilisateur de test non trouvé"));
+    //     // 🔹 Récupérer un utilisateur de test
+    //     // Par exemple, le premier utilisateur de la base (ou ID fixe)
+    //     Utilisateur utilisateur = utilisateurRepository.findById(1L)
+    //             .orElseThrow(() -> new RuntimeException("Utilisateur de test non trouvé"));
 
-        // Appel du service avec l'utilisateur
-        documentInstrumentService.addInstrumentToDocument(documentId, instrumentId, utilisateur);
+    //     // Appel du service avec l'utilisateur
+    //     documentInstrumentService.addInstrumentToDocument(documentId, instrumentId, utilisateur);
 
-        return ResponseEntity.ok().build();
-    }
+    //     return ResponseEntity.ok().build();
+    // }
+@PostMapping("/add")
+public ResponseEntity<Void> addInstrumentToDocument(
+        @RequestParam Long documentId,
+        @RequestParam Long instrumentId,
+        @RequestParam Long userId  // <-- ID de l'utilisateur connecté
+) {
+    Utilisateur utilisateur = utilisateurRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID : " + userId));
+
+    // Appel du service qui va vérifier si l'utilisateur peut ajouter l'instrument
+    documentInstrumentService.addInstrumentToDocument(documentId, instrumentId, utilisateur);
+
+    return ResponseEntity.ok().build();
+}
+
+    
 
     /**
      * Supprimer un instrument d’un document

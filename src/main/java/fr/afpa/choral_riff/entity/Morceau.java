@@ -37,8 +37,11 @@ public class Morceau {
     // private Ensemble ensemble;
 
     @ManyToOne
-    @JoinColumn(name = "id_createur")
+    @JoinColumn(name = "id_createur", nullable = true) // <-- nullable true
     private Utilisateur createur;
+
+    @Column(name = "createur_nom")
+    private String createurNom;
 
     @OneToMany(mappedBy = "morceau", cascade = CascadeType.ALL)
     private Set<Document> documents;
@@ -107,5 +110,13 @@ public class Morceau {
     public void setDocuments(Set<Document> documents) {
         this.documents = documents;
     }
+
+    public String getCreateurNom() {
+    return createurNom;
+}
+
+public void setCreateurNom(String createurNom) {
+    this.createurNom = createurNom;
+}
 
 }

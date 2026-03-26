@@ -19,12 +19,15 @@ import java.util.List;
  */
 
 public record DocumentDto(
-        Long id_document,
-        String type,
-        String format,
-        LocalDate dateAjout,
-        String urlFichier,
-        Long utilisateurId,
-        Long morceauId,
-        List<InstrumentDto> instruments // <-- instruments associés
-) {}
+                Long id_document,
+                String type,
+                String format,
+                LocalDate dateAjout,
+                String urlFichier,
+                String nomOriginal, // <- nouveau champ
+                  
+                Long utilisateurId,
+                Long morceauId,
+                List<InstrumentDto> instruments // <-- instruments associés
+) {
+}

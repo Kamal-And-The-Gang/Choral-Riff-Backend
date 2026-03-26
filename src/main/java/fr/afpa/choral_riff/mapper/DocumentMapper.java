@@ -37,6 +37,8 @@ public interface DocumentMapper {
     @Mapping(source = "utilisateur.id", target = "utilisateurId")
     @Mapping(source = "morceau.id", target = "morceauId")
     @Mapping(source = "id", target = "id_document")
+    @Mapping(source = "urlFichier", target = "urlFichier")
+    @Mapping(source = "nomOriginal", target = "nomOriginal") // nouveau champ
     @Mapping(target = "instruments", expression = "java(mapInstruments(document))")
     DocumentDto toDto(Document document);
 

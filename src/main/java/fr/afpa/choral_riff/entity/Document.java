@@ -42,6 +42,8 @@ public class Document {
     @ManyToOne
     @JoinColumn(name = "id_morceau", nullable = false)
     private Morceau morceau;
+    @Column(name = "nom_original", length = 255)
+    private String nomOriginal;
 
     /** Liste des relations document-instrument. */
     @OneToMany(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -77,11 +79,11 @@ public class Document {
     }
 
     // public boolean isOriginal() {
-    //     return original;
+    // return original;
     // }
 
     // public void setOriginal(boolean original) {
-    //     this.original = original;
+    // this.original = original;
     // }
 
     // Getters et Setters
@@ -181,6 +183,15 @@ public class Document {
     // Méthode utilitaire pour supprimer un instrument
     public void removeInstrument(Instrument instrument) {
         documentInstruments.removeIf(di -> di.getInstrument().equals(instrument));
+    }
+
+    // Getter & Setter
+    public String getNomOriginal() {
+        return nomOriginal;
+    }
+
+    public void setNomOriginal(String nomOriginal) {
+        this.nomOriginal = nomOriginal;
     }
 
 }

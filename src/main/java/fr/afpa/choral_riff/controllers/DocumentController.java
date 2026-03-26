@@ -3,9 +3,28 @@ package fr.afpa.choral_riff.controllers;
 
 import fr.afpa.choral_riff.dto.DocumentDto;
 import fr.afpa.choral_riff.dto.InstrumentDto;
+import fr.afpa.choral_riff.entity.Document;
+import fr.afpa.choral_riff.repositories.DocumentRepository;
 import fr.afpa.choral_riff.security.SecurityService;
 import fr.afpa.choral_riff.services.DocumentService;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+
+
+import java.nio.file.Paths;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,7 +36,7 @@ import java.util.List;
 public class DocumentController {
 
     private final DocumentService documentService;
-    private final SecurityService securityService; // ajoute ceci
+    private final DocumentRepository documentRepository;
 
     /**
      * Injection du service DocumentService via le constructeur.
@@ -27,11 +46,12 @@ public class DocumentController {
     // this.documentService = documentService;
     // }
 
-    public DocumentController(DocumentService documentService,
-            SecurityService securityService) { // 👈 injecte ici
-        this.documentService = documentService;
-        this.securityService = securityService;
-    }
+   public DocumentController(DocumentService documentService,
+                          DocumentRepository documentRepository,
+                          SecurityService securityService) {
+    this.documentService = documentService;
+    this.documentRepository = documentRepository;
+}
 
     /*
      * ============================================================
@@ -141,9 +161,18 @@ public class DocumentController {
      * ============================================================
      */
 
+    // @DeleteMapping("/{id}")
+    // public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
+    // documentService.delete(id);
+    // return ResponseEntity.noContent().build();
+    // }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
-        documentService.delete(id);
+    public ResponseEntity<Void> delete(
+            @PathVariable Long id,
+            @RequestParam Long userId) {
+
+        documentService.delete(id, userId);
         return ResponseEntity.noContent().build();
     }
 
@@ -176,6 +205,24 @@ public class DocumentController {
     public ResponseEntity<List<InstrumentDto>> getInstrumentsByDocument(@PathVariable Long documentId) {
         List<InstrumentDto> instruments = documentService.getInstrumentsByDocument(documentId);
         return ResponseEntity.ok(instruments);
+    }
+
+    @GetMapping("/file/{documentId}")
+    public ResponseEntity<Resource> getFile(@PathVariable Long documentId) throws Exception {
+
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document non trouvé avec l'ID : " + documentId));
+
+        // Récupère juste le nom du fichier
+        String fileName = document.getUrlFichier().replaceFirst("^/+", ""); // retire le / devant si présent
+
+        Path path = Paths.get(fileName.startsWith("uploads") ? fileName : "uploads/" + fileName);
+        Resource resource = new UrlResource(path.toUri());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + document.getUrlFichier() + "\"")
+                .body(resource);
     }
 
 }

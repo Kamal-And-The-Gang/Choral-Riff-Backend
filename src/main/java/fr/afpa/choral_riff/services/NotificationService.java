@@ -223,53 +223,20 @@ public class NotificationService {
         notificationRepository.saveAll(notifications);
     }
 
-    // @Transactional
-    // public void notifyInstrumentAjoute(Long utilisateurId, Long instrumentId, Long morceauId, String instrumentNom) {
-    //     Morceau morceau = morceauRepository.findById(morceauId)
-    //             .orElseThrow(() -> new RuntimeException("Morceau non trouvé"));
-
-    //     Ensemble ensemble = morceau.getEnsemble();
-    //     List<UtilisateurEnsemble> membresEnsemble = utilisateurEnsembleRepository.findByEnsembleId(ensemble.getId());
-    //     String nomUtilisateur = utilisateurRepository.findById(utilisateurId)
-    //             .map(u -> u.getPrenom() + " " + u.getNom())
-    //             .orElse("Utilisateur inconnu");
-
-    //     List<Notification> notifications = new ArrayList<>();
-    //     for (UtilisateurEnsemble ue : membresEnsemble) {
-    //         Notification notification = new Notification();
-    //         notification.setUtilisateur(ue.getUtilisateur());
-    //         notification.setType(NotificationType.INSTRUMENT_AJOUTE);
-    //         notification.setMessage(
-    //                 "L'utilisateur \"" + nomUtilisateur + "\" a ajouté l'instrument \"" + instrumentNom
-    //                         + "\" au morceau \"" + morceau.getTitre() + "\"");
-    //         notification.setIsRead(false);
-    //         notification.setDateCreation(LocalDateTime.now());
-    //         notification.setEnsembleId(ensemble.getId());
-    //         notifications.add(notification);
-    //     }
-
-    //     notificationRepository.saveAll(notifications);
-    // }
-
- public void notifierInstrumentAjoute(
+    public void notifierInstrumentAjoute(
             Utilisateur utilisateur,
+
             String nomInstrument,
-            Long documentId
-    ) {
+            Long documentId) {
         Notification notification = new Notification();
         notification.setUtilisateur(utilisateur);
         notification.setType(NotificationType.INSTRUMENT_AJOUTE);
         notification.setMessage(
-            "L’instrument \"" + nomInstrument + "\" a été ajouté au document #" + documentId
-        );
+                "L’instrument \"" + nomInstrument + "\" a été ajouté au document #" + documentId);
         notification.setIsRead(false);
         notification.setValid(true);
 
         notificationRepository.save(notification);
     }
-
-
-
-
 
 }

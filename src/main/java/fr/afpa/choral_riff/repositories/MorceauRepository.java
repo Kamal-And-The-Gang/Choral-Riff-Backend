@@ -19,10 +19,18 @@ public interface MorceauRepository extends JpaRepository<Morceau, Long> {
 
     Optional<Morceau> findTopByEnsembleIdOrderByIdDesc(Long ensembleId);
 
-    // --- AJOUTÉ pour la suppression en cascade ---
+    // --- AJOUTÉ pour la suppression en cascade d'un ensemble ---
     @Modifying
     @Transactional
     @Query("DELETE FROM Morceau m WHERE m.ensemble.id = :ensembleId")
     void deleteByEnsembleId(@Param("ensembleId") Long ensembleId);
 
+    // --- NOUVELLE MÉTHODE : récupérer les morceaux créés par un utilisateur ---
+    List<Morceau> findByCreateur_Id(Long createurId);
+
+    // --- Supprimer les morceaux d'un utilisateur (optionnel) ---
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Morceau m WHERE m.createur.id = :utilisateurId")
+    void deleteByCreateurId(@Param("utilisateurId") Long utilisateurId);
 }

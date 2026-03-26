@@ -2,9 +2,11 @@ package fr.afpa.choral_riff.services;
 
 import fr.afpa.choral_riff.dto.RegisterDto;
 import fr.afpa.choral_riff.dto.UtilisateurDto;
+import fr.afpa.choral_riff.entity.Morceau;
 import fr.afpa.choral_riff.entity.Utilisateur;
 import fr.afpa.choral_riff.entity.UtilisateurEnsemble;
 import fr.afpa.choral_riff.mapper.UtilisateurMapper;
+import fr.afpa.choral_riff.repositories.MorceauRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurEnsembleRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,21 +26,23 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+
 @Service
-/**
- * 
- */
 public class UtilisateurService {
 
     private final UtilisateurRepository utilisateurRepository;
-    private final UtilisateurMapper utilisateurMapper;
+    private final MorceauRepository morceauRepository; // <-- ajouter
     private final PasswordEncoder passwordEncoder;
-    private UtilisateurEnsembleRepository utilisateurEnsembleRepository;
+    private final UtilisateurEnsembleRepository utilisateurEnsembleRepository;
+    private final UtilisateurMapper utilisateurMapper;
 
-    public UtilisateurService(UtilisateurRepository utilisateurRepository, UtilisateurMapper utilisateurMapper,
-            PasswordEncoder passwordEncoder, InvitationService invitationService,
-            UtilisateurEnsembleRepository utilisateurEnsembleRepository) {
+    public UtilisateurService(UtilisateurRepository utilisateurRepository,
+                              MorceauRepository morceauRepository, // <-- ajouter
+                              UtilisateurMapper utilisateurMapper,
+                              PasswordEncoder passwordEncoder,
+                              UtilisateurEnsembleRepository utilisateurEnsembleRepository) {
         this.utilisateurRepository = utilisateurRepository;
+        this.morceauRepository = morceauRepository; // <-- affecter
         this.utilisateurMapper = utilisateurMapper;
         this.passwordEncoder = passwordEncoder;
         this.utilisateurEnsembleRepository = utilisateurEnsembleRepository;
@@ -97,12 +101,47 @@ public class UtilisateurService {
                 .orElseThrow(() -> new NoSuchElementException("Utilisateur non trouvé avec email : " + email));
     }
 
-    public void delete(Long id) {
-        if (!utilisateurRepository.existsById(id)) {
-            throw new NoSuchElementException("Utilisateur non trouvé avec id " + id);
-        }
-        utilisateurRepository.deleteById(id);
+    // public void delete(Long id) {
+    //     if (!utilisateurRepository.existsById(id)) {
+    //         throw new NoSuchElementException("Utilisateur non trouvé avec id " + id);
+    //     }
+    //     utilisateurRepository.deleteById(id);
+    // }
+
+
+//     public void delete(Long id) {
+//     Utilisateur utilisateur = utilisateurRepository.findById(id)
+//             .orElseThrow(() -> new NoSuchElementException("Utilisateur non trouvé avec id " + id));
+
+//     // Détacher les morceaux créés avant suppression
+//     if (utilisateur.getMorceauxCree() != null) {
+//         for (Morceau m : utilisateur.getMorceauxCree()) {
+//             m.setCreateur(null); // détacher l'utilisateur
+//             m.setCreateurNom(utilisateur.getNom() + " " + utilisateur.getPrenom()); // garder le nom
+//             morceauRepository.save(m); // besoin d’injecter MorceauRepository
+//         }
+//     }
+
+//     // Supprimer l’utilisateur après détachement
+//     utilisateurRepository.delete(utilisateur);
+// }
+
+
+public void delete(Long id) {
+    Utilisateur utilisateur = utilisateurRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("Utilisateur non trouvé avec id " + id));
+
+    // Détacher les morceaux créés avant suppression
+    List<Morceau> morceaux = morceauRepository.findByCreateur_Id(id);
+    for (Morceau m : morceaux) {
+        m.setCreateur(null);
+        m.setCreateurNom(utilisateur.getNom() + " " + utilisateur.getPrenom()); // si tu ajoutes ce champ
+        morceauRepository.save(m);
     }
+
+    // Supprimer l’utilisateur
+    utilisateurRepository.delete(utilisateur);
+}
 
     public Utilisateur createFromRegisterDto(RegisterDto dto) {
         Utilisateur utilisateur = new Utilisateur();

@@ -61,6 +61,7 @@ public class Utilisateur implements UserDetails {
     private Set<UtilisateurEnsemble> utilisateurEnsembles = new HashSet<>();
 
     // -------------------- UserDetails --------------------
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<SimpleGrantedAuthority> listAuthorities = new ArrayList<>();

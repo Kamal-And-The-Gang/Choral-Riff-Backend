@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 public class NotificationDto {
 
     private Long id;
-    private String type; // "INVITATION", "MORCEAU_AJOUTE", "GENERAL"
+    private String type; // "INVITATION", "MORCEAU_AJOUTE", "GENERAL" et autres
     private String message;
     private Boolean isRead;
     private LocalDateTime createdAt;
