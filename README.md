@@ -1,4 +1,4 @@
-# Chorall-Riff-Backend
+# Choral-Riff-Backend
 
 
 ## Description
