@@ -34,3 +34,4 @@ build/
 
 # Secrets
 .devcontainer/.env
+src/main/resources/application-dev.properties
