@@ -9,7 +9,6 @@ Il expose des API REST pour créer, lire, mettre à jour et supprimer des ensemb
 - Java 21
 - Spring Boot 3
 - Spring Data JPA
-- Spring Data JPA
 - Hibernate
 - Spring Security
 - PostgreSQL
