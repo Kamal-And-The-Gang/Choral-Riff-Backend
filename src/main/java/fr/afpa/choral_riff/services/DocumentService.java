@@ -84,9 +84,9 @@ public class DocumentService {
         if (file.isEmpty()) {
             throw new RuntimeException("Fichier vide");
         }
-        if (file.getSize() > 5 * 1024 * 1024) {
-            throw new RuntimeException("Fichier trop volumineux");
-        }
+        if (file.getSize() > 50 * 1024 * 1024) {
+    throw new RuntimeException("Fichier trop volumineux");
+}
 
         // 2) Calcul du type réel
         String realType = file.getContentType(); // ex: image/png
