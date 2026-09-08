@@ -92,7 +92,7 @@
 
 #       - name: Wait for Postgres to be ready
 #         run: |
-#           until pg_isready -h localhost -p 5432 -U postgres; do
+#          until pg_isready -h localhost -p 5432 -U postgres; do
 #             echo "Waiting for Postgres..."
 #             sleep 5
 #           done
@@ -148,7 +148,7 @@ jobs:
       # 3️⃣ Attendre que PostgreSQL soit prêt
       - name: Wait for Postgres to be ready
         run: |
-          until pg_isready -h postgresdb -p 5432 -U postgres; do
+             until pg_isready -h localhost -p 5432 -U postgres; do
             echo "Waiting for Postgres..."
             sleep 5
           done
@@ -165,7 +165,7 @@ jobs:
       - name: Compile and run tests
         run: mvn clean verify
         env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://postgresdb:5432/choralriffdb
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/choralriffdb
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: B@nLgU4qz*9?D~3n83
 
@@ -183,7 +183,6 @@ jobs:
           echo "=== Surefire reports ==="
           cat target/surefire-reports/*.txt || true
 
-# Tous les accès PostgreSQL utilisent maintenant le nom du service postgresdb, pas localhost.      
 
 # Les variables d’environnement Spring Boot pointent vers jdbc:postgresql://postgresdb:5432/....
 
