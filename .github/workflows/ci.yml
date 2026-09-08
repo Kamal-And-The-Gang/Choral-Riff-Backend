@@ -352,7 +352,7 @@ jobs:
       #  Tester la connexion à la DB (optionnel mais utile)
       - name: Test DB connection
         run: |
-          psql -h localhost -U postgres -d choralriffdb -c '\l'
+          psql -h localhost -U postgres -d choralriffdb -c 'SELECT 1;'
         env:
           PGPASSWORD: B@nLgU4qz*9?D~3n83
       # Compiler et exécuter les tests
