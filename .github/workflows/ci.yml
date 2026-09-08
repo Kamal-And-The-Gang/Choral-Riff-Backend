@@ -19,7 +19,7 @@ jobs:
         image: postgres:17.2
         env:
           POSTGRES_USER: postgres
-          # POSTGRES_PASSWORD: B@nLgU4qz*9?D~3n83
+         
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: choralriffdb
         ports:
@@ -50,7 +50,7 @@ jobs:
             sleep 5
           done
         env:
-          # PGPASSWORD: B@nLgU4qz*9?D~3n83
+          
           PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 
       #  Tester la connexion à la DB (optionnel mais utile)
@@ -58,7 +58,7 @@ jobs:
         run: |
           psql -h localhost -U postgres -d choralriffdb -c 'SELECT 1;'
         env:
-          # PGPASSWORD: B@nLgU4qz*9?D~3n83
+         
           PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 
       # Compiler et exécuter les tests
