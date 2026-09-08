@@ -66,7 +66,7 @@ jobs:
           SPRING_DATASOURCE_USERNAME: postgres
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          JWT_SECRET_KEY: test-secret-key-for-ci-only-not-for-production-use
+          JWT_SECRET_KEY: dGVzdC1zZWNyZXQta2V5LWZvci1jaS1vbmx5LW5vdC1mb3ItcHJvZHVjdGlvbi11c2U=
           MAIL_USERNAME: test@example.com
           MAIL_PASSWORD: dummy-password
           GROQ_API_KEY: dummy-key-for-ci
