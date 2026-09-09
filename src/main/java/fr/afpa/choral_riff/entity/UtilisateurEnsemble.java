@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * 
  * Cette entité modélise l'appartenance d'un utilisateur à un ensemble avec un
  * rôle spécifique
- * (exemple : ADMIN, MEMBRE, Modérateur) ainsi que la date d'adhésion à cet
+ * (exemple : OWNER, MEMBRE, Modérateur) ainsi que la date d'adhésion à cet
  * ensemble.
  * 
  * (une personne ne peut avoir qu'un seul rôle par ensemble).
@@ -122,3 +122,4 @@ public class UtilisateurEnsemble {
         this.nomComplet = nomComplet;
     }
 }
+

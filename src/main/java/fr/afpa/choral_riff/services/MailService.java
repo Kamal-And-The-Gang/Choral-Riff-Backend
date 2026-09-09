@@ -47,3 +47,4 @@ public class MailService {
         logger.info("Email envoyé à {}", to);
     }
 }
+

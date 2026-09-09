@@ -39,3 +39,4 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
   List<Notification> findValidByUtilisateurId(@Param("utilisateurId") Long utilisateurId);
 
 }
+

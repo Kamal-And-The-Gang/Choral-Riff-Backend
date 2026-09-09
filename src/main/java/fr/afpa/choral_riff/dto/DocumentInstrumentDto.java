@@ -8,3 +8,4 @@ public record DocumentInstrumentDto(
         Long instrumentId,
         LocalDate dateAjout
 ) {}
+

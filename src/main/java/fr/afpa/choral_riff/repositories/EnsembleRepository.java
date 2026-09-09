@@ -34,3 +34,4 @@ Optional<Ensemble> findByNomWithRelations(@Param("nom") String nom);
     Optional<Ensemble> findByIdWithRelations(@Param("id") Long id);
 
 }
+

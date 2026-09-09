@@ -93,3 +93,4 @@ public class SecurityService {
                 "Type de principal non géré : " + principal.getClass().getName());
     }
 }
+

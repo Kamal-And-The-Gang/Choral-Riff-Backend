@@ -110,7 +110,7 @@ public class InstrumentService {
 
     /**
      * Ajoute un instrument à un ensemble AVEC contrôle de rôle.
-     * (ADMIN ou MODERATEUR)
+     * (OWNER ou MODERATEUR)
      */
 
     public InstrumentDto update(Long id, InstrumentDto dto) {
@@ -139,7 +139,7 @@ public class InstrumentService {
         Long ensembleId = document.getMorceau().getEnsemble().getId();
 
         // Vérifie les droits
-        if (!utilisateurEnsembleService.utilisateurAutorise(userId, ensembleId, List.of("ADMIN", "MODERATEUR"))) {
+        if (!utilisateurEnsembleService.utilisateurAutorise(userId, ensembleId, List.of("OWNER", "MODERATEUR"))) {
             throw new RuntimeException("Vous n'avez pas les droits pour modifier cet instrument");
         }
 
@@ -152,3 +152,4 @@ public class InstrumentService {
     }
 
 }
+

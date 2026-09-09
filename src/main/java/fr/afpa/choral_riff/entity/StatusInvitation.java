@@ -12,3 +12,4 @@ public enum StatusInvitation {
     ACCEPTEE,
     REFUSEE
 }
+

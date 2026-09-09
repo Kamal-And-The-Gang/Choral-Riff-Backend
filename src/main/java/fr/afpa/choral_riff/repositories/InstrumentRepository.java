@@ -11,3 +11,4 @@ public interface InstrumentRepository extends JpaRepository<Instrument, Long> {
   // Méthode pour récupérer un instrument par son nom
   Optional<Instrument> findByNom(String nom);
 }
+

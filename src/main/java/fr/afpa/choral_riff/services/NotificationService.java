@@ -21,6 +21,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import fr.afpa.choral_riff.entity.Role;
+import fr.afpa.choral_riff.repositories.EnsembleRepository;
 
 /**
  * Service pour gérer toutes les notifications de l'application.
@@ -39,21 +41,25 @@ public class NotificationService {
     private final NotificationMapper notificationMapper;
     private final UtilisateurEnsembleRepository utilisateurEnsembleRepository;
     private final MorceauRepository morceauRepository; // <-- Déclaration de morceauRepository
+    private final EnsembleRepository ensembleRepository;
 
     public NotificationService(
-            UtilisateurEnsembleRepository utilisateurEnsembleRepository,
-            NotificationRepository notificationRepository,
-            UtilisateurRepository utilisateurRepository,
-            InvitationRepository invitationRepository,
-            NotificationMapper notificationMapper,
-            MorceauRepository morceauRepository) { // <-- Ajout de morceauRepository
-        this.notificationRepository = notificationRepository;
-        this.utilisateurRepository = utilisateurRepository;
-        this.invitationRepository = invitationRepository;
-        this.notificationMapper = notificationMapper;
-        this.utilisateurEnsembleRepository = utilisateurEnsembleRepository;
-        this.morceauRepository = morceauRepository; // <-- Initialisation du morceauRepository
-    }
+        UtilisateurEnsembleRepository utilisateurEnsembleRepository,
+        NotificationRepository notificationRepository,
+        UtilisateurRepository utilisateurRepository,
+        InvitationRepository invitationRepository,
+        NotificationMapper notificationMapper,
+        MorceauRepository morceauRepository,
+        EnsembleRepository ensembleRepository) {
+
+    this.notificationRepository = notificationRepository;
+    this.utilisateurRepository = utilisateurRepository;
+    this.invitationRepository = invitationRepository;
+    this.notificationMapper = notificationMapper;
+    this.utilisateurEnsembleRepository = utilisateurEnsembleRepository;
+    this.morceauRepository = morceauRepository;
+    this.ensembleRepository = ensembleRepository;
+}
 
     // ==========================
     // Méthode principale de création de notification
@@ -239,4 +245,80 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
+
+        @Transactional
+    public void accepterRattachement(Long notificationId) {
+
+        Notification notification =
+                notificationRepository
+                        .findById(notificationId)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Notification non trouvée"));
+
+        if (notification.getType()
+                != NotificationType.DEMANDE_RATTACHEMENT) {
+
+            throw new RuntimeException(
+                    "Cette notification n'est pas une demande de rattachement");
+        }
+
+        Utilisateur utilisateur =
+                notification.getUtilisateur();
+
+        if (utilisateur == null) {
+            throw new RuntimeException(
+                    "Aucun utilisateur associé à la notification");
+        }
+
+        Long ensembleId =
+                notification.getEnsembleId();
+
+        if (ensembleId == null) {
+            throw new RuntimeException(
+                    "Aucun ensemble associé à la notification");
+        }
+
+        Ensemble ensemble =
+                ensembleRepository.findById(ensembleId)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Ensemble non trouvé : "
+                                                + ensembleId));
+
+        boolean dejaRattache =
+                utilisateurEnsembleRepository
+                        .existsByUtilisateurIdAndEnsembleId(
+                                utilisateur.getId(),
+                                ensembleId);
+
+        if (!dejaRattache) {
+
+            UtilisateurEnsemble rattachement =
+                    new UtilisateurEnsemble();
+
+            rattachement.setUtilisateur(
+                    utilisateur);
+
+            rattachement.setEnsemble(
+                    ensemble);
+
+            rattachement.setRoleDansEnsemble(
+                    Role.MEMBRE);
+
+            rattachement.setDateAdhesion(
+                    LocalDateTime.now());
+
+            rattachement.setCreator(false);
+
+            utilisateurEnsembleRepository.save(
+                    rattachement);
+        }
+
+        notificationRepository.delete(notification);
+
+        notifyRattachement(utilisateur, ensemble);
+    }
+
 }
+

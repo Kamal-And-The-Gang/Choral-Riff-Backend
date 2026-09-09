@@ -21,3 +21,4 @@ public interface MorceauMapper {
     @Mapping(target = "documents", ignore = true)
     Morceau toEntity(MorceauDto dto);
 }
+

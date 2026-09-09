@@ -18,3 +18,4 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
 
     void deleteByEmail(String email);
 }
+

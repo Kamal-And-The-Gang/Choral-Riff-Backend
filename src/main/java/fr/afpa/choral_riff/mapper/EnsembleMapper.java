@@ -86,7 +86,7 @@ public interface EnsembleMapper {
         dto.setNombreMembres(users.size());
 
         for (UtilisateurEnsemble ue : users) {
-            if (ue.getRoleDansEnsemble() == Role.ADMIN) {
+            if (ue.getRoleDansEnsemble() == Role.OWNER) {
                 dto.setCreatedBy(ue.getUtilisateur().getId());
                 dto.setCreateurNom(ue.getUtilisateur().getNom());
                 dto.setCreateurPrenom(ue.getUtilisateur().getPrenom());
@@ -95,3 +95,4 @@ public interface EnsembleMapper {
         }
     }
 }
+

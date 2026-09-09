@@ -124,7 +124,7 @@ public class InvitationController {
      * l'invitation.
      * 
      * @param token Token de l'invitation
-     * @return Nom du rôle (ADMIN, MEMBRE, etc.) ou 404 si l'utilisateur n'existe
+     * @return Nom du rôle (OWNER, MEMBRE, etc.) ou 404 si l'utilisateur n'existe
      *         pas encore
      */
     @GetMapping("/role/{token}")
@@ -352,3 +352,4 @@ public class InvitationController {
     }
 
 }
+

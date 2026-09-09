@@ -31,3 +31,4 @@ public interface CreateInvitationMapper {
     // InvitationDTO
     CreateInvitationDTO toDto(Invitation invitation);
 }
+

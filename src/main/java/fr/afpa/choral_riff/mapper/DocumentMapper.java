@@ -60,3 +60,4 @@ public interface DocumentMapper {
     @Mapping(target = "instruments", ignore = true) // conseillé pour éviter erreurs et cycles
     Document toEntity(DocumentDto documentDto);
 }
+

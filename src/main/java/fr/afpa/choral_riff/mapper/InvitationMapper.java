@@ -74,3 +74,4 @@ public interface InvitationMapper {
         return invitation != null ? invitation.getId() : null;
     }
 }
+

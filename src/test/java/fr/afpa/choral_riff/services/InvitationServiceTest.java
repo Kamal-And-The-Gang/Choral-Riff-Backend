@@ -183,3 +183,4 @@ class InvitationServiceTest {
         verify(utilisateurEnsembleRepository, never()).saveAndFlush(any());
     }
 }
+

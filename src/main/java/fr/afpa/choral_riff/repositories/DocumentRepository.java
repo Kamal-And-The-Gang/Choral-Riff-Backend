@@ -30,3 +30,4 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
    */
   List<Document> findByMorceau(Morceau morceau);
 }
+

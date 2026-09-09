@@ -9,8 +9,7 @@ package fr.afpa.choral_riff.entity;
  */
 
 public enum Role {
-    ADMIN,
+    OWNER,
     MEMBRE,
     MODERATEUR
-
 }

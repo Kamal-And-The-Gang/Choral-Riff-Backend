@@ -26,4 +26,7 @@ public interface UtilisateurEnsembleRepository extends JpaRepository<Utilisateur
 
      // Compter le nombre de membres pour un ensemble
     int countByEnsemble_Id(Long ensembleId);
+
+    void deleteByUtilisateur_IdAndEnsemble_Id(Long utilisateurId, Long ensembleId);
 }
+

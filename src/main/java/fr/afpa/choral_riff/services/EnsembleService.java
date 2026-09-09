@@ -101,9 +101,9 @@ public class EnsembleService {
      * {@code userId}.</li>
      * <li>Crée une relation {@link UtilisateurEnsemble} liant le créateur à
      * l'ensemble
-     * avec le rôle ADMIN et marque l'utilisateur comme créateur.</li>
+     * avec le rôle OWNER et marque l'utilisateur comme créateur.</li>
      * <li>Pour les types restreints d'ensemble (QUATUOR ou BAND), le créateur est
-     * systématiquement ADMIN.</li>
+     * systématiquement OWNER.</li>
      * <li>Ajoute la relation créateur à l'ensemble.</li>
      * <li>Enregistre l'ensemble en base de données avec la relation utilisateur
      * (cascade automatique).</li>
@@ -127,17 +127,17 @@ public class EnsembleService {
 
             Set<UtilisateurEnsemble> userEnsemble = ensemble.getUtilisateurEnsembles();
 
-            Role rolePourCreateur = Role.ADMIN;
+            Role rolePourCreateur = Role.OWNER;
 
             if (dto.getTypeEnsemble() == TypeEnsemble.QUATUOR || dto.getTypeEnsemble() == TypeEnsemble.BAND) {
-                rolePourCreateur = Role.ADMIN; // reste ADMIN, logique pour montrer qu'on force admin
+                rolePourCreateur = Role.OWNER; // reste OWNER, logique pour montrer qu'on force OWNER
             }
 
             // on la modifie avec un nouvel objet de la classe USerEnsemble
             UtilisateurEnsemble utilisateurEnsemble = new UtilisateurEnsemble(
                     createur.get(),
                     ensemble,
-                    Role.ADMIN,
+                    Role.OWNER,
                     LocalDateTime.now());
             // On indique que c'est le créateur de l'ensemble
             utilisateurEnsemble.setCreator(true);
@@ -166,7 +166,7 @@ public class EnsembleService {
                     EnsembleDto dto = ensembleMapper.toDto(ensemble, userId);
 
                     // Ajout du rôle pour l'utilisateur actuel
-                    dto.setUserRole(utilisateurEnsemble.getRoleDansEnsemble().name()); // ADMIN, MEMBRE, etc.
+                    dto.setUserRole(utilisateurEnsemble.getRoleDansEnsemble().name()); // OWNER, MEMBRE, etc.
 
                     return dto;
                 })
@@ -191,7 +191,7 @@ public class EnsembleService {
         if (userId != null) {
             utilisateurEnsembleRepository.findByUtilisateur_IdAndEnsemble_Id(userId, id)
                     .ifPresent(ue -> {
-                        dto.setUserRole(ue.getRoleDansEnsemble().name()); // ADMIN, MODERATEUR, MEMBRE
+                        dto.setUserRole(ue.getRoleDansEnsemble().name()); // OWNER, MODERATEUR, MEMBRE
                         dto.setIsCreator(ue.isCreator()); // true si créateur
                     });
         }
@@ -242,12 +242,12 @@ public class EnsembleService {
     }
 
     /**
-     * Vérifie si un utilisateur a les droits de MODÉRATEUR ou ADMIN sur un ensemble
+     * Vérifie si un utilisateur a les droits de MODÉRATEUR ou OWNER sur un ensemble
      */
     public boolean hasRights(Long userId, Long ensembleId) {
         return utilisateurEnsembleRepository
                 .findByUtilisateur_IdAndEnsemble_Id(userId, ensembleId)
-                .map(ue -> ue.isCreator() || ue.getRoleDansEnsemble() == Role.ADMIN)
+                .map(ue -> ue.isCreator() || ue.getRoleDansEnsemble() == Role.OWNER)
 
                 .orElse(false);
     }
@@ -284,7 +284,7 @@ public class EnsembleService {
      * <ul>
      * <li>Les informations de base (id, nom, description, type, date de création)
      * sont copiées dans un {@link EnsembleDto}.</li>
-     * <li>Le créateur (utilisateur avec le rôle ADMIN) est identifié et ses
+     * <li>Le créateur (utilisateur avec le rôle OWNER) est identifié et ses
      * informations (id, nom, prénom) sont ajoutées.</li>
      * <li>Le nombre total de membres dans l'ensemble est calculé.</li>
      * <li>Le rôle spécifique de l'utilisateur courant et le flag de créateur
@@ -308,9 +308,9 @@ public class EnsembleService {
                     dto.setTypeEnsemble(ensemble.getTypeEnsemble());
                     dto.setDateCreation(ensemble.getDateCreation());
 
-                    // Créateur (ADMIN)
+                    // Créateur (OWNER)
                     ensemble.getUtilisateurEnsembles().stream()
-                            .filter(ue -> ue.getRoleDansEnsemble() == Role.ADMIN)
+                            .filter(ue -> ue.getRoleDansEnsemble() == Role.OWNER)
                             .findFirst()
                             .ifPresent(ue -> {
                                 dto.setCreatedBy(ue.getUtilisateur().getId());
@@ -348,3 +348,4 @@ public class EnsembleService {
     }
 
 }
+

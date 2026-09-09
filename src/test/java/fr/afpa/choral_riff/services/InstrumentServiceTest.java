@@ -174,7 +174,7 @@
 //     void shouldUpdateInstrumentWithRightsCheckWhenAuthorized() {
 //         when(instrumentRepository.findById(5L)).thenReturn(Optional.of(instrument));
 //         when(instrumentRepository.save(any())).thenReturn(instrument);
-//         when(utilisateurEnsembleService.utilisateurAutorise(1L, 100L, List.of("ADMIN", "MODERATEUR"))).thenReturn(true);
+//         when(utilisateurEnsembleService.utilisateurAutorise(1L, 100L, List.of("OWNER", "MODERATEUR"))).thenReturn(true);
 
 //         InstrumentDto dto = instrumentService.update(1L, 5L, instrumentDto);
 
@@ -185,10 +185,11 @@
 //     @Test
 //     void shouldThrowUpdateInstrumentWithRightsCheckWhenNotAuthorized() {
 //         when(instrumentRepository.findById(5L)).thenReturn(Optional.of(instrument));
-//         when(utilisateurEnsembleService.utilisateurAutorise(1L, 100L, List.of("ADMIN", "MODERATEUR"))).thenReturn(false);
+//         when(utilisateurEnsembleService.utilisateurAutorise(1L, 100L, List.of("OWNER", "MODERATEUR"))).thenReturn(false);
 
 //         RuntimeException exception = assertThrows(RuntimeException.class,
 //                 () -> instrumentService.update(1L, 5L, instrumentDto));
 //         assertEquals("Vous n'avez pas les droits pour modifier cet instrument", exception.getMessage());
 //     }
 // }
+

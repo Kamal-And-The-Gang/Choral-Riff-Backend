@@ -17,3 +17,4 @@ public record InstrumentDto(
         String nom,
         Set<Long> documentIds) {
 }
+

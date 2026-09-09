@@ -79,7 +79,7 @@ public class MorceauService {
 
         // --- Vérifie que l'utilisateur est membre de l'ensemble ---
         if (!utilisateurEnsembleService.utilisateurAutorise(userId, dto.ensembleId(),
-                List.of("ADMIN", "MODERATEUR", "MEMBRE"))) {
+                List.of("OWNER", "MODERATEUR", "MEMBRE"))) {
             throw new RuntimeException("Vous devez être membre de l'ensemble pour ajouter un morceau");
         }
 
@@ -153,13 +153,13 @@ public class MorceauService {
 
         // Vérifier que l'utilisateur est membre de l'ensemble
         if (!utilisateurEnsembleService.utilisateurAutorise(userId, ensembleId,
-                List.of("ADMIN", "MODERATEUR", "MEMBRE"))) {
+                List.of("OWNER", "MODERATEUR", "MEMBRE"))) {
             throw new RuntimeException("Vous devez être membre de l'ensemble pour supprimer ce morceau");
         }
 
         // Vérifier les droits : créateur ou rôle élevé
         Role role = utilisateurEnsembleService.getRoleUtilisateurDansEnsemble(userId, ensembleId);
-        boolean isAdminOrModerator = role == Role.ADMIN || role == Role.MODERATEUR;
+        boolean isAdminOrModerator = role == Role.OWNER || role == Role.MODERATEUR;
         boolean isCreateur = morceau.getCreateur().getId().equals(userId);
 
         if (!isCreateur && !isAdminOrModerator) {
@@ -185,3 +185,4 @@ public class MorceauService {
     }
 
 }
+

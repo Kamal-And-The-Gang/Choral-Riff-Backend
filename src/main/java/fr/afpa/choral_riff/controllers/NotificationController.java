@@ -52,4 +52,15 @@ public class NotificationController {
     public void deleteNotification(@PathVariable Long notificationId) {
         notificationService.deleteNotification(notificationId);
     }
+
+
+    @PostMapping("/accepter/{notificationId}")
+public ResponseEntity<Void> accepterRattachement(
+        @PathVariable Long notificationId) {
+
+    notificationService.accepterRattachement(notificationId);
+
+    return ResponseEntity.noContent().build();
+}
+
 }

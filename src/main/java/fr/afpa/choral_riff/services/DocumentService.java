@@ -171,7 +171,7 @@ public DocumentDto create(DocumentDto documentDto) {
     boolean adminOuModerateur = utilisateurEnsembleService.utilisateurAutorise(
             documentDto.utilisateurId(),
             ensembleId,
-            List.of("ADMIN", "MODERATEUR"));
+            List.of("OWNER", "MODERATEUR"));
 
     if (!adminOuModerateur) {
         throw new AccessDeniedException(
@@ -246,7 +246,7 @@ public void delete(Long documentId, Long userId) {
     boolean adminOuModerateur = utilisateurEnsembleService.utilisateurAutorise(
             userId,
             ensembleId,
-            List.of("ADMIN", "MODERATEUR"));
+            List.of("OWNER", "MODERATEUR"));
 
     boolean createur = document.getUtilisateur().getId().equals(userId);
 
@@ -277,3 +277,4 @@ public void delete(Long documentId, Long userId) {
     }
 
 }
+

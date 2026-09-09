@@ -211,3 +211,4 @@ class AuthControllerTests {
                 .andExpect(jsonPath("$.message").value("Déconnexion réussie"));
     }
 }
+

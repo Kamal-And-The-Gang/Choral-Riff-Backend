@@ -115,7 +115,7 @@ class EnsembleServiceTest {
         UtilisateurEnsemble utilisateurEnsemble = new UtilisateurEnsemble(
                 utilisateur,
                 ensemble,
-                Role.ADMIN,
+                Role.OWNER,
                 LocalDateTime.now()
         );
         utilisateurEnsemble.setCreator(true);
@@ -127,7 +127,7 @@ class EnsembleServiceTest {
 
         EnsembleDto result = ensembleService.getById(10L, 1L);
 
-        assertEquals("ADMIN", result.getUserRole());
+        assertEquals("OWNER", result.getUserRole());
         assertTrue(result.isCreator());
     }
 
@@ -144,7 +144,7 @@ class EnsembleServiceTest {
         when(ensembleRepository.findById(10L)).thenReturn(Optional.of(ensemble));
         when(utilisateurEnsembleRepository.findByUtilisateur_IdAndEnsemble_Id(1L, 10L))
                 .thenReturn(Optional.of(new UtilisateurEnsemble(
-                        utilisateur, ensemble, Role.ADMIN, LocalDateTime.now()
+                        utilisateur, ensemble, Role.OWNER, LocalDateTime.now()
                 )));
         when(ensembleRepository.save(any(Ensemble.class))).thenReturn(ensemble);
         when(ensembleMapper.toDto(ensemble, 1L)).thenReturn(ensembleDto);
@@ -170,7 +170,7 @@ class EnsembleServiceTest {
 //         UtilisateurEnsemble ue = new UtilisateurEnsemble(
 //                 utilisateur,
 //                 ensemble,
-//                 Role.ADMIN,
+//                 Role.OWNER,
 //                 LocalDateTime.now()
 //         );
 //         ue.setCreator(true);
@@ -189,7 +189,7 @@ class EnsembleServiceTest {
 //     UtilisateurEnsemble ue = new UtilisateurEnsemble(
 //             utilisateur,
 //             ensemble,
-//             Role.ADMIN,
+//             Role.OWNER,
 //             LocalDateTime.now()
 //     );
 //     ue.setCreator(true); // Indique que l'utilisateur est le créateur
@@ -224,7 +224,7 @@ class EnsembleServiceTest {
 //     UtilisateurEnsemble ue = new UtilisateurEnsemble();
 //     ue.setUtilisateur(utilisateur);
 //     ue.setEnsemble(ensemble);
-//     ue.setRoleDansEnsemble(Role.ADMIN);
+//     ue.setRoleDansEnsemble(Role.OWNER);
 //     ue.setDateAdhesion(LocalDateTime.now());
 //     ue.setCreator(true); // indique que l'utilisateur est créateur
 
@@ -248,7 +248,7 @@ void shouldDeleteEnsembleWhenUserHasRights() {
     UtilisateurEnsemble ue = new UtilisateurEnsemble();
     ue.setUtilisateur(utilisateur);
     ue.setEnsemble(ensemble);
-    ue.setRoleDansEnsemble(Role.ADMIN);
+    ue.setRoleDansEnsemble(Role.OWNER);
     ue.setDateAdhesion(LocalDateTime.now());
     ue.setCreator(true);
 
@@ -277,7 +277,7 @@ void shouldDeleteEnsembleWhenUserHasRights() {
     void shouldReturnTrueWhenUserIsAdmin() {
         when(utilisateurEnsembleRepository.findByUtilisateur_IdAndEnsemble_Id(1L, 10L))
                 .thenReturn(Optional.of(new UtilisateurEnsemble(
-                        utilisateur, ensemble, Role.ADMIN, LocalDateTime.now()
+                        utilisateur, ensemble, Role.OWNER, LocalDateTime.now()
                 )));
 
         assertTrue(ensembleService.hasRights(1L, 10L));
@@ -293,3 +293,4 @@ void shouldDeleteEnsembleWhenUserHasRights() {
         assertFalse(ensembleService.hasRights(1L, 10L));
     }
 }
+

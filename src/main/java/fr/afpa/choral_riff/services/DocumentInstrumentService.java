@@ -89,7 +89,7 @@ public void addInstrumentToDocument(Long documentId, Long instrumentId, Utilisat
     boolean adminOuModerateur = utilisateurEnsembleService.utilisateurAutorise(
             utilisateur.getId(),
             ensembleId,
-            List.of("ADMIN", "MODERATEUR")
+            List.of("OWNER", "MODERATEUR")
     );
 
     if (!isCreateur && !adminOuModerateur) {
@@ -137,3 +137,4 @@ public void addInstrumentToDocument(Long documentId, Long instrumentId, Utilisat
         documentRepository.save(document);
     }
 }
+

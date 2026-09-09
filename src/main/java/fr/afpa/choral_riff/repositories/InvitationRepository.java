@@ -30,3 +30,4 @@ public interface InvitationRepository extends JpaRepository<Invitation, Long> {
     @Query("DELETE FROM Invitation i WHERE i.ensemble.id = :ensembleId")
     void deleteByEnsembleId(@Param("ensembleId") Long ensembleId);
 }
+
