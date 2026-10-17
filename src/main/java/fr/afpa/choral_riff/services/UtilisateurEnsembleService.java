@@ -8,6 +8,9 @@ import fr.afpa.choral_riff.repositories.EnsembleRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurEnsembleRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import jakarta.transaction.Transactional;
+
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -88,41 +91,7 @@ public class UtilisateurEnsembleService {
                 .getRoleDansEnsemble();
     }
 
-    // @Transactional
-    // public void rattacherUtilisateurAEnsemble(Long utilisateurId, Long
-    // ensembleId) {
-    // // Vérifie si l'utilisateur existe
-    // Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
-    // .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-
-    // // Vérifie si l'ensemble existe
-    // Ensemble ensemble = ensembleRepository.findById(ensembleId)
-    // .orElseThrow(() -> new RuntimeException("Ensemble introuvable"));
-
-    // // Vérifie si l'utilisateur est déjà membre
-    // boolean dejaMembre = utilisateurEnsembleRepository
-    // .existsByUtilisateurIdAndEnsembleId(utilisateurId, ensembleId);
-
-    // if (!dejaMembre) {
-    // UtilisateurEnsemble ue = new UtilisateurEnsemble();
-    // ue.setUtilisateur(utilisateur);
-    // ue.setEnsemble(ensemble);
-    // ue.setRoleDansEnsemble(Role.MEMBRE);
-    // ue.setDateAdhesion(LocalDateTime.now());
-    // // Ajouter le nom complet
-    // ue.setNomComplet(utilisateur.getPrenom() + " " + utilisateur.getNom());
-    // utilisateurEnsembleRepository.saveAndFlush(ue);
-    // } else {
-    // throw new RuntimeException("L'utilisateur est déjà membre de cet ensemble");
-    // }
-    // }
-
-    // public boolean estMembreDeLensemble(Long utilisateurId, Long ensembleId) {
-    // return
-    // utilisateurEnsembleRepository.existsByUtilisateurIdAndEnsembleId(utilisateurId,
-    // ensembleId);
-    // }
-
+    
     @Transactional
     public void rattacherUtilisateurAEnsemble(Long utilisateurId, Long ensembleId) {
         Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
@@ -219,19 +188,67 @@ public class UtilisateurEnsembleService {
         return false;
     }
 
-    public List<UtilisateurEnsembleDTO> getMembresDeLEnsemble(Long ensembleId) {
+//     public List<UtilisateurEnsembleDTO> getMembresDeLEnsemble(Long ensembleId) {
 
-        return utilisateurEnsembleRepository.findByEnsembleId(ensembleId)
-                .stream()
-                .map(ue -> new UtilisateurEnsembleDTO(
-                        ue.getUtilisateur().getId(),
-                        ue.getUtilisateur().getNom(),
-                        ue.getUtilisateur().getPrenom(),
-                        ue.getRoleDansEnsemble().name(),
-                        ue.isCreator()
-                ))
-                .toList();
+//         return utilisateurEnsembleRepository.findByEnsembleId(ensembleId)
+//                 .stream()
+//                 .map(ue -> new UtilisateurEnsembleDTO(
+//                         ue.getUtilisateur().getId(),
+//                         ue.getUtilisateur().getNom(),
+//                         ue.getUtilisateur().getPrenom(),
+//                         ue.getRoleDansEnsemble().name(),
+//                         ue.isCreator()
+//                 ))
+//                 .toList();
+//     }
+
+
+
+public List<UtilisateurEnsembleDTO> getMembresDeLEnsemble(Long ensembleId) {
+
+    // 1. Identifier l'utilisateur connecté
+    var authentication =
+            SecurityContextHolder.getContext().getAuthentication();
+
+    if (authentication == null
+            || !authentication.isAuthenticated()
+            || "anonymousUser".equals(authentication.getPrincipal())) {
+        throw new AccessDeniedException("Authentification requise");
     }
+
+    // 2. Récupérer l'utilisateur connecté
+    Utilisateur utilisateurConnecte =
+            utilisateurRepository.findByEmail(authentication.getName())
+                    .orElseThrow(() ->
+                            new AccessDeniedException(
+                                    "Utilisateur connecté introuvable"));
+
+    // 3. Vérifier que l'utilisateur appartient à cet ensemble
+    boolean estMembre =
+            utilisateurEnsembleRepository
+                    .existsByUtilisateurIdAndEnsembleId(
+                            utilisateurConnecte.getId(),
+                            ensembleId
+                    );
+
+    if (!estMembre) {
+        throw new AccessDeniedException(
+                "Accès interdit : vous n'êtes pas membre de cet ensemble");
+    }
+
+    // 4. Récupérer les membres et construire les DTO
+    return utilisateurEnsembleRepository.findByEnsembleId(ensembleId)
+            .stream()
+            .map(ue -> new UtilisateurEnsembleDTO(
+                    ue.getUtilisateur().getId(),
+                    ue.getUtilisateur().getNom(),
+                    ue.getUtilisateur().getPrenom(),
+                    ue.getRoleDansEnsemble().name(),
+                    ue.isCreator()
+            ))
+            .toList();
+}
+
 
     @Transactional
     public void retirerUtilisateurDeLEnsemble(
@@ -270,6 +287,29 @@ public class UtilisateurEnsembleService {
                         cibleId,
                         ensembleId);
     }
+
+    private void verifierProprietaire(Long id) {
+
+    var authentication =
+            SecurityContextHolder.getContext().getAuthentication();
+
+    if (authentication == null
+            || !authentication.isAuthenticated()
+            || "anonymousUser".equals(authentication.getPrincipal())) {
+        throw new AccessDeniedException("Authentification requise");
+    }
+
+    Utilisateur utilisateurConnecte =
+            utilisateurRepository.findByEmail(authentication.getName())
+                    .orElseThrow(() ->
+                            new AccessDeniedException(
+                                    "Utilisateur connecté introuvable"));
+
+    if (!utilisateurConnecte.getId().equals(id)) {
+        throw new AccessDeniedException(
+                "Accès interdit à cet utilisateur");
+    }
+}
 
 }
 

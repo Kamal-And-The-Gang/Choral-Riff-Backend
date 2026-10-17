@@ -8,6 +8,7 @@ import fr.afpa.choral_riff.services.UtilisateurService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.Map;
 
@@ -32,14 +33,25 @@ public class AuthController {
      * @param loginDTO email et mot de passe envoyés par le client
      * @return un objet JSON contenant accessToken et refreshToken
      */
+    // @PostMapping("/login")
+    // public ResponseEntity<Map<String, String>> login(@RequestBody LoginDTO
+    // loginDTO) {
+    // Map<String, String> tokens = loginService.login(loginDTO);
+    // return ResponseEntity.ok(tokens);
+    // }
+
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody LoginDTO loginDTO) {
+    public ResponseEntity<Map<String, String>> login(
+            @Valid @RequestBody LoginDTO loginDTO) {
+
         Map<String, String> tokens = loginService.login(loginDTO);
         return ResponseEntity.ok(tokens);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UtilisateurDto> register(@RequestBody RegisterDto dto) {
+    public ResponseEntity<UtilisateurDto> register(
+            @Valid @RequestBody RegisterDto dto) {
+
         UtilisateurDto created = utilisateurService.register(dto);
         return ResponseEntity.ok(created);
     }
@@ -51,4 +63,3 @@ public class AuthController {
     }
 
 }
-

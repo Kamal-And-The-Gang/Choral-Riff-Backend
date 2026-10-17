@@ -1,15 +1,38 @@
 package fr.afpa.choral_riff.dto;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 /**
  * 
  */
 public class RegisterDto {
+
+    @NotBlank(message = "L'email est obligatoire")
+    @Email(message = "L'email doit être valide")
     private String email;
+
+    @NotBlank(message = "Le nom est obligatoire")
     private String nom;
+
+    @NotBlank(message = "Le prénom est obligatoire")
     private String prenom;
+
+    @NotBlank(message = "Le mot de passe est obligatoire")
     private String motDePasse;
 
     // Nouveau champ pour récupérer le token envoyé dans le lien d'invitation
+    @NotBlank(message = "Le token d'invitation est obligatoire")
     private String token;
+
+    // public class RegisterDto {
+    // private String email;
+    // private String nom;
+    // private String prenom;
+    // private String motDePasse;
+
+    // // Nouveau champ pour récupérer le token envoyé dans le lien d'invitation
+    // private String token;
 
     /**
      * @return String
@@ -76,4 +99,3 @@ public class RegisterDto {
     }
 
 }
-

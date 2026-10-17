@@ -278,11 +278,15 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
+   public boolean isTokenValid(String token, UserDetails userDetails) {
+    try {
         final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && isTokenNotExpired(token);
+        return username.equals(userDetails.getUsername())
+                && isTokenNotExpired(token);
+    } catch (Exception e) {
+        return false;
     }
-
+}
     /**
      * Vérifie si un token est valide sans vérifier l'utilisateur
      *

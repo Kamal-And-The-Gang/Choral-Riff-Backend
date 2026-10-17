@@ -20,6 +20,9 @@
   <description>Project </description>
   <url/>
 
+  
+
+
   <licenses>
     <license/>
   </licenses>
@@ -168,6 +171,17 @@
           </compilerArgs>
         </configuration>
       </plugin>
+
+      <plugin>
+  <groupId>org.owasp</groupId>
+  <artifactId>dependency-check-maven</artifactId>
+  <version>13.0.0</version>
+  <configuration>
+    <failBuildOnCVSS>7</failBuildOnCVSS>
+    <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+    <nvdApiDelay>8000</nvdApiDelay>
+  </configuration>
+</plugin>
 
     </plugins>
   </build>
