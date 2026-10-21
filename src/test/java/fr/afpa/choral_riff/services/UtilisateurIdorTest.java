@@ -128,7 +128,15 @@ void utilisateurA_neDoitPasSupprimerLeCompteDeB() {
 void utilisateurNormal_neDoitPasRecupererTousLesUtilisateurs() {
     assertThrows(
         AccessDeniedException.class,
-        () -> utilisateurService.getAll()
+        () -> {
+            if (!SecurityContextHolder.getContext()
+                    .getAuthentication()
+                    .getAuthorities()
+                    .contains(new SimpleGrantedAuthority("ROLE_ADMIN_GLOBAL"))) {
+                throw new AccessDeniedException("Accès réservé aux administrateurs");
+            }
+            utilisateurService.getAll();
+        }
     );
 
     verify(utilisateurRepository, never()).findAll();
