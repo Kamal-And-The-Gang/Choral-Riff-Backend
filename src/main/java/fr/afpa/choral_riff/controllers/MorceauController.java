@@ -8,6 +8,10 @@ import org.springframework.web.bind.annotation.*;
 // import java.security.Principal;
 import java.util.List;
 
+import fr.afpa.choral_riff.entity.Utilisateur;
+import fr.afpa.choral_riff.repositories.UtilisateurRepository;
+import org.springframework.security.core.Authentication;
+
 /**
  * Contrôleur REST pour gérer les morceaux.
  */
@@ -16,9 +20,13 @@ import java.util.List;
 public class MorceauController {
 
     private final MorceauService morceauService;
+    private final UtilisateurRepository utilisateurRepository;
 
-    public MorceauController(MorceauService morceauService) {
+    public MorceauController(
+            MorceauService morceauService,
+            UtilisateurRepository utilisateurRepository) {
         this.morceauService = morceauService;
+        this.utilisateurRepository = utilisateurRepository;
     }
 
     /**
@@ -94,11 +102,31 @@ public class MorceauController {
     // return ResponseEntity.noContent().build();
     // }
 
+    // @DeleteMapping("/{id}")
+    // public ResponseEntity<Void> delete(@PathVariable Long id, @RequestParam Long userId) {
+    //     morceauService.delete(id, userId);
+    //     return ResponseEntity.noContent().build();
+    // }
+
+
+
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id, @RequestParam Long userId) {
-        morceauService.delete(id, userId);
-        return ResponseEntity.noContent().build();
+public ResponseEntity<Void> delete(
+        @PathVariable Long id,
+        Authentication authentication) {
+
+    if (authentication == null || !authentication.isAuthenticated()) {
+        return ResponseEntity.status(401).build();
     }
 
+    Utilisateur utilisateur = utilisateurRepository
+            .findByEmail(authentication.getName())
+            .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+    morceauService.delete(id, utilisateur.getId());
+
+    return ResponseEntity.noContent().build();
 }
 
+}

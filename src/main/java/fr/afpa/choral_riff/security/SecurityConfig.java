@@ -18,6 +18,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 public class SecurityConfig {
@@ -48,22 +49,46 @@ public class SecurityConfig {
     // return http.build();
     // }
 
-    @Bean
+//     @Bean
+// public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//     http
+//         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+//         .csrf(csrf -> csrf.disable())
+//         .authorizeHttpRequests(auth -> auth
+//             // règles spécifiques D’ABORD
+//             .requestMatchers("/api/documents/upload").permitAll()
+
+//             // règle générale TOUJOURS EN DERNIER
+//             .anyRequest().permitAll()
+//         );
+        
+
+//     // .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+//     return http.build();
+// }
+
+
+//21/10
+
+@Bean
 public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .csrf(csrf -> csrf.disable())
+        // .authorizeHttpRequests(auth -> auth
+        //     .requestMatchers("/api/documents/upload").permitAll()
+        //     .anyRequest().permitAll()
+        // )
         .authorizeHttpRequests(auth -> auth
-            // règles spécifiques D’ABORD
-            .requestMatchers("/api/documents/upload").permitAll()
+    .requestMatchers("/api/documents/upload").permitAll()
+    .requestMatchers(HttpMethod.DELETE, "/api/morceaux/**").authenticated()
+    .anyRequest().permitAll()
+)
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-            // règle générale TOUJOURS EN DERNIER
-            .anyRequest().permitAll()
-        );
-
-    // .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     return http.build();
 }
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();

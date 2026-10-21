@@ -144,29 +144,66 @@ public class MorceauService {
     // morceauRepository.deleteById(id);
     // }
 
+    // public void delete(Long morceauId, Long userId) {
+    // // Récupérer le morceau
+    // Morceau morceau = morceauRepository.findById(morceauId)
+    // .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID : " +
+    // morceauId));
+
+    // Long ensembleId = morceau.getEnsemble().getId();
+
+    // // Vérifier que l'utilisateur est membre de l'ensemble
+    // if (!utilisateurEnsembleService.utilisateurAutorise(userId, ensembleId,
+    // List.of("OWNER", "MODERATEUR", "MEMBRE"))) {
+    // throw new RuntimeException("Vous devez être membre de l'ensemble pour
+    // supprimer ce morceau");
+    // }
+
+    // // Vérifier les droits : créateur ou rôle élevé
+    // Role role = utilisateurEnsembleService.getRoleUtilisateurDansEnsemble(userId,
+    // ensembleId);
+    // boolean isAdminOrModerator = role == Role.OWNER || role == Role.MODERATEUR;
+    // boolean isCreateur = morceau.getCreateur().getId().equals(userId);
+
+    // if (!isCreateur && !isAdminOrModerator) {
+    // throw new RuntimeException("Vous n'avez pas les droits pour supprimer ce
+    // morceau");
+    // }
+
+    // // Suppression autorisée
+    // morceauRepository.delete(morceau);
+    // }
+
+    // 21/10
+
     public void delete(Long morceauId, Long userId) {
-        // Récupérer le morceau
         Morceau morceau = morceauRepository.findById(morceauId)
-                .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID : " + morceauId));
+                .orElseThrow(() -> new RuntimeException(
+                        "Morceau non trouvé avec l'ID : " + morceauId));
 
         Long ensembleId = morceau.getEnsemble().getId();
 
-        // Vérifier que l'utilisateur est membre de l'ensemble
-        if (!utilisateurEnsembleService.utilisateurAutorise(userId, ensembleId,
-                List.of("OWNER", "MODERATEUR", "MEMBRE"))) {
-            throw new RuntimeException("Vous devez être membre de l'ensemble pour supprimer ce morceau");
+        // Vérifier que l'utilisateur appartient à l'ensemble
+        if (!utilisateurEnsembleService.utilisateurAutorise(
+                userId, ensembleId, List.of("OWNER", "MODERATEUR", "MEMBRE"))) {
+            throw new RuntimeException(
+                    "Vous devez être membre de l'ensemble pour supprimer ce morceau");
         }
 
-        // Vérifier les droits : créateur ou rôle élevé
-        Role role = utilisateurEnsembleService.getRoleUtilisateurDansEnsemble(userId, ensembleId);
-        boolean isAdminOrModerator = role == Role.OWNER || role == Role.MODERATEUR;
-        boolean isCreateur = morceau.getCreateur().getId().equals(userId);
+        // Récupérer le rôle de l'utilisateur dans cet ensemble
+        Role role = utilisateurEnsembleService
+                .getRoleUtilisateurDansEnsemble(userId, ensembleId);
 
-        if (!isCreateur && !isAdminOrModerator) {
-            throw new RuntimeException("Vous n'avez pas les droits pour supprimer ce morceau");
+        boolean isOwnerOrModerator = role == Role.OWNER || role == Role.MODERATEUR;
+
+        boolean isCreateur = morceau.getCreateur() != null
+                && morceau.getCreateur().getId().equals(userId);
+
+        if (!isOwnerOrModerator && !isCreateur) {
+            throw new RuntimeException(
+                    "Vous pouvez supprimer uniquement vos propres morceaux, sauf si vous êtes OWNER");
         }
 
-        // Suppression autorisée
         morceauRepository.delete(morceau);
     }
 
@@ -185,4 +222,3 @@ public class MorceauService {
     }
 
 }
-

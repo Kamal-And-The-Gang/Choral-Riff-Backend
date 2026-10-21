@@ -26,66 +26,74 @@ public class JwtFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
+@Override
+protected void doFilterInternal(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        FilterChain chain) throws ServletException, IOException {
 
-        // Ici tu mets les logs
-        System.out.println("JWT FILTER EXECUTED");
-        System.out.println("AUTH HEADER = " + request.getHeader("Authorization"));
+    String requestPath = request.getServletPath();
 
-        // Exclure les endpoints publics (exemple : `/auth/**` et `/api/users/**`)
-        String requestPath = request.getServletPath();
-        if (requestPath.startsWith("/api/auth") || requestPath.startsWith("/api/utilisateur")
-                || requestPath.equals("/api/documents/upload")) {
-            chain.doFilter(request, response);
-            return;
-        }
-
-        // Récupère l'en-tête Authorization
-        String authHeader = request.getHeader("Authorization");
-
-        // Ajout de logs pour debug
-        System.out.println("=== [DEBUG JWT FILTER] ===");
-        System.out.println("Request Path: " + requestPath);
-        System.out.println("Authorization Header: " + authHeader);
-
-        String jwt = null;
-        String username = null;
-
-        // Vérifie si le header est présent et commence par "Bearer "
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            jwt = authHeader.substring(7); // Extrait le token après "Bearer "
-            System.out.println("Extracted JWT: " + jwt);
-
-            username = jwtService.extractUsername(jwt);// Extrait le username du token
-            System.out.println("Extracted Username: " + username);
-        }
-
-        // Vérifie si le username n'est pas déjà authentifié dans le contexte de
-        // sécurité
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            // Charge les informations de l'utilisateur
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-            // Valide le token
-            if (jwtService.isTokenValid(jwt, userDetails)) {
-                // Crée un objet d'authentification valide
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                // Définit le contexte de sécurité pour cette requête
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                System.out.println("User authenticated: " + username);
-            }
-        } else {
-            System.out.println("Token invalid for user: " + username);
-        }
-
-        // Passe au filtre suivant
+    // Laisse passer les routes publiques
+    if (requestPath.startsWith("/api/auth")
+            || requestPath.startsWith("/api/utilisateur")
+            || requestPath.equals("/api/documents/upload")) {
         chain.doFilter(request, response);
+        return;
     }
+
+    // 1. Essaie de récupérer le JWT depuis l'en-tête Authorization
+    String jwt = null;
+    String authHeader = request.getHeader("Authorization");
+
+    if (authHeader != null && authHeader.startsWith("Bearer ")) {
+        jwt = authHeader.substring(7);
+    }
+
+    // 2. Si aucun JWT dans l'en-tête, cherche le cookie accessToken
+    if (jwt == null && request.getCookies() != null) {
+        for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+            if ("accessToken".equals(cookie.getName())) {
+                jwt = cookie.getValue();
+                break;
+            }
+        }
+    }
+
+    // 3. Valide le JWT et authentifie l'utilisateur
+    if (jwt != null
+            && SecurityContextHolder.getContext().getAuthentication() == null) {
+        try {
+            String username = jwtService.extractUsername(jwt);
+
+            if (username != null) {
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(username);
+
+                if (jwtService.isTokenValid(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities());
+
+                    authentication.setDetails(
+                            new WebAuthenticationDetailsSource()
+                                    .buildDetails(request));
+
+                    SecurityContextHolder.getContext()
+                            .setAuthentication(authentication);
+                }
+            }
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
+        }
+    }
+
+    // Une seule exécution du filtre suivant
+    chain.doFilter(request, response);
+}
+
 
 }
 
