@@ -137,7 +137,13 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import fr.afpa.choral_riff.entity.Ensemble;
+import fr.afpa.choral_riff.entity.Invitation;
+import fr.afpa.choral_riff.entity.StatusInvitation;
 
+import fr.afpa.choral_riff.repositories.EnsembleRepository;
+import fr.afpa.choral_riff.repositories.InvitationRepository;
+import java.time.LocalDateTime;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AuthControllerTests {
@@ -154,6 +160,11 @@ class AuthControllerTests {
     private MockMvc mockMvc;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+private EnsembleRepository ensembleRepository;
+
+@Autowired
+private InvitationRepository invitationRepository;
 
     @BeforeEach
     void setup() {
@@ -186,22 +197,41 @@ class AuthControllerTests {
                 .andExpect(jsonPath("$.refreshToken").exists());
     }
 
-    @Test
-    void register_should_return_created_user() throws Exception {
-        RegisterDto dto = new RegisterDto();
-        dto.setNom("Test");
-        dto.setPrenom("User");
-        dto.setEmail("registeruser" + System.currentTimeMillis() + "@example.com"); // Email unique
-        dto.setMotDePasse("password");
+   
+@Test
+void register_should_return_created_user() throws Exception {
+    Ensemble ensemble = new Ensemble();
+    ensemble.setNom("Ensemble Test");
+    ensemble = ensembleRepository.save(ensemble);
 
-        mockMvc.perform(post("/api/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.email").value(dto.getEmail()))
-                .andExpect(jsonPath("$.nom").value("Test"));
-    }
+    String email = "registeruser" + System.currentTimeMillis() + "@example.com";
+    String token = "token-register-" + System.currentTimeMillis();
+
+    Invitation invitation = new Invitation();
+    invitation.setEmailInvite(email);
+    invitation.setToken(token);
+    invitation.setEtat(StatusInvitation.EN_ATTENTE);
+    invitation.setDateEnvoi(LocalDateTime.now());
+    invitation.setDateExpiration(LocalDateTime.now().plusDays(7));
+    invitation.setEnsemble(ensemble);
+    invitationRepository.save(invitation);
+
+    RegisterDto dto = new RegisterDto();
+    dto.setNom("Test");
+    dto.setPrenom("User");
+    dto.setEmail(email);
+    dto.setMotDePasse("password");
+    dto.setToken(token);
+
+    mockMvc.perform(post("/api/auth/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").exists())
+            .andExpect(jsonPath("$.email").value(dto.getEmail()))
+            .andExpect(jsonPath("$.nom").value("Test"));
+}
+
 
     @Test
     void logout_should_return_confirmation() throws Exception {
