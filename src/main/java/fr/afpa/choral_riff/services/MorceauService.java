@@ -17,208 +17,218 @@ import java.util.Objects;
 
 @Service
 public class MorceauService {
-    private final EnsembleService ensembleService;
-    private final UtilisateurEnsembleService utilisateurEnsembleService;
+        private final EnsembleService ensembleService;
+        private final UtilisateurEnsembleService utilisateurEnsembleService;
 
-    private final MorceauRepository morceauRepository;
-    private final EnsembleRepository ensembleRepository;
-    private final UtilisateurRepository utilisateurRepository;
-    private final MorceauMapper morceauMapper;
-    private final NotificationService notificationService;
+        private final MorceauRepository morceauRepository;
+        private final EnsembleRepository ensembleRepository;
+        private final UtilisateurRepository utilisateurRepository;
+        private final MorceauMapper morceauMapper;
+        private final NotificationService notificationService;
 
-    public MorceauService(
-            MorceauRepository morceauRepository,
-            EnsembleRepository ensembleRepository,
-            UtilisateurRepository utilisateurRepository,
-            MorceauMapper morceauMapper,
-            EnsembleService ensembleService,
-            NotificationService notificationService,
-            UtilisateurEnsembleService utilisateurEnsembleService // <-- ici
-    ) {
-        this.morceauRepository = morceauRepository;
-        this.ensembleRepository = ensembleRepository;
-        this.utilisateurRepository = utilisateurRepository;
-        this.morceauMapper = morceauMapper;
-        this.notificationService = notificationService;
-        this.ensembleService = ensembleService;
-        this.utilisateurEnsembleService = utilisateurEnsembleService; // <-- initialisation
-    }
-
-    // Récupérer tous les morceaux
-    public List<MorceauDto> getAll() {
-        return morceauRepository.findAll().stream()
-                .map(morceauMapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-    // Récupérer et filtrer les ensembles
-    public List<MorceauDto> getAllByEnsembleId(Long ensembleId) {
-        return morceauRepository.findByEnsembleId(ensembleId)
-                .stream()
-                .map(morceauMapper::toDto)
-                .toList();
-    }
-
-    // Récupérer un morceau par son ID
-    public MorceauDto getById(Long id) {
-        Morceau morceau = morceauRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID: " + id));
-        return morceauMapper.toDto(morceau);
-    }
-
-    public MorceauDto create(MorceauDto dto, Long userId) {
-        Objects.requireNonNull(dto, "Le DTO ne doit pas être null");
-
-        // --- Vérification : l'ensemble existe ---
-        if (dto.ensembleId() == null) {
-            throw new RuntimeException("Un morceau doit être rattaché à un ensemble");
+        public MorceauService(
+                        MorceauRepository morceauRepository,
+                        EnsembleRepository ensembleRepository,
+                        UtilisateurRepository utilisateurRepository,
+                        MorceauMapper morceauMapper,
+                        EnsembleService ensembleService,
+                        NotificationService notificationService,
+                        UtilisateurEnsembleService utilisateurEnsembleService // <-- ici
+        ) {
+                this.morceauRepository = morceauRepository;
+                this.ensembleRepository = ensembleRepository;
+                this.utilisateurRepository = utilisateurRepository;
+                this.morceauMapper = morceauMapper;
+                this.notificationService = notificationService;
+                this.ensembleService = ensembleService;
+                this.utilisateurEnsembleService = utilisateurEnsembleService; // <-- initialisation
         }
 
-        Ensemble ensemble = ensembleRepository.findById(dto.ensembleId())
-                .orElseThrow(() -> new RuntimeException("Ensemble non trouvé avec l'ID: " + dto.ensembleId()));
-
-        // --- Vérifie que l'utilisateur est membre de l'ensemble ---
-        if (!utilisateurEnsembleService.utilisateurAutorise(userId, dto.ensembleId(),
-                List.of("OWNER", "MODERATEUR", "MEMBRE"))) {
-            throw new RuntimeException("Vous devez être membre de l'ensemble pour ajouter un morceau");
+        // Récupérer tous les morceaux
+        public List<MorceauDto> getAll() {
+                return morceauRepository.findAll().stream()
+                                .map(morceauMapper::toDto)
+                                .collect(Collectors.toList());
         }
 
-        // --- Transformer le DTO en entité ---
-        Morceau morceau = Objects.requireNonNull(
-                morceauMapper.toEntity(dto),
-                "Le mapper a retourné null");
-
-        // --- Lier l'ensemble ---
-        morceau.setEnsemble(ensemble);
-
-        // --- Récupérer le créateur depuis l'utilisateur authentifié ---
-        Utilisateur createur = utilisateurRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-        morceau.setCreateur(createur);
-
-        // --- Sauvegarder le morceau ---
-        Morceau saved = morceauRepository.save(morceau);
-
-        // --- Notification (optionnel selon ton besoin) ---
-        notificationService.notifyMorceauAjoute(saved);
-
-        // --- Retourner le DTO pour le front ---
-        return morceauMapper.toDto(saved);
-    }
-
-    // Mettre à jour un morceau existant
-    public MorceauDto update(Long id, MorceauDto dto) {
-        Objects.requireNonNull(dto, "Le DTO ne doit pas être null");
-        Morceau morceau = morceauRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID: " + id));
-
-        // Mettre à jour les champs simples
-        // Morceau = entité plus complexe que instrument, update manuel et sécurisé.
-        morceau.setTitre(dto.titre());
-        morceau.setCompositeur(dto.compositeur());
-        morceau.setGenre(dto.genre());
-        morceau.setDescriptif(dto.descriptif());
-
-        // Mettre à jour les relations
-        if (dto.ensembleId() != null) {
-            Ensemble ensemble = ensembleRepository.findById(dto.ensembleId())
-                    .orElseThrow(() -> new RuntimeException("Ensemble non trouvé avec l'ID: " + dto.ensembleId()));
-            morceau.setEnsemble(ensemble);
+        // Récupérer et filtrer les ensembles
+        public List<MorceauDto> getAllByEnsembleId(Long ensembleId) {
+                return morceauRepository.findByEnsembleId(ensembleId)
+                                .stream()
+                                .map(morceauMapper::toDto)
+                                .toList();
         }
 
-        if (dto.createurId() != null) {
-            Utilisateur createur = utilisateurRepository.findById(dto.createurId())
-                    .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + dto.createurId()));
-            morceau.setCreateur(createur);
+        // Récupérer un morceau par son ID
+        public MorceauDto getById(Long id) {
+                Morceau morceau = morceauRepository.findById(id)
+                                .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID: " + id));
+                return morceauMapper.toDto(morceau);
         }
 
-        Morceau updated = morceauRepository.save(morceau);
-        return morceauMapper.toDto(updated);
-    }
+        public MorceauDto create(MorceauDto dto, Long userId) {
+                Objects.requireNonNull(dto, "Le DTO ne doit pas être null");
 
-    // Supprimer un morceau par son ID
-    // public void delete(Long id) {
-    // if (!morceauRepository.existsById(id)) {
-    // throw new RuntimeException("Morceau non trouvé avec l'ID: " + id);
-    // }
-    // morceauRepository.deleteById(id);
-    // }
+                // --- Vérification : l'ensemble existe ---
+                if (dto.ensembleId() == null) {
+                        throw new RuntimeException("Un morceau doit être rattaché à un ensemble");
+                }
 
-    // public void delete(Long morceauId, Long userId) {
-    // // Récupérer le morceau
-    // Morceau morceau = morceauRepository.findById(morceauId)
-    // .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID : " +
-    // morceauId));
+                Ensemble ensemble = ensembleRepository.findById(dto.ensembleId())
+                                .orElseThrow(() -> new RuntimeException(
+                                                "Ensemble non trouvé avec l'ID: " + dto.ensembleId()));
 
-    // Long ensembleId = morceau.getEnsemble().getId();
+                // --- Vérifie que l'utilisateur est membre de l'ensemble ---
+                if (!utilisateurEnsembleService.utilisateurAutorise(
+                                userId, dto.ensembleId(),
+                                List.of("OWNER"))) {
+                        throw new RuntimeException(
+                                        "Seul l'OWNER peut créer un morceau dans cet ensemble");
+                }
 
-    // // Vérifier que l'utilisateur est membre de l'ensemble
-    // if (!utilisateurEnsembleService.utilisateurAutorise(userId, ensembleId,
-    // List.of("OWNER", "MODERATEUR", "MEMBRE"))) {
-    // throw new RuntimeException("Vous devez être membre de l'ensemble pour
-    // supprimer ce morceau");
-    // }
+                // --- Transformer le DTO en entité ---
+                Morceau morceau = Objects.requireNonNull(
+                                morceauMapper.toEntity(dto),
+                                "Le mapper a retourné null");
 
-    // // Vérifier les droits : créateur ou rôle élevé
-    // Role role = utilisateurEnsembleService.getRoleUtilisateurDansEnsemble(userId,
-    // ensembleId);
-    // boolean isAdminOrModerator = role == Role.OWNER || role == Role.MODERATEUR;
-    // boolean isCreateur = morceau.getCreateur().getId().equals(userId);
+                // --- Lier l'ensemble ---
+                morceau.setEnsemble(ensemble);
 
-    // if (!isCreateur && !isAdminOrModerator) {
-    // throw new RuntimeException("Vous n'avez pas les droits pour supprimer ce
-    // morceau");
-    // }
+                // --- Récupérer le créateur depuis l'utilisateur authentifié ---
+                Utilisateur createur = utilisateurRepository.findById(userId)
+                                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+                morceau.setCreateur(createur);
 
-    // // Suppression autorisée
-    // morceauRepository.delete(morceau);
-    // }
+                // --- Sauvegarder le morceau ---
+                Morceau saved = morceauRepository.save(morceau);
 
-    // 21/10
+                // --- Notification (optionnel selon ton besoin) ---
+                notificationService.notifyMorceauAjoute(saved);
 
-    public void delete(Long morceauId, Long userId) {
-        Morceau morceau = morceauRepository.findById(morceauId)
-                .orElseThrow(() -> new RuntimeException(
-                        "Morceau non trouvé avec l'ID : " + morceauId));
-
-        Long ensembleId = morceau.getEnsemble().getId();
-
-        // Vérifier que l'utilisateur appartient à l'ensemble
-        if (!utilisateurEnsembleService.utilisateurAutorise(
-                userId, ensembleId, List.of("OWNER", "MODERATEUR", "MEMBRE"))) {
-            throw new RuntimeException(
-                    "Vous devez être membre de l'ensemble pour supprimer ce morceau");
+                // --- Retourner le DTO pour le front ---
+                return morceauMapper.toDto(saved);
         }
 
-        // Récupérer le rôle de l'utilisateur dans cet ensemble
-        Role role = utilisateurEnsembleService
-                .getRoleUtilisateurDansEnsemble(userId, ensembleId);
+        // Mettre à jour un morceau existant
+        public MorceauDto update(Long id, MorceauDto dto) {
+                Objects.requireNonNull(dto, "Le DTO ne doit pas être null");
+                Morceau morceau = morceauRepository.findById(id)
+                                .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID: " + id));
 
-        boolean isOwnerOrModerator = role == Role.OWNER || role == Role.MODERATEUR;
+                // Mettre à jour les champs simples
+                // Morceau = entité plus complexe que instrument, update manuel et sécurisé.
+                morceau.setTitre(dto.titre());
+                morceau.setCompositeur(dto.compositeur());
+                morceau.setGenre(dto.genre());
+                morceau.setDescriptif(dto.descriptif());
 
-        boolean isCreateur = morceau.getCreateur() != null
-                && morceau.getCreateur().getId().equals(userId);
+                // Mettre à jour les relations
+                if (dto.ensembleId() != null) {
+                        Ensemble ensemble = ensembleRepository.findById(dto.ensembleId())
+                                        .orElseThrow(() -> new RuntimeException(
+                                                        "Ensemble non trouvé avec l'ID: " + dto.ensembleId()));
+                        morceau.setEnsemble(ensemble);
+                }
 
-        if (!isOwnerOrModerator && !isCreateur) {
-            throw new RuntimeException(
-                    "Vous pouvez supprimer uniquement vos propres morceaux, sauf si vous êtes OWNER");
+                if (dto.createurId() != null) {
+                        Utilisateur createur = utilisateurRepository.findById(dto.createurId())
+                                        .orElseThrow(() -> new RuntimeException(
+                                                        "Utilisateur non trouvé avec l'ID: " + dto.createurId()));
+                        morceau.setCreateur(createur);
+                }
+
+                Morceau updated = morceauRepository.save(morceau);
+                return morceauMapper.toDto(updated);
         }
 
-        morceauRepository.delete(morceau);
-    }
+        // Supprimer un morceau par son ID
+        // public void delete(Long id) {
+        // if (!morceauRepository.existsById(id)) {
+        // throw new RuntimeException("Morceau non trouvé avec l'ID: " + id);
+        // }
+        // morceauRepository.deleteById(id);
+        // }
 
-    // public MorceauDto findLastAddedMorceauByEnsemble(Long ensembleId) {
-    // return morceauRepository.findTopByEnsembleIdOrderByIdDesc(ensembleId) // <--
-    // Appel au Repository
-    // .map(morceauMapper::toDto)
-    // .orElseThrow(() -> new RuntimeException("Aucun morceau trouvé pour l'ensemble
-    // " + ensembleId));
-    // }
+        // public void delete(Long morceauId, Long userId) {
+        // // Récupérer le morceau
+        // Morceau morceau = morceauRepository.findById(morceauId)
+        // .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID : " +
+        // morceauId));
 
-    public MorceauDto findLastAddedMorceauByEnsemble(Long ensembleId) {
-        return morceauRepository.findTopByEnsembleIdOrderByIdDesc(ensembleId)
-                .map(morceauMapper::toDto)
-                .orElse(null);
-    }
+        // Long ensembleId = morceau.getEnsemble().getId();
+
+        // // Vérifier que l'utilisateur est membre de l'ensemble
+        // if (!utilisateurEnsembleService.utilisateurAutorise(userId, ensembleId,
+        // List.of("OWNER", "MODERATEUR", "MEMBRE"))) {
+        // throw new RuntimeException("Vous devez être membre de l'ensemble pour
+        // supprimer ce morceau");
+        // }
+
+        // // Vérifier les droits : créateur ou rôle élevé
+        // Role role = utilisateurEnsembleService.getRoleUtilisateurDansEnsemble(userId,
+        // ensembleId);
+        // boolean isAdminOrModerator = role == Role.OWNER || role == Role.MODERATEUR;
+        // boolean isCreateur = morceau.getCreateur().getId().equals(userId);
+
+        // if (!isCreateur && !isAdminOrModerator) {
+        // throw new RuntimeException("Vous n'avez pas les droits pour supprimer ce
+        // morceau");
+        // }
+
+        // // Suppression autorisée
+        // morceauRepository.delete(morceau);
+        // }
+
+        // 21/10
+
+        public void delete(Long morceauId, Long userId) {
+                Morceau morceau = morceauRepository.findById(morceauId)
+                                .orElseThrow(() -> new RuntimeException(
+                                                "Morceau non trouvé avec l'ID : " + morceauId));
+
+                Long ensembleId = morceau.getEnsemble().getId();
+
+                // Vérifier que l'utilisateur appartient à l'ensemble
+                if (!utilisateurEnsembleService.utilisateurAutorise(
+                                userId, ensembleId,
+                                List.of("OWNER", "MODERATEUR", "MEMBRE"))) {
+                        throw new RuntimeException(
+                                        "Vous devez être membre de l'ensemble pour supprimer ce morceau");
+                }
+
+                // Récupérer le rôle de l'utilisateur dans cet ensemble
+                Role role = utilisateurEnsembleService
+                                .getRoleUtilisateurDansEnsemble(userId, ensembleId);
+
+                // L'OWNER et le MODÉRATEUR peuvent supprimer tous les morceaux
+                boolean isOwnerOrModerator = role == Role.OWNER || role == Role.MODERATEUR;
+
+                // Vérifier si l'utilisateur a créé ce morceau
+                boolean isCreateur = morceau.getCreateur() != null
+                                && morceau.getCreateur().getId().equals(userId);
+
+                // Les autres membres peuvent supprimer uniquement leurs morceaux
+                if (!isOwnerOrModerator && !isCreateur) {
+                        throw new RuntimeException(
+                                        "Vous pouvez supprimer uniquement vos propres morceaux, "
+                                                        + "sauf si vous êtes OWNER ou MODERATEUR");
+                }
+
+                morceauRepository.delete(morceau);
+        }
+
+        // public MorceauDto findLastAddedMorceauByEnsemble(Long ensembleId) {
+        // return morceauRepository.findTopByEnsembleIdOrderByIdDesc(ensembleId) // <--
+        // Appel au Repository
+        // .map(morceauMapper::toDto)
+        // .orElseThrow(() -> new RuntimeException("Aucun morceau trouvé pour l'ensemble
+        // " + ensembleId));
+        // }
+
+        public MorceauDto findLastAddedMorceauByEnsemble(Long ensembleId) {
+                return morceauRepository.findTopByEnsembleIdOrderByIdDesc(ensembleId)
+                                .map(morceauMapper::toDto)
+                                .orElse(null);
+        }
 
 }

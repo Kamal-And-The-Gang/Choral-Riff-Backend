@@ -216,6 +216,15 @@ public class InvitationService {
         if (invitation.getDateUtilisation() != null) {
             throw new RuntimeException("Cette invitation a déjà été utilisée.");
         }
+        // Vérifier que l'e-mail correspond à l'invitation 23/10
+        if (nouvelUtilisateur == null
+                || nouvelUtilisateur.getEmail() == null
+                || invitation.getEmailInvite() == null
+                || !nouvelUtilisateur.getEmail().trim()
+                        .equalsIgnoreCase(invitation.getEmailInvite().trim())) {
+            throw new IllegalArgumentException(
+                    "L'adresse e-mail ne correspond pas à l'invitation.");
+        }
 
         // --- Étape 2 : vérifier si le token est expiré ---
         if (invitation.getDateExpiration() != null &&

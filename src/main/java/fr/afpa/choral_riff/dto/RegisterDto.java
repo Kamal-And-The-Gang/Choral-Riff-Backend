@@ -22,7 +22,7 @@ public class RegisterDto {
     private String motDePasse;
 
     // Nouveau champ pour récupérer le token envoyé dans le lien d'invitation
-    @NotBlank(message = "Le token d'invitation est obligatoire")
+    // @NotBlank(message = "Le token d'invitation est obligatoire")
     private String token;
 
     // public class RegisterDto {
