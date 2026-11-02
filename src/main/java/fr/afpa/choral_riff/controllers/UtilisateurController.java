@@ -11,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
+import jakarta.validation.Valid;
 
 /**
  * Contrôleur REST pour gérer les utilisateurs.
@@ -70,7 +71,7 @@ public class UtilisateurController {
     }
 
     @PostMapping("/inscription-invitation")
-    public ResponseEntity<String> inscriptionViaInvitation(@RequestBody RegisterDto dto) {
+    public ResponseEntity<String> inscriptionViaInvitation(@Valid@RequestBody RegisterDto dto) {
         // Créer l'utilisateur
         Utilisateur nouvelUtilisateur = utilisateurService.createFromRegisterDto(dto);
 

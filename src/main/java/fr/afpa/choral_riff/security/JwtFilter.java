@@ -45,6 +45,7 @@ protected void doFilterInternal(
     // 1. Essaie de récupérer le JWT depuis l'en-tête Authorization
     String jwt = null;
     String authHeader = request.getHeader("Authorization");
+    System.out.println("Authorization présent : " + (authHeader != null));
 
     if (authHeader != null && authHeader.startsWith("Bearer ")) {
         jwt = authHeader.substring(7);
@@ -85,9 +86,10 @@ protected void doFilterInternal(
                             .setAuthentication(authentication);
                 }
             }
-        } catch (Exception e) {
-            SecurityContextHolder.clearContext();
-        }
+      } catch (Exception e) {
+    e.printStackTrace();
+    SecurityContextHolder.clearContext();
+}
     }
 
     // Une seule exécution du filtre suivant

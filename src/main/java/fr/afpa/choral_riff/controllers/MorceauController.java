@@ -103,30 +103,29 @@ public class MorceauController {
     // }
 
     // @DeleteMapping("/{id}")
-    // public ResponseEntity<Void> delete(@PathVariable Long id, @RequestParam Long userId) {
-    //     morceauService.delete(id, userId);
-    //     return ResponseEntity.noContent().build();
+    // public ResponseEntity<Void> delete(@PathVariable Long id, @RequestParam Long
+    // userId) {
+    // morceauService.delete(id, userId);
+    // return ResponseEntity.noContent().build();
     // }
 
-
-
-
     @DeleteMapping("/{id}")
-public ResponseEntity<Void> delete(
-        @PathVariable Long id,
-        Authentication authentication) {
+    public ResponseEntity<Void> delete(
+            @PathVariable Long id,
+            Authentication authentication) {
+        System.out.println(">>> Entrée dans MorceauController.delete()");
 
-    if (authentication == null || !authentication.isAuthenticated()) {
-        return ResponseEntity.status(401).build();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Utilisateur utilisateur = utilisateurRepository
+                .findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        morceauService.delete(id, utilisateur.getId());
+
+        return ResponseEntity.noContent().build();
     }
-
-    Utilisateur utilisateur = utilisateurRepository
-            .findByEmail(authentication.getName())
-            .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-
-    morceauService.delete(id, utilisateur.getId());
-
-    return ResponseEntity.noContent().build();
-}
 
 }

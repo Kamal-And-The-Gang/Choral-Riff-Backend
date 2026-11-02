@@ -51,12 +51,7 @@ public class UtilisateurService {
         this.utilisateurEnsembleRepository = utilisateurEnsembleRepository;
     }
 
-    // public UtilisateurDto getById(Long id) {
-    // Utilisateur utilisateur = utilisateurRepository.findById(id)
-    // .orElseThrow(() -> new NoSuchElementException("Utilisateur non trouvé avec id
-    // " + id));
-    // return utilisateurMapper.toDto(utilisateur);
-    // }
+   
 
     public UtilisateurDto getById(Long id) {
 
