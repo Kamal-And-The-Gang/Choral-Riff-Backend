@@ -198,13 +198,33 @@ private InvitationRepository invitationRepository;
     }
 
    
+
 @Test
-void register_should_return_created_user() throws Exception {
+void register_should_return_created_user_without_invitation() throws Exception {
+    String email = "registeruser" + System.currentTimeMillis() + "@example.com";
+
+    RegisterDto dto = new RegisterDto();
+    dto.setNom("Test");
+    dto.setPrenom("User");
+    dto.setEmail(email);
+    dto.setMotDePasse("password");
+
+    mockMvc.perform(post("/api/auth/register")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").exists())
+            .andExpect(jsonPath("$.email").value(email))
+            .andExpect(jsonPath("$.nom").value("Test"));
+}
+
+@Test
+void register_should_return_created_user_with_invitation() throws Exception {
     Ensemble ensemble = new Ensemble();
     ensemble.setNom("Ensemble Test");
     ensemble = ensembleRepository.save(ensemble);
 
-    String email = "registeruser" + System.currentTimeMillis() + "@example.com";
+    String email = "inviteduser" + System.currentTimeMillis() + "@example.com";
     String token = "token-register-" + System.currentTimeMillis();
 
     Invitation invitation = new Invitation();
@@ -217,7 +237,7 @@ void register_should_return_created_user() throws Exception {
     invitationRepository.save(invitation);
 
     RegisterDto dto = new RegisterDto();
-    dto.setNom("Test");
+    dto.setNom("Invited");
     dto.setPrenom("User");
     dto.setEmail(email);
     dto.setMotDePasse("password");
@@ -228,9 +248,10 @@ void register_should_return_created_user() throws Exception {
             .content(objectMapper.writeValueAsString(dto)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").exists())
-            .andExpect(jsonPath("$.email").value(dto.getEmail()))
-            .andExpect(jsonPath("$.nom").value("Test"));
+            .andExpect(jsonPath("$.email").value(email))
+            .andExpect(jsonPath("$.nom").value("Invited"));
 }
+
 
 
     @Test
