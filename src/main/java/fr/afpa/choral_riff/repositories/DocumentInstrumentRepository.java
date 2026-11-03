@@ -7,11 +7,10 @@ import org.springframework.stereotype.Repository;
 /**
  * Repository pour gérer les opérations CRUD sur l'entité
  * {@link DocumentInstrument}.
- * 
+ *
  * Fournit des méthodes pour accéder aux relations entre Documents et
  * Instruments.
  */
 @Repository
-public interface DocumentInstrumentRepository extends JpaRepository<DocumentInstrument, Long> {
-}
-
+public interface DocumentInstrumentRepository
+  extends JpaRepository<DocumentInstrument, Long> {}

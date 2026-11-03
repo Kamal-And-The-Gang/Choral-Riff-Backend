@@ -10,103 +10,110 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/utilisateur-ensembles")
 public class UtilisateurEnsembleController {
 
-    private final UtilisateurEnsembleService utilisateurEnsembleService;
+  private final UtilisateurEnsembleService utilisateurEnsembleService;
 
-    public UtilisateurEnsembleController(
-            UtilisateurEnsembleService utilisateurEnsembleService) {
-        this.utilisateurEnsembleService = utilisateurEnsembleService;
-    }
+  public UtilisateurEnsembleController(
+    UtilisateurEnsembleService utilisateurEnsembleService
+  ) {
+    this.utilisateurEnsembleService = utilisateurEnsembleService;
+  }
 
-    /**
-     * Permet à un OWNER de modifier le rôle d'un membre
-     * de son ensemble.
-     */
+  /**
+   * Permet à un OWNER de modifier le rôle d'un membre
+   * de son ensemble.
+   */
   @PutMapping("/role")
-public ResponseEntity<?> changerRole(
-        @RequestParam Long acteurId,
-        @RequestParam Long cibleId,
-        @RequestParam Long ensembleId,
-        @RequestParam Role nouveauRole) {
-
+  public ResponseEntity<?> changerRole(
+    @RequestParam Long acteurId,
+    @RequestParam Long cibleId,
+    @RequestParam Long ensembleId,
+    @RequestParam Role nouveauRole
+  ) {
     try {
-        utilisateurEnsembleService.changerRole(
-                acteurId,
-                cibleId,
-                ensembleId,
-                nouveauRole
-        );
+      utilisateurEnsembleService.changerRole(
+        acteurId,
+        cibleId,
+        ensembleId,
+        nouveauRole
+      );
 
-        return ResponseEntity.ok(
-                java.util.Map.of(
-                        "message", "Rôle modifié avec succès",
-                        "utilisateurId", cibleId,
-                        "ensembleId", ensembleId,
-                        "nouveauRole", nouveauRole.name()
-                )
-        );
-
+      return ResponseEntity.ok(
+        java.util.Map.of(
+          "message",
+          "Rôle modifié avec succès",
+          "utilisateurId",
+          cibleId,
+          "ensembleId",
+          ensembleId,
+          "nouveauRole",
+          nouveauRole.name()
+        )
+      );
     } catch (SecurityException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(java.util.Map.of(
-                        "message", e.getMessage()
-                ));
-
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+        java.util.Map.of("message", e.getMessage())
+      );
     } catch (RuntimeException e) {
-        return ResponseEntity.notFound()
-                .build();
+      return ResponseEntity.notFound().build();
     }
-}
+  }
 
+  /**
+   * Permet de récupérer tous les membres d'un ensemble
+   * @param ensembleId
+   * @return
+   */
 
-@GetMapping("/ensemble/{ensembleId}/membres")
-public ResponseEntity<?> getMembresDeLEnsemble(
-        @PathVariable Long ensembleId) {
-
+  @GetMapping("/ensemble/{ensembleId}/membres")
+  public ResponseEntity<?> getMembresDeLEnsemble(
+    @PathVariable Long ensembleId
+  ) {
     try {
-        return ResponseEntity.ok(
-                utilisateurEnsembleService.getMembresDeLEnsemble(ensembleId)
-        );
+      return ResponseEntity.ok(
+        utilisateurEnsembleService.getMembresDeLEnsemble(ensembleId)
+      );
     } catch (RuntimeException e) {
-        return ResponseEntity.notFound().build();
+      return ResponseEntity.notFound().build();
     }
-}
+  }
 
-@DeleteMapping("/membre")
-public ResponseEntity<?> retirerMembre(
-        @RequestParam Long acteurId,
-        @RequestParam Long cibleId,
-        @RequestParam Long ensembleId) {
+  /**
+   * Permet à un OWNER de retirer un membre de son ensemble.
+   * @param acteurId
+   * @param cibleId
+   * @param ensembleId
+   * @return
+   */
 
+  @DeleteMapping("/membre")
+  public ResponseEntity<?> retirerMembre(
+    @RequestParam Long acteurId,
+    @RequestParam Long cibleId,
+    @RequestParam Long ensembleId
+  ) {
     try {
+      utilisateurEnsembleService.retirerUtilisateurDeLEnsemble(
+        acteurId,
+        cibleId,
+        ensembleId
+      );
 
-        utilisateurEnsembleService.retirerUtilisateurDeLEnsemble(
-                acteurId,
-                cibleId,
-                ensembleId
-        );
-
-        return ResponseEntity.ok(
-                java.util.Map.of(
-                        "message", "Membre retiré de l'ensemble",
-                        "utilisateurId", cibleId,
-                        "ensembleId", ensembleId
-                )
-        );
-
+      return ResponseEntity.ok(
+        java.util.Map.of(
+          "message",
+          "Membre retiré de l'ensemble",
+          "utilisateurId",
+          cibleId,
+          "ensembleId",
+          ensembleId
+        )
+      );
     } catch (SecurityException e) {
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(java.util.Map.of(
-                        "message", e.getMessage()
-                ));
-
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+        java.util.Map.of("message", e.getMessage())
+      );
     } catch (RuntimeException e) {
-
-        return ResponseEntity.notFound().build();
+      return ResponseEntity.notFound().build();
     }
+  }
 }
-
-
-
-}
-

@@ -1,5 +1,6 @@
 package fr.afpa.choral_riff.services;
 
+import fr.afpa.choral_riff.dto.UtilisateurEnsembleDTO;
 import fr.afpa.choral_riff.entity.Ensemble;
 import fr.afpa.choral_riff.entity.Role;
 import fr.afpa.choral_riff.entity.Utilisateur;
@@ -8,13 +9,11 @@ import fr.afpa.choral_riff.repositories.EnsembleRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurEnsembleRepository;
 import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import jakarta.transaction.Transactional;
-
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
-import java.util.List;
-import fr.afpa.choral_riff.dto.UtilisateurEnsembleDTO;
 
 /**
  * Service métier permettant de gérer les relations entre un {@link Utilisateur}
@@ -43,273 +42,277 @@ import fr.afpa.choral_riff.dto.UtilisateurEnsembleDTO;
  * </p>
  */
 
-
 @Service
 public class UtilisateurEnsembleService {
 
-    private final UtilisateurEnsembleRepository utilisateurEnsembleRepository;
-    private final UtilisateurRepository utilisateurRepository;
-    private final EnsembleRepository ensembleRepository;
+  private final UtilisateurEnsembleRepository utilisateurEnsembleRepository;
+  private final UtilisateurRepository utilisateurRepository;
+  private final EnsembleRepository ensembleRepository;
 
-    public UtilisateurEnsembleService(
-            UtilisateurEnsembleRepository utilisateurEnsembleRepository,
-            UtilisateurRepository utilisateurRepository,
-            EnsembleRepository ensembleRepository) {
-        this.utilisateurEnsembleRepository = utilisateurEnsembleRepository;
-        this.utilisateurRepository = utilisateurRepository;
-        this.ensembleRepository = ensembleRepository;
+  public UtilisateurEnsembleService(
+    UtilisateurEnsembleRepository utilisateurEnsembleRepository,
+    UtilisateurRepository utilisateurRepository,
+    EnsembleRepository ensembleRepository
+  ) {
+    this.utilisateurEnsembleRepository = utilisateurEnsembleRepository;
+    this.utilisateurRepository = utilisateurRepository;
+    this.ensembleRepository = ensembleRepository;
+  }
+
+  // Vérifie si un utilisateur est déjà membre d'un ensemble
+  public boolean estMembreDeLensemble(Long utilisateurId, Long ensembleId) {
+    return utilisateurEnsembleRepository.existsByUtilisateurIdAndEnsembleId(
+      utilisateurId,
+      ensembleId
+    );
+  }
+
+  /**
+   * Vérifie si un utilisateur a un rôle autorisé dans un ensemble.
+   *
+   * @param utilisateurId id de l'utilisateur
+   * @param ensembleId    id de l'ensemble
+   * @param roles         liste des rôles autorisés, ex: ["OWNER", "MODERATEUR"]
+   * @return true si l'utilisateur a l'un de ces rôles, false sinon
+   */
+  public boolean utilisateurAutorise(
+    Long utilisateurId,
+    Long ensembleId,
+    List<String> roles
+  ) {
+    // Convertit les String en enum Role
+    List<Role> rolesEnum = roles
+      .stream()
+      .map(Role::valueOf) // attention : valueOf lance IllegalArgumentException si le String ne correspond
+      // pas
+      .toList();
+
+    return utilisateurEnsembleRepository.existsByUtilisateur_IdAndEnsemble_IdAndRoleDansEnsembleIn(
+      utilisateurId,
+      ensembleId,
+      rolesEnum
+    );
+  }
+
+  // Nouvelle méthode pour récupérer le rôle d'un utilisateur dans un ensemble
+  public Role getRoleUtilisateurDansEnsemble(
+    Long utilisateurId,
+    Long ensembleId
+  ) {
+    return utilisateurEnsembleRepository
+      .findByUtilisateur_IdAndEnsemble_Id(utilisateurId, ensembleId)
+      .orElseThrow(() ->
+        new RuntimeException("Utilisateur pas trouvé dans l'ensemble")
+      )
+      .getRoleDansEnsemble();
+  }
+
+  @Transactional
+  public void rattacherUtilisateurAEnsemble(
+    Long utilisateurId,
+    Long ensembleId
+  ) {
+    Utilisateur utilisateur = utilisateurRepository
+      .findById(utilisateurId)
+      .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+    Ensemble ensemble = ensembleRepository
+      .findById(ensembleId)
+      .orElseThrow(() -> new RuntimeException("Ensemble introuvable"));
+
+    boolean dejaMembre =
+      utilisateurEnsembleRepository.existsByUtilisateurIdAndEnsembleId(
+        utilisateurId,
+        ensembleId
+      );
+
+    if (!dejaMembre) {
+      UtilisateurEnsemble ue = new UtilisateurEnsemble();
+      ue.setUtilisateur(utilisateur);
+      ue.setEnsemble(ensemble);
+      ue.setRoleDansEnsemble(Role.MEMBRE);
+      ue.setDateAdhesion(LocalDateTime.now());
+      ue.setNomComplet(utilisateur.getPrenom() + " " + utilisateur.getNom());
+      utilisateurEnsembleRepository.saveAndFlush(ue);
+    }
+    // Sinon ne rien faire, juste continuer
+  }
+
+  @Transactional
+  public void changerRole(
+    Long acteurId,
+    Long cibleId,
+    Long ensembleId,
+    Role nouveauRole
+  ) {
+    // Vérifier que l'acteur est OWNER dans cet ensemble
+    Role roleActeur = getRoleUtilisateurDansEnsemble(acteurId, ensembleId);
+
+    if (roleActeur != Role.OWNER) {
+      throw new SecurityException(
+        "Seul le OWNER peut modifier les rôles dans cet ensemble"
+      );
     }
 
-    // Vérifie si un utilisateur est déjà membre d'un ensemble
-    public boolean estMembreDeLensemble(Long utilisateurId, Long ensembleId) {
-        return utilisateurEnsembleRepository.existsByUtilisateurIdAndEnsembleId(utilisateurId, ensembleId);
+    // Récupérer la personne dont on veut modifier le rôle
+    UtilisateurEnsemble utilisateurEnsemble = utilisateurEnsembleRepository
+      .findByUtilisateur_IdAndEnsemble_Id(cibleId, ensembleId)
+      .orElseThrow(() ->
+        new RuntimeException("Utilisateur non trouvé dans cet ensemble")
+      );
+
+    // L'OWNER ne peut modifier que MEMBRE <-> MODERATEUR
+    Role ancienRole = utilisateurEnsemble.getRoleDansEnsemble();
+
+    if (ancienRole == Role.OWNER) {
+      throw new SecurityException("Le rôle OWNER ne peut pas être modifié");
     }
 
-    /**
-     * Vérifie si un utilisateur a un rôle autorisé dans un ensemble.
-     * 
-     * @param utilisateurId id de l'utilisateur
-     * @param ensembleId    id de l'ensemble
-     * @param roles         liste des rôles autorisés, ex: ["OWNER", "MODERATEUR"]
-     * @return true si l'utilisateur a l'un de ces rôles, false sinon
-     */
-    public boolean utilisateurAutorise(Long utilisateurId, Long ensembleId, List<String> roles) {
-        // Convertit les String en enum Role
-        List<Role> rolesEnum = roles.stream()
-                .map(Role::valueOf) // attention : valueOf lance IllegalArgumentException si le String ne correspond
-                                    // pas
-                .toList();
-
-        return utilisateurEnsembleRepository.existsByUtilisateur_IdAndEnsemble_IdAndRoleDansEnsembleIn(
-                utilisateurId, ensembleId, rolesEnum);
+    if (nouveauRole == Role.OWNER) {
+      throw new SecurityException("Impossible d'attribuer le rôle OWNER");
     }
 
-    // Nouvelle méthode pour récupérer le rôle d'un utilisateur dans un ensemble
-    public Role getRoleUtilisateurDansEnsemble(Long utilisateurId, Long ensembleId) {
-        return utilisateurEnsembleRepository.findByUtilisateur_IdAndEnsemble_Id(utilisateurId, ensembleId)
-                .orElseThrow(() -> new RuntimeException("Utilisateur pas trouvé dans l'ensemble"))
-                .getRoleDansEnsemble();
+    if (nouveauRole != Role.MEMBRE && nouveauRole != Role.MODERATEUR) {
+      throw new IllegalArgumentException(
+        "Le nouveau rôle doit être MEMBRE ou MODERATEUR"
+      );
     }
 
-    
-    @Transactional
-    public void rattacherUtilisateurAEnsemble(Long utilisateurId, Long ensembleId) {
-        Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+    utilisateurEnsemble.setRoleDansEnsemble(nouveauRole);
 
-        Ensemble ensemble = ensembleRepository.findById(ensembleId)
-                .orElseThrow(() -> new RuntimeException("Ensemble introuvable"));
+    utilisateurEnsembleRepository.save(utilisateurEnsemble);
+  }
 
-        boolean dejaMembre = utilisateurEnsembleRepository
-                .existsByUtilisateurIdAndEnsembleId(utilisateurId, ensembleId);
+  public boolean peutModifierRole(
+    Long acteurId,
+    Long cibleId,
+    Long ensembleId,
+    Role nouveauRole
+  ) {
+    Role roleActeur = getRoleUtilisateurDansEnsemble(acteurId, ensembleId);
+    Role roleCible = getRoleUtilisateurDansEnsemble(cibleId, ensembleId);
 
-        if (!dejaMembre) {
-            UtilisateurEnsemble ue = new UtilisateurEnsemble();
-            ue.setUtilisateur(utilisateur);
-            ue.setEnsemble(ensemble);
-            ue.setRoleDansEnsemble(Role.MEMBRE);
-            ue.setDateAdhesion(LocalDateTime.now());
-            ue.setNomComplet(utilisateur.getPrenom() + " " + utilisateur.getNom());
-            utilisateurEnsembleRepository.saveAndFlush(ue);
-        }
-        // Sinon ne rien faire, juste continuer
+    if (roleActeur == Role.MEMBRE) {
+      return false;
     }
 
-
-        @Transactional
-    public void changerRole(
-            Long acteurId,
-            Long cibleId,
-            Long ensembleId,
-            Role nouveauRole) {
-
-        // Vérifier que l'acteur est OWNER dans cet ensemble
-        Role roleActeur = getRoleUtilisateurDansEnsemble(acteurId, ensembleId);
-
-        if (roleActeur != Role.OWNER) {
-            throw new SecurityException(
-                    "Seul le OWNER peut modifier les rôles dans cet ensemble");
-        }
-
-        // Récupérer la personne dont on veut modifier le rôle
-        UtilisateurEnsemble utilisateurEnsemble =
-                utilisateurEnsembleRepository
-                        .findByUtilisateur_IdAndEnsemble_Id(cibleId, ensembleId)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Utilisateur non trouvé dans cet ensemble"));
-
-        // L'OWNER ne peut modifier que MEMBRE <-> MODERATEUR
-        Role ancienRole = utilisateurEnsemble.getRoleDansEnsemble();
-
-        if (ancienRole == Role.OWNER) {
-            throw new SecurityException(
-                    "Le rôle OWNER ne peut pas être modifié");
-        }
-
-        if (nouveauRole == Role.OWNER) {
-            throw new SecurityException(
-                    "Impossible d'attribuer le rôle OWNER");
-        }
-
-        if (nouveauRole != Role.MEMBRE && nouveauRole != Role.MODERATEUR) {
-            throw new IllegalArgumentException(
-                    "Le nouveau rôle doit être MEMBRE ou MODERATEUR");
-        }
-
-        utilisateurEnsemble.setRoleDansEnsemble(nouveauRole);
-
-        utilisateurEnsembleRepository.save(utilisateurEnsemble);
+    if (roleActeur == Role.OWNER) {
+      return (
+        (roleCible == Role.MEMBRE || roleCible == Role.MODERATEUR) &&
+        (nouveauRole == Role.MEMBRE || nouveauRole == Role.MODERATEUR)
+      );
     }
 
-    public boolean peutModifierRole(
-            Long acteurId,
-            Long cibleId,
-            Long ensembleId,
-            Role nouveauRole) {
-
-        Role roleActeur = getRoleUtilisateurDansEnsemble(acteurId, ensembleId);
-        Role roleCible = getRoleUtilisateurDansEnsemble(cibleId, ensembleId);
-
-        if (roleActeur == Role.MEMBRE) {
-            return false;
-        }
-
-        if (roleActeur == Role.OWNER) {
-            return (roleCible == Role.MEMBRE || roleCible == Role.MODERATEUR)
-                    && (nouveauRole == Role.MEMBRE || nouveauRole == Role.MODERATEUR);
-        }
-
-        if (roleActeur == Role.MODERATEUR) {
-            return roleCible == Role.MEMBRE
-                    && nouveauRole == Role.MODERATEUR;
-        }
-
-        return false;
+    if (roleActeur == Role.MODERATEUR) {
+      return roleCible == Role.MEMBRE && nouveauRole == Role.MODERATEUR;
     }
 
-//     public List<UtilisateurEnsembleDTO> getMembresDeLEnsemble(Long ensembleId) {
+    return false;
+  }
 
-//         return utilisateurEnsembleRepository.findByEnsembleId(ensembleId)
-//                 .stream()
-//                 .map(ue -> new UtilisateurEnsembleDTO(
-//                         ue.getUtilisateur().getId(),
-//                         ue.getUtilisateur().getNom(),
-//                         ue.getUtilisateur().getPrenom(),
-//                         ue.getRoleDansEnsemble().name(),
-//                         ue.isCreator()
-//                 ))
-//                 .toList();
-//     }
-
-
-
-public List<UtilisateurEnsembleDTO> getMembresDeLEnsemble(Long ensembleId) {
-
+  public List<UtilisateurEnsembleDTO> getMembresDeLEnsemble(Long ensembleId) {
     // 1. Identifier l'utilisateur connecté
-    var authentication =
-            SecurityContextHolder.getContext().getAuthentication();
+    var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    if (authentication == null
-            || !authentication.isAuthenticated()
-            || "anonymousUser".equals(authentication.getPrincipal())) {
-        throw new AccessDeniedException("Authentification requise");
+    if (
+      authentication == null ||
+      !authentication.isAuthenticated() ||
+      "anonymousUser".equals(authentication.getPrincipal())
+    ) {
+      throw new AccessDeniedException("Authentification requise");
     }
 
     // 2. Récupérer l'utilisateur connecté
-    Utilisateur utilisateurConnecte =
-            utilisateurRepository.findByEmail(authentication.getName())
-                    .orElseThrow(() ->
-                            new AccessDeniedException(
-                                    "Utilisateur connecté introuvable"));
+    Utilisateur utilisateurConnecte = utilisateurRepository
+      .findByEmail(authentication.getName())
+      .orElseThrow(() ->
+        new AccessDeniedException("Utilisateur connecté introuvable")
+      );
 
     // 3. Vérifier que l'utilisateur appartient à cet ensemble
     boolean estMembre =
-            utilisateurEnsembleRepository
-                    .existsByUtilisateurIdAndEnsembleId(
-                            utilisateurConnecte.getId(),
-                            ensembleId
-                    );
+      utilisateurEnsembleRepository.existsByUtilisateurIdAndEnsembleId(
+        utilisateurConnecte.getId(),
+        ensembleId
+      );
 
     if (!estMembre) {
-        throw new AccessDeniedException(
-                "Accès interdit : vous n'êtes pas membre de cet ensemble");
+      throw new AccessDeniedException(
+        "Accès interdit : vous n'êtes pas membre de cet ensemble"
+      );
     }
 
     // 4. Récupérer les membres et construire les DTO
-    return utilisateurEnsembleRepository.findByEnsembleId(ensembleId)
-            .stream()
-            .map(ue -> new UtilisateurEnsembleDTO(
-                    ue.getUtilisateur().getId(),
-                    ue.getUtilisateur().getNom(),
-                    ue.getUtilisateur().getPrenom(),
-                    ue.getRoleDansEnsemble().name(),
-                    ue.isCreator()
-            ))
-            .toList();
-}
+    return utilisateurEnsembleRepository
+      .findByEnsembleId(ensembleId)
+      .stream()
+      .map(ue ->
+        new UtilisateurEnsembleDTO(
+          ue.getUtilisateur().getId(),
+          ue.getUtilisateur().getNom(),
+          ue.getUtilisateur().getPrenom(),
+          ue.getRoleDansEnsemble().name(),
+          ue.isCreator()
+        )
+      )
+      .toList();
+  }
 
+  @Transactional
+  public void retirerUtilisateurDeLEnsemble(
+    Long acteurId,
+    Long cibleId,
+    Long ensembleId
+  ) {
+    // L'acteur doit être OWNER
+    Role roleActeur = getRoleUtilisateurDansEnsemble(acteurId, ensembleId);
 
-    @Transactional
-    public void retirerUtilisateurDeLEnsemble(
-            Long acteurId,
-            Long cibleId,
-            Long ensembleId) {
-
-        // L'acteur doit être OWNER
-        Role roleActeur =
-                getRoleUtilisateurDansEnsemble(acteurId, ensembleId);
-
-        if (roleActeur != Role.OWNER) {
-            throw new SecurityException(
-                    "Seul le OWNER peut retirer un membre de cet ensemble");
-        }
-
-        // Récupérer la relation de la personne à retirer
-        UtilisateurEnsemble membre =
-                utilisateurEnsembleRepository
-                        .findByUtilisateur_IdAndEnsemble_Id(
-                                cibleId,
-                                ensembleId)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Utilisateur non trouvé dans cet ensemble"));
-
-        // Impossible de retirer le OWNER
-        if (membre.getRoleDansEnsemble() == Role.OWNER) {
-            throw new SecurityException(
-                    "Impossible de retirer le OWNER de l'ensemble");
-        }
-
-        // Suppression uniquement de la relation
-        utilisateurEnsembleRepository
-                .deleteByUtilisateur_IdAndEnsemble_Id(
-                        cibleId,
-                        ensembleId);
+    if (roleActeur != Role.OWNER) {
+      throw new SecurityException(
+        "Seul le OWNER peut retirer un membre de cet ensemble"
+      );
     }
 
-    private void verifierProprietaire(Long id) {
+    // Récupérer la relation de la personne à retirer
+    UtilisateurEnsemble membre = utilisateurEnsembleRepository
+      .findByUtilisateur_IdAndEnsemble_Id(cibleId, ensembleId)
+      .orElseThrow(() ->
+        new RuntimeException("Utilisateur non trouvé dans cet ensemble")
+      );
 
-    var authentication =
-            SecurityContextHolder.getContext().getAuthentication();
-
-    if (authentication == null
-            || !authentication.isAuthenticated()
-            || "anonymousUser".equals(authentication.getPrincipal())) {
-        throw new AccessDeniedException("Authentification requise");
+    // Impossible de retirer le OWNER
+    if (membre.getRoleDansEnsemble() == Role.OWNER) {
+      throw new SecurityException(
+        "Impossible de retirer le OWNER de l'ensemble"
+      );
     }
 
-    Utilisateur utilisateurConnecte =
-            utilisateurRepository.findByEmail(authentication.getName())
-                    .orElseThrow(() ->
-                            new AccessDeniedException(
-                                    "Utilisateur connecté introuvable"));
+    // Suppression uniquement de la relation
+    utilisateurEnsembleRepository.deleteByUtilisateur_IdAndEnsemble_Id(
+      cibleId,
+      ensembleId
+    );
+  }
+
+  private void verifierProprietaire(Long id) {
+    var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    if (
+      authentication == null ||
+      !authentication.isAuthenticated() ||
+      "anonymousUser".equals(authentication.getPrincipal())
+    ) {
+      throw new AccessDeniedException("Authentification requise");
+    }
+
+    Utilisateur utilisateurConnecte = utilisateurRepository
+      .findByEmail(authentication.getName())
+      .orElseThrow(() ->
+        new AccessDeniedException("Utilisateur connecté introuvable")
+      );
 
     if (!utilisateurConnecte.getId().equals(id)) {
-        throw new AccessDeniedException(
-                "Accès interdit à cet utilisateur");
+      throw new AccessDeniedException("Accès interdit à cet utilisateur");
     }
+  }
 }
-
-}
-

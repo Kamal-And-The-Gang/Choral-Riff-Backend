@@ -22,13 +22,16 @@ public class NotificationDto {
 
     // Pour accepter/refuser via backend
     private String token;
-    // ← NOUVEAU CHAMP
+ 
     private Long utilisateurId;
 
-    // <-- Nouveau champ
+
     private Boolean valid;
 
-    // Getters et setters
+/**
+ * Récupère la valeur du champ valid.
+ * @return
+ */
 
     public Boolean getValid() {
         return valid;

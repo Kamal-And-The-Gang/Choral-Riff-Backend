@@ -1,5 +1,8 @@
 package fr.afpa.choral_riff.entity;
-
+/**
+ * Représente les différents types d'ensembles musicaux.
+ * TypeEnsemble
+ */
 public enum TypeEnsemble {
     CHOEUR("Chorale"),
     ORCHESTRE("Orchestre"),

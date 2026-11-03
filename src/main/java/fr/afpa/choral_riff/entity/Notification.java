@@ -144,12 +144,11 @@ public class Notification {
     this.ensembleId = ensembleId;
   }
 
-
   public Morceau getMorceau() {
     return morceau;
-}
+  }
 
-public void setMorceau(Morceau morceau) {
+  public void setMorceau(Morceau morceau) {
     this.morceau = morceau;
-}
+  }
 }

@@ -15,7 +15,11 @@ public class IaController {
     public IaController(IaService iaService) {
         this.iaService = iaService;
     }
-
+/**
+ * 
+ * @param dto
+ * @return
+ */
     @PostMapping("/generer-descriptif")
     public ResponseEntity<Map<String, String>> genererDescriptif(
             @RequestBody DescriptifRequestDto dto) {

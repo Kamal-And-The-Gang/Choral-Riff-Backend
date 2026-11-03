@@ -2,10 +2,8 @@ package fr.afpa.choral_riff.repositories;
 
 import fr.afpa.choral_riff.entity.Morceau;
 import jakarta.transaction.Transactional;
-
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,23 +12,22 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MorceauRepository extends JpaRepository<Morceau, Long> {
+  List<Morceau> findByEnsembleId(Long ensembleId);
 
-    List<Morceau> findByEnsembleId(Long ensembleId);
+  Optional<Morceau> findTopByEnsembleIdOrderByIdDesc(Long ensembleId);
 
-    Optional<Morceau> findTopByEnsembleIdOrderByIdDesc(Long ensembleId);
+  // --- AJOUTÉ pour la suppression en cascade d'un ensemble ---
+  @Modifying
+  @Transactional
+  @Query("DELETE FROM Morceau m WHERE m.ensemble.id = :ensembleId")
+  void deleteByEnsembleId(@Param("ensembleId") Long ensembleId);
 
-    // --- AJOUTÉ pour la suppression en cascade d'un ensemble ---
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM Morceau m WHERE m.ensemble.id = :ensembleId")
-    void deleteByEnsembleId(@Param("ensembleId") Long ensembleId);
+  // --- NOUVELLE MÉTHODE : récupérer les morceaux créés par un utilisateur ---
+  List<Morceau> findByCreateur_Id(Long createurId);
 
-    // --- NOUVELLE MÉTHODE : récupérer les morceaux créés par un utilisateur ---
-    List<Morceau> findByCreateur_Id(Long createurId);
-
-    // --- Supprimer les morceaux d'un utilisateur (optionnel) ---
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM Morceau m WHERE m.createur.id = :utilisateurId")
-    void deleteByCreateurId(@Param("utilisateurId") Long utilisateurId);
+  // --- Supprimer les morceaux d'un utilisateur (optionnel) ---
+  @Modifying
+  @Transactional
+  @Query("DELETE FROM Morceau m WHERE m.createur.id = :utilisateurId")
+  void deleteByCreateurId(@Param("utilisateurId") Long utilisateurId);
 }

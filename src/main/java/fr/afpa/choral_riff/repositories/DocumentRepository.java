@@ -13,7 +13,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, Long> {
-
   /**
    * Récupère la liste des documents ajoutés par un utilisateur donné.
    *
@@ -30,4 +29,3 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
    */
   List<Document> findByMorceau(Morceau morceau);
 }
-

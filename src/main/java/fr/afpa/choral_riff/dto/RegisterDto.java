@@ -31,7 +31,7 @@ public class RegisterDto {
     // private String prenom;
     // private String motDePasse;
 
-    // // Nouveau champ pour récupérer le token envoyé dans le lien d'invitation
+    // Nouveau champ pour récupérer le token envoyé dans le lien d'invitation
     // private String token;
 
     /**

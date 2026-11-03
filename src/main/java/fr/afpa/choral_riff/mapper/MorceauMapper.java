@@ -7,18 +7,17 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring", uses = { DocumentMapper.class })
 public interface MorceauMapper {
-    /**
-     * Convertit une entité Morceau en MorceauDto.
-     * Les IDs des relations Ensemble et Createur sont extraits.
-     */
+  /**
+   * Convertit une entité Morceau en MorceauDto.
+   * Les IDs des relations Ensemble et Createur sont extraits.
+   */
 
-    @Mapping(source = "ensemble.id", target = "ensembleId")
-    @Mapping(source = "createur.id", target = "createurId")
-    MorceauDto toDto(Morceau morceau);
+  @Mapping(source = "ensemble.id", target = "ensembleId")
+  @Mapping(source = "createur.id", target = "createurId")
+  MorceauDto toDto(Morceau morceau);
 
-    @Mapping(target = "ensemble", ignore = true)
-    @Mapping(target = "createur", ignore = true)
-    @Mapping(target = "documents", ignore = true)
-    Morceau toEntity(MorceauDto dto);
+  @Mapping(target = "ensemble", ignore = true)
+  @Mapping(target = "createur", ignore = true)
+  @Mapping(target = "documents", ignore = true)
+  Morceau toEntity(MorceauDto dto);
 }
-

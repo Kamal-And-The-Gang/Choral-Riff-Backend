@@ -51,7 +51,6 @@ public class EnsembleDto {
                 this.nombreMembres = (int) nombreMembres;
         }
 
-        // Nouveau champ
         private int nombreMembres;
 
         // Getters et setters
