@@ -1,7 +1,7 @@
 package fr.afpa.choral_riff.entity;
 
-import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
@@ -20,124 +20,136 @@ import java.time.LocalDateTime;
 @Table(name = "notification")
 public class Notification {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private NotificationType type;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private NotificationType type;
 
-    @Column(length = 150, nullable = false)
-    private String message;
+  @Column(length = 150, nullable = false)
+  private String message;
 
-    @Column(name = "is_read", nullable = false)
-    private Boolean isRead = false;
+  @Column(name = "is_read", nullable = false)
+  private Boolean isRead = false;
 
-    @Column(name = "date_creation", nullable = false)
-    private LocalDateTime dateCreation = LocalDateTime.now();
+  @Column(name = "date_creation", nullable = false)
+  private LocalDateTime dateCreation = LocalDateTime.now();
 
-    // Relation utilisateur
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "id_utilisateur")
-    private Utilisateur utilisateur;
+  // Relation utilisateur
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "id_utilisateur")
+  private Utilisateur utilisateur;
 
-    // Relation invitation (nullable)
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_invitation")
-    private Invitation invitation;
+  // Relation invitation (nullable)
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "id_invitation")
+  private Invitation invitation;
 
-    // Token pour accepter/refuser
-    @Column(length = 100)
-    private String token;
+  // Token pour accepter/refuser
+  @Column(length = 100)
+  private String token;
 
-    // Id ensemble lié (optionnel)
-    @Column(name = "ensemble_id")
-    private Long ensembleId;
+  // Id ensemble lié (optionnel)
+  @Column(name = "ensemble_id")
+  private Long ensembleId;
 
-    @Column(nullable = false)
-    private Boolean valid = true; // true = notification active, false = invalide
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "morceau_id")
+  private Morceau morceau;
 
-    public Boolean getValid() {
-        return valid;
-    }
+  @Column(nullable = false)
+  private Boolean valid = true; // true = notification active, false = invalide
 
-    public void setValid(Boolean valid) {
-        this.valid = valid;
-    }
+  public Boolean getValid() {
+    return valid;
+  }
 
-    // ======= Getters & Setters =======
+  public void setValid(Boolean valid) {
+    this.valid = valid;
+  }
 
-    public Long getId() {
-        return id;
-    }
+  // ======= Getters & Setters =======
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public NotificationType getType() {
-        return type;
-    }
+  public void setId(Long id) {
+    this.id = id;
+  }
 
-    public void setType(NotificationType type) {
-        this.type = type;
-    }
+  public NotificationType getType() {
+    return type;
+  }
 
-    public String getMessage() {
-        return message;
-    }
+  public void setType(NotificationType type) {
+    this.type = type;
+  }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
+  public String getMessage() {
+    return message;
+  }
 
-    public Boolean getIsRead() {
-        return isRead;
-    }
+  public void setMessage(String message) {
+    this.message = message;
+  }
 
-    public void setIsRead(Boolean isRead) {
-        this.isRead = isRead;
-    }
+  public Boolean getIsRead() {
+    return isRead;
+  }
 
-    public LocalDateTime getDateCreation() {
-        return dateCreation;
-    }
+  public void setIsRead(Boolean isRead) {
+    this.isRead = isRead;
+  }
 
-    public void setDateCreation(LocalDateTime dateCreation) {
-        this.dateCreation = dateCreation;
-    }
+  public LocalDateTime getDateCreation() {
+    return dateCreation;
+  }
 
-    public Utilisateur getUtilisateur() {
-        return utilisateur;
-    }
+  public void setDateCreation(LocalDateTime dateCreation) {
+    this.dateCreation = dateCreation;
+  }
 
-    public void setUtilisateur(Utilisateur utilisateur) {
-        this.utilisateur = utilisateur;
-    }
+  public Utilisateur getUtilisateur() {
+    return utilisateur;
+  }
 
-    public Invitation getInvitation() {
-        return invitation;
-    }
+  public void setUtilisateur(Utilisateur utilisateur) {
+    this.utilisateur = utilisateur;
+  }
 
-    public void setInvitation(Invitation invitation) {
-        this.invitation = invitation;
-    }
+  public Invitation getInvitation() {
+    return invitation;
+  }
 
-    public String getToken() {
-        return token;
-    }
+  public void setInvitation(Invitation invitation) {
+    this.invitation = invitation;
+  }
 
-    public void setToken(String token) {
-        this.token = token;
-    }
+  public String getToken() {
+    return token;
+  }
 
-    public Long getEnsembleId() {
-        return ensembleId;
-    }
+  public void setToken(String token) {
+    this.token = token;
+  }
 
-    public void setEnsembleId(Long ensembleId) {
-        this.ensembleId = ensembleId;
-    }
+  public Long getEnsembleId() {
+    return ensembleId;
+  }
+
+  public void setEnsembleId(Long ensembleId) {
+    this.ensembleId = ensembleId;
+  }
+
+
+  public Morceau getMorceau() {
+    return morceau;
 }
 
+public void setMorceau(Morceau morceau) {
+    this.morceau = morceau;
+}
+}

@@ -49,6 +49,17 @@ public class AuthController {
         return ResponseEntity.ok(tokens);
     }
 
+    @PostMapping("/refresh")
+public ResponseEntity<Map<String, String>> refresh(
+        @RequestBody Map<String, String> request) {
+
+    String refreshToken = request.get("refreshToken");
+
+    Map<String, String> tokens = loginService.refresh(refreshToken);
+
+    return ResponseEntity.ok(tokens);
+}
+
     @PostMapping("/register")
     public ResponseEntity<UtilisateurDto> register(
             @Valid @RequestBody RegisterDto dto) {

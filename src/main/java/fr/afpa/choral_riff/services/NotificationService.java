@@ -97,6 +97,7 @@ public class NotificationService {
         notification.setInvitation(invitation);
         notification.setEnsembleId(ensembleId); // <-- important !
 
+
         notificationRepository.saveAndFlush(notification);
 
         return notificationMapper.toDTO(notification);
@@ -222,6 +223,7 @@ public class NotificationService {
             notification.setIsRead(false);
             notification.setDateCreation(LocalDateTime.now());
             notification.setEnsembleId(ensemble.getId());
+            notification.setMorceau(morceau);
 
             notifications.add(notification);
         }
@@ -319,6 +321,11 @@ public class NotificationService {
 
         notifyRattachement(utilisateur, ensemble);
     }
+
+    @Transactional
+public void supprimerNotificationsMorceau(Long morceauId) {
+    notificationRepository.deleteAllByMorceauId(morceauId);
+}
 
 }
 

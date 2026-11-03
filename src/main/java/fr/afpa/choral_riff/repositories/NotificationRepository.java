@@ -37,6 +37,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
           ORDER BY n.dateCreation DESC
       """)
   List<Notification> findValidByUtilisateurId(@Param("utilisateurId") Long utilisateurId);
+  void deleteAllByMorceauId(Long morceauId);
 
 }
 

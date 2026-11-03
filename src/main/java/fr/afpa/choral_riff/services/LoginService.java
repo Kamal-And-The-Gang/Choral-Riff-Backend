@@ -133,6 +133,26 @@ public class LoginService {
         return response;
     }
 
+
+    public Map<String, String> refresh(String refreshToken) {
+
+    if (!jwtService.isRefreshToken(refreshToken)) {
+        throw new RuntimeException("Refresh token invalide ou expiré");
+    }
+
+    String email = jwtService.extractUsername(refreshToken);
+
+    Utilisateur user = utilisateurRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+    String newAccessToken = jwtService.generateToken(user);
+
+    Map<String, String> response = new HashMap<>();
+    response.put("accessToken", newAccessToken);
+
+    return response;
+}
+
     public Map<String, String> logout(String refreshTokenId) {
         Map<String, String> response = new HashMap<>();
         response.put("message", "Déconnexion réussie");

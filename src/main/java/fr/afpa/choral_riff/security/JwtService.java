@@ -8,7 +8,6 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
 import fr.afpa.choral_riff.entity.Utilisateur;
 import javax.crypto.SecretKey;
 import java.time.Duration;
@@ -101,6 +100,15 @@ public class JwtService {
     public String extractTokenId(String token) {
         return extractClaim(token, claims -> claims.get("tokenId", String.class));
     }
+
+    public boolean isRefreshToken(String token) {
+    try {
+        String tokenId = extractTokenId(token);
+        return tokenId != null && !tokenId.isBlank() && isTokenValid(token);
+    } catch (Exception e) {
+        return false;
+    }
+}
 
     public long getExpirationTime() {
         return jwtExpiration;
