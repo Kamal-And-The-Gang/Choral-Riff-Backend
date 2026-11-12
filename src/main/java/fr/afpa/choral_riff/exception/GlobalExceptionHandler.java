@@ -104,18 +104,21 @@ public class GlobalExceptionHandler {
   }
 
   // Gestion des accès refusés
-  @ExceptionHandler(AccessDeniedException.class)
-  public ResponseEntity<Map<String, String>> handleAccessDenied(
-    AccessDeniedException ex
-  ) {
-    Map<String, String> error = new HashMap<>();
-    error.put(
-      "message",
-      "Vous n'avez pas les droits nécessaires pour effectuer cette action."
-    );
+// Gestion des accès refusés
+@ExceptionHandler(AccessDeniedException.class)
+public ResponseEntity<Map<String, String>> handleAccessDenied(
+  AccessDeniedException ex
+) {
+  log.warn("Accès refusé : {}", ex.getMessage(), ex);
 
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
-  }
+  Map<String, String> error = new HashMap<>();
+  error.put(
+    "message",
+    "Vous n'avez pas les droits nécessaires pour effectuer cette action."
+  );
+
+  return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+}
 
   // Gestion des erreurs inattendues
   @ExceptionHandler(Exception.class)

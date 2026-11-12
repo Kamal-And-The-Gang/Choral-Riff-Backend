@@ -252,7 +252,8 @@ public class UtilisateurEnsembleService {
           ue.getUtilisateur().getNom(),
           ue.getUtilisateur().getPrenom(),
           ue.getRoleDansEnsemble().name(),
-          ue.isCreator()
+          ue.isCreator(),
+          ue.getUtilisateur().getPhotoProfil()
         )
       )
       .toList();

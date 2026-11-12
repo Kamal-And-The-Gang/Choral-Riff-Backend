@@ -64,18 +64,32 @@ public class UtilisateurEnsembleController {
    * @return
    */
 
-  @GetMapping("/ensemble/{ensembleId}/membres")
-  public ResponseEntity<?> getMembresDeLEnsemble(
-    @PathVariable Long ensembleId
-  ) {
-    try {
-      return ResponseEntity.ok(
-        utilisateurEnsembleService.getMembresDeLEnsemble(ensembleId)
-      );
-    } catch (RuntimeException e) {
-      return ResponseEntity.notFound().build();
-    }
+  // @GetMapping("/ensemble/{ensembleId}/membres")
+  // public ResponseEntity<?> getMembresDeLEnsemble(
+  //   @PathVariable Long ensembleId
+  // ) {
+  //   try {
+  //     return ResponseEntity.ok(
+  //       utilisateurEnsembleService.getMembresDeLEnsemble(ensembleId)
+  //     );
+  //   } catch (RuntimeException e) {
+  //     return ResponseEntity.notFound().build();
+  //   }
+  // }
+
+@GetMapping("/ensemble/{ensembleId}/membres")
+public ResponseEntity<?> getMembresDeLEnsemble(@PathVariable Long ensembleId) {
+  try {
+    return ResponseEntity.ok(
+      utilisateurEnsembleService.getMembresDeLEnsemble(ensembleId)
+    );
+  } catch (RuntimeException e) {
+    e.printStackTrace();
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+      java.util.Map.of("message", String.valueOf(e.getMessage()))
+    );
   }
+}
 
   /**
    * Permet à un OWNER de retirer un membre de son ensemble.

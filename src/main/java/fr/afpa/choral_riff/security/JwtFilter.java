@@ -36,14 +36,23 @@ public class JwtFilter extends OncePerRequestFilter {
     String requestPath = request.getServletPath();
 
     // Laisse passer les routes publiques
-    if (
-      requestPath.startsWith("/api/auth") ||
-      requestPath.startsWith("/api/utilisateur") ||
-      requestPath.equals("/api/documents/upload")
-    ) {
-      chain.doFilter(request, response);
-      return;
-    }
+//     if (
+//   requestPath.startsWith("/api/auth") ||
+//   requestPath.equals("/api/utilisateur") ||
+//   requestPath.startsWith("/api/utilisateur/") ||
+//   requestPath.equals("/api/documents/upload")
+// ) {
+//       chain.doFilter(request, response);
+//       return;
+//     }
+
+if (
+  requestPath.startsWith("/api/auth") ||
+  requestPath.equals("/api/documents/upload")
+) {
+  chain.doFilter(request, response);
+  return;
+}
 
     // 1. Essaie de récupérer le JWT depuis l'en-tête Authorization
     String jwt = null;

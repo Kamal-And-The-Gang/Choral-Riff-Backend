@@ -232,10 +232,19 @@ public void delete(Long id) {
     // }
 
     public Utilisateur getCurrentUser() {
-        // temporaire pour tester la récupération de la photo
-        return utilisateurRepository.findById(1L)
-                .orElseThrow(() -> new RuntimeException("Utilisateur de test non trouvé"));
+    var authentication =
+            SecurityContextHolder.getContext().getAuthentication();
+
+    if (authentication == null
+            || !authentication.isAuthenticated()
+            || "anonymousUser".equals(authentication.getPrincipal())) {
+        throw new AccessDeniedException("Authentification requise");
     }
+
+    return utilisateurRepository.findByEmail(authentication.getName())
+            .orElseThrow(() ->
+                    new RuntimeException("Utilisateur connecté introuvable"));
+}
 
     // public UtilisateurDto updatePhotoProfil(@RequestParam("photoProfil")
     // MultipartFile file) {
