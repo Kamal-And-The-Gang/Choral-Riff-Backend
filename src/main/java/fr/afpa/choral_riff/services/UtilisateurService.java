@@ -233,50 +233,18 @@ public class UtilisateurService {
     // }
     // }
 
-    // public Utilisateur getCurrentUser() {
-    //     var authentication = SecurityContextHolder.getContext().getAuthentication();
+    public Utilisateur getCurrentUser() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    //     if (authentication == null
-    //             || !authentication.isAuthenticated()
-    //             || "anonymousUser".equals(authentication.getPrincipal())) {
-    //         throw new AccessDeniedException("Authentification requise");
-    //     }
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            throw new AccessDeniedException("Authentification requise");
+        }
 
-    //     return utilisateurRepository.findByEmail(authentication.getName())
-    //             .orElseThrow(() -> new RuntimeException("Utilisateur connecté introuvable"));
-    // }
-
-
-public Utilisateur getCurrentUser() {
-    var authentication =
-        SecurityContextHolder.getContext().getAuthentication();
-
-    System.out.println("=== AUTHENTIFICATION PHOTO ===");
-
-    if (authentication == null) {
-        System.out.println("ERREUR : authentication est null");
-        throw new AccessDeniedException("Authentification requise");
+        return utilisateurRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Utilisateur connecté introuvable"));
     }
-
-    System.out.println("Principal : " + authentication.getPrincipal());
-    System.out.println("Nom : " + authentication.getName());
-    System.out.println("Authentifié : " + authentication.isAuthenticated());
-
-    if (!authentication.isAuthenticated()
-        || "anonymousUser".equals(authentication.getPrincipal())) {
-        System.out.println("ERREUR : utilisateur non authentifié");
-        throw new AccessDeniedException("Authentification requise");
-    }
-
-    return utilisateurRepository.findByEmail(authentication.getName())
-        .orElseThrow(() -> {
-            System.out.println("ERREUR : utilisateur introuvable en base");
-            return new AccessDeniedException(
-                "Utilisateur connecté introuvable"
-            );
-        });
-}
-
 
     // public UtilisateurDto updatePhotoProfil(@RequestParam("photoProfil")
     // MultipartFile file) {

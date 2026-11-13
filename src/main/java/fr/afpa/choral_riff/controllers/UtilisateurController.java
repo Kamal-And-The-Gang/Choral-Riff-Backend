@@ -13,7 +13,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * Contrôleur REST pour gérer les utilisateurs.
@@ -27,9 +26,8 @@ public class UtilisateurController {
   private final InvitationService invitationService;
 
   public UtilisateurController(
-    UtilisateurService utilisateurService,
-    InvitationService invitationService
-  ) {
+      UtilisateurService utilisateurService,
+      InvitationService invitationService) {
     this.utilisateurService = utilisateurService;
     this.invitationService = invitationService; // Injection
   }
@@ -55,8 +53,7 @@ public class UtilisateurController {
    */
   @PostMapping
   public ResponseEntity<UtilisateurDto> create(
-    @RequestBody UtilisateurDto dto
-  ) {
+      @RequestBody UtilisateurDto dto) {
     return ResponseEntity.ok(utilisateurService.create(dto));
   }
 
@@ -65,9 +62,8 @@ public class UtilisateurController {
    */
   @PutMapping("/{id}")
   public ResponseEntity<UtilisateurDto> update(
-    @PathVariable Long id,
-    @RequestBody UtilisateurDto dto
-  ) {
+      @PathVariable Long id,
+      @RequestBody UtilisateurDto dto) {
     return ResponseEntity.ok(utilisateurService.update(id, dto));
   }
 
@@ -82,23 +78,20 @@ public class UtilisateurController {
 
   @PostMapping("/inscription-invitation")
   public ResponseEntity<String> inscriptionViaInvitation(
-    @Valid @RequestBody RegisterDto dto
-  ) {
+      @Valid @RequestBody RegisterDto dto) {
     // Créer l'utilisateur
     Utilisateur nouvelUtilisateur = utilisateurService.createFromRegisterDto(
-      dto
-    );
+        dto);
 
     // Rattacher l'utilisateur à l'invitation si token présent
     String token = dto.getToken();
     if (token != null && !token.isEmpty()) {
-      //  Correction : récupérer l'invitation et passer l'utilisateur et
+      // Correction : récupérer l'invitation et passer l'utilisateur et
       // l'invitation
       Invitation invitation = invitationService.getByTokenEntity(token);
       invitationService.rattacherUtilisateurApresInscription(
-        nouvelUtilisateur,
-        invitation
-      );
+          nouvelUtilisateur,
+          invitation);
     }
 
     return ResponseEntity.ok("Inscription via invitation réussie !");
@@ -106,35 +99,37 @@ public class UtilisateurController {
 
   @GetMapping("/ensembles/{ensembleId}/membres")
   public ResponseEntity<List<UtilisateurDto>> getMembresEnsemble(
-    @PathVariable Long ensembleId
-  ) {
-    List<UtilisateurDto> membres =
-      utilisateurService.getUtilisateursParEnsemble(ensembleId);
+      @PathVariable Long ensembleId) {
+    List<UtilisateurDto> membres = utilisateurService.getUtilisateursParEnsemble(ensembleId);
     return ResponseEntity.ok(membres);
   }
 
- 
-@GetMapping("/me")
-public ResponseEntity<UtilisateurDto> getCurrentUser(
-    @AuthenticationPrincipal UserDetails userDetails
-) {
+  // @GetMapping("/me")
+  // public ResponseEntity<UtilisateurDto> getCurrentUser(
+  // @AuthenticationPrincipal Utilisateur utilisateur
+  // ) {
+  // if (utilisateur == null) {
+  // return ResponseEntity.status(401).build(); // Non authentifié
+  // }
+  // UtilisateurDto dto = utilisateurService.toDto(utilisateur);
+  // return ResponseEntity.ok(dto);
+  // }
+
+  @GetMapping("/me")
+  public ResponseEntity<UtilisateurDto> getCurrentUser(
+      @AuthenticationPrincipal UserDetails userDetails) {
     if (userDetails == null) {
-        return ResponseEntity.status(401).build();
+      return ResponseEntity.status(401).build();
     }
 
-    Utilisateur utilisateur = utilisateurService
-        .getByEmail(userDetails.getUsername());
+    Utilisateur utilisateur = utilisateurService.getByEmail(userDetails.getUsername());
 
-    UtilisateurDto dto = utilisateurService.toDto(utilisateur);
-
-    return ResponseEntity.ok(dto);
-}
-
+    return ResponseEntity.ok(utilisateurService.toDto(utilisateur));
+  }
 
   @PostMapping("/me/photo")
   public ResponseEntity<UtilisateurDto> updatePhotoProfil(
-    @RequestParam("photoProfil") MultipartFile file
-  ) {
+      @RequestParam("photoProfil") MultipartFile file) {
     UtilisateurDto updatedUser = utilisateurService.updatePhotoProfil(file);
     return ResponseEntity.ok(updatedUser);
   }
