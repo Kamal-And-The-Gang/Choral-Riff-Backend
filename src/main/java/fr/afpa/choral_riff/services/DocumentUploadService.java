@@ -15,15 +15,13 @@ public class DocumentUploadService {
   @Value("${upload.dir}")
   private String uploadDir;
 
-  // --- Méthode optimisée pour gros fichiers ---
-  public String saveFile(MultipartFile file) throws IOException {
+  public String saveFile(MultipartFile file, String folder) throws IOException {
     String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-    Path path = Paths.get(uploadDir, fileName);
 
-    // Crée le dossier s'il n'existe pas
+    Path path = Paths.get(uploadDir, folder, fileName);
+
     Files.createDirectories(path.getParent());
 
-    // Copie le flux d'entrée directement sur le disque (évite de charger tout le fichier en mémoire)
     try (var inputStream = file.getInputStream()) {
       Files.copy(inputStream, path);
     }

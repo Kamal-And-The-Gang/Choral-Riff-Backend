@@ -35,3 +35,11 @@ build/
 # Secrets
 .devcontainer/.env
 src/main/resources/application-dev.properties
+
+# Fichiers uploadés par les utilisateurs
+/uploads/
+**/uploads/
+
+# Sauvegardes de bases de données
+*.backup
+*.dump

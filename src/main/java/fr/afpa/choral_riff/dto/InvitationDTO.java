@@ -28,6 +28,8 @@ public class InvitationDTO {
     private String etat;
     private LocalDateTime dateEnvoi;
     private String token;
+    private String photoUrl;
+private String instrument;
 
     // --- Nouveau champ pour indiquer que l'utilisateur existe déjà ---
     private boolean existant = false;
@@ -123,6 +125,21 @@ public class InvitationDTO {
     public void setDejaMembre(boolean dejaMembre) {
         this.dejaMembre = dejaMembre;
     }
+    public String getPhotoUrl() {
+    return photoUrl;
+}
+
+public void setPhotoUrl(String photoUrl) {
+    this.photoUrl = photoUrl;
+}
+
+public String getInstrument() {
+    return instrument;
+}
+
+public void setInstrument(String instrument) {
+    this.instrument = instrument;
+}
 
 }
 

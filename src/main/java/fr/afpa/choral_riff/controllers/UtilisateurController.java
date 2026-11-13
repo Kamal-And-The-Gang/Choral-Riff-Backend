@@ -10,8 +10,10 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * Contrôleur REST pour gérer les utilisateurs.
@@ -111,16 +113,23 @@ public class UtilisateurController {
     return ResponseEntity.ok(membres);
   }
 
-  @GetMapping("/me")
-  public ResponseEntity<UtilisateurDto> getCurrentUser(
-    @AuthenticationPrincipal Utilisateur utilisateur
-  ) {
-    if (utilisateur == null) {
-      return ResponseEntity.status(401).build(); // Non authentifié
+ 
+@GetMapping("/me")
+public ResponseEntity<UtilisateurDto> getCurrentUser(
+    @AuthenticationPrincipal UserDetails userDetails
+) {
+    if (userDetails == null) {
+        return ResponseEntity.status(401).build();
     }
+
+    Utilisateur utilisateur = utilisateurService
+        .getByEmail(userDetails.getUsername());
+
     UtilisateurDto dto = utilisateurService.toDto(utilisateur);
+
     return ResponseEntity.ok(dto);
-  }
+}
+
 
   @PostMapping("/me/photo")
   public ResponseEntity<UtilisateurDto> updatePhotoProfil(

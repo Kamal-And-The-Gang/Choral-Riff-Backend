@@ -52,17 +52,19 @@ public interface InvitationMapper {
   }
 
   @AfterMapping
-  default void afterMapping(
-    Invitation invitation,
-    @MappingTarget InvitationDTO dto
-  ) {
-    if (invitation.getUtilisateur() != null) {
-      dto.setExistant(true);
-      dto.setUtilisateurNom(invitation.getUtilisateur().getNom());
-    } else {
-      dto.setExistant(false);
-    }
+default void afterMapping(
+  Invitation invitation,
+  @MappingTarget InvitationDTO dto
+) {
+  if (invitation.getUtilisateur() != null) {
+    dto.setExistant(true);
+    dto.setUtilisateurId(invitation.getUtilisateur().getId());
+    dto.setUtilisateurNom(invitation.getUtilisateur().getNom());
+    dto.setPhotoUrl(invitation.getUtilisateur().getPhotoProfil());
+  } else {
+    dto.setExistant(false);
   }
+}
 
   // --- Conversion Long <-> Invitation pour Notification ---
   default Invitation map(Long id) {

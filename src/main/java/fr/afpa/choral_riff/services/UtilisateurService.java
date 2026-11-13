@@ -38,20 +38,23 @@ public class UtilisateurService {
     private final PasswordEncoder passwordEncoder;
     private final UtilisateurEnsembleRepository utilisateurEnsembleRepository;
     private final UtilisateurMapper utilisateurMapper;
+    private final DocumentUploadService documentUploadService;
 
-    public UtilisateurService(UtilisateurRepository utilisateurRepository,
-            MorceauRepository morceauRepository, // <-- ajouter
+    public UtilisateurService(
+            UtilisateurRepository utilisateurRepository,
+            MorceauRepository morceauRepository,
             UtilisateurMapper utilisateurMapper,
             PasswordEncoder passwordEncoder,
-            UtilisateurEnsembleRepository utilisateurEnsembleRepository) {
+            UtilisateurEnsembleRepository utilisateurEnsembleRepository,
+            DocumentUploadService documentUploadService) {
+
         this.utilisateurRepository = utilisateurRepository;
-        this.morceauRepository = morceauRepository; // <-- affecter
+        this.morceauRepository = morceauRepository;
         this.utilisateurMapper = utilisateurMapper;
         this.passwordEncoder = passwordEncoder;
         this.utilisateurEnsembleRepository = utilisateurEnsembleRepository;
+        this.documentUploadService = documentUploadService;
     }
-
-   
 
     public UtilisateurDto getById(Long id) {
 
@@ -96,15 +99,15 @@ public class UtilisateurService {
     }
 
     // public List<UtilisateurDto> getAll() {
-    //     List<Utilisateur> utilisateur = utilisateurRepository.findAll();
-    //     return utilisateurMapper.toDtoList(utilisateur);
+    // List<Utilisateur> utilisateur = utilisateurRepository.findAll();
+    // return utilisateurMapper.toDtoList(utilisateur);
     // }
 
     @PreAuthorize("hasRole('ADMIN_GLOBAL')")
-public List<UtilisateurDto> getAll() {
-    List<Utilisateur> utilisateur = utilisateurRepository.findAll();
-    return utilisateurMapper.toDtoList(utilisateur);
-}
+    public List<UtilisateurDto> getAll() {
+        List<Utilisateur> utilisateur = utilisateurRepository.findAll();
+        return utilisateurMapper.toDtoList(utilisateur);
+    }
 
     public UtilisateurDto create(UtilisateurDto dto) {
         Utilisateur entity = utilisateurMapper.toEntity(dto);
@@ -150,45 +153,44 @@ public List<UtilisateurDto> getAll() {
                 .orElseThrow(() -> new NoSuchElementException("Utilisateur non trouvé avec email : " + email));
     }
 
-    
     // public void delete(Long id) {
-    //     Utilisateur utilisateur = utilisateurRepository.findById(id)
-    //             .orElseThrow(() -> new NoSuchElementException("Utilisateur non trouvé avec id " + id));
+    // Utilisateur utilisateur = utilisateurRepository.findById(id)
+    // .orElseThrow(() -> new NoSuchElementException("Utilisateur non trouvé avec id
+    // " + id));
 
-    //     // Détacher les morceaux créés avant suppression
-    //     List<Morceau> morceaux = morceauRepository.findByCreateur_Id(id);
-    //     for (Morceau m : morceaux) {
-    //         m.setCreateur(null);
-    //         m.setCreateurNom(utilisateur.getNom() + " " + utilisateur.getPrenom()); // si tu ajoutes ce champ
-    //         morceauRepository.save(m);
-    //     }
-
-    //     // Supprimer l’utilisateur
-    //     utilisateurRepository.delete(utilisateur);
+    // // Détacher les morceaux créés avant suppression
+    // List<Morceau> morceaux = morceauRepository.findByCreateur_Id(id);
+    // for (Morceau m : morceaux) {
+    // m.setCreateur(null);
+    // m.setCreateurNom(utilisateur.getNom() + " " + utilisateur.getPrenom()); // si
+    // tu ajoutes ce champ
+    // morceauRepository.save(m);
     // }
 
-    
-public void delete(Long id) {
-    // Vérifier que l'utilisateur connecté est propriétaire du compte
-    verifierProprietaire(id);
+    // // Supprimer l’utilisateur
+    // utilisateurRepository.delete(utilisateur);
+    // }
 
-    Utilisateur utilisateur = utilisateurRepository.findById(id)
-            .orElseThrow(() -> new NoSuchElementException(
-                    "Utilisateur non trouvé avec id " + id));
+    public void delete(Long id) {
+        // Vérifier que l'utilisateur connecté est propriétaire du compte
+        verifierProprietaire(id);
 
-    // Détacher les morceaux créés avant suppression
-    List<Morceau> morceaux = morceauRepository.findByCreateur_Id(id);
+        Utilisateur utilisateur = utilisateurRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Utilisateur non trouvé avec id " + id));
 
-    for (Morceau m : morceaux) {
-        m.setCreateur(null);
-        m.setCreateurNom(utilisateur.getNom() + " " + utilisateur.getPrenom());
-        morceauRepository.save(m);
+        // Détacher les morceaux créés avant suppression
+        List<Morceau> morceaux = morceauRepository.findByCreateur_Id(id);
+
+        for (Morceau m : morceaux) {
+            m.setCreateur(null);
+            m.setCreateurNom(utilisateur.getNom() + " " + utilisateur.getPrenom());
+            morceauRepository.save(m);
+        }
+
+        // Supprimer l’utilisateur
+        utilisateurRepository.delete(utilisateur);
     }
-
-    // Supprimer l’utilisateur
-    utilisateurRepository.delete(utilisateur);
-}
-
 
     public Utilisateur createFromRegisterDto(RegisterDto dto) {
         Utilisateur utilisateur = new Utilisateur();
@@ -231,72 +233,91 @@ public void delete(Long id) {
     // }
     // }
 
-    public Utilisateur getCurrentUser() {
-    var authentication =
-            SecurityContextHolder.getContext().getAuthentication();
+    // public Utilisateur getCurrentUser() {
+    //     var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    if (authentication == null
-            || !authentication.isAuthenticated()
-            || "anonymousUser".equals(authentication.getPrincipal())) {
+    //     if (authentication == null
+    //             || !authentication.isAuthenticated()
+    //             || "anonymousUser".equals(authentication.getPrincipal())) {
+    //         throw new AccessDeniedException("Authentification requise");
+    //     }
+
+    //     return utilisateurRepository.findByEmail(authentication.getName())
+    //             .orElseThrow(() -> new RuntimeException("Utilisateur connecté introuvable"));
+    // }
+
+
+public Utilisateur getCurrentUser() {
+    var authentication =
+        SecurityContextHolder.getContext().getAuthentication();
+
+    System.out.println("=== AUTHENTIFICATION PHOTO ===");
+
+    if (authentication == null) {
+        System.out.println("ERREUR : authentication est null");
+        throw new AccessDeniedException("Authentification requise");
+    }
+
+    System.out.println("Principal : " + authentication.getPrincipal());
+    System.out.println("Nom : " + authentication.getName());
+    System.out.println("Authentifié : " + authentication.isAuthenticated());
+
+    if (!authentication.isAuthenticated()
+        || "anonymousUser".equals(authentication.getPrincipal())) {
+        System.out.println("ERREUR : utilisateur non authentifié");
         throw new AccessDeniedException("Authentification requise");
     }
 
     return utilisateurRepository.findByEmail(authentication.getName())
-            .orElseThrow(() ->
-                    new RuntimeException("Utilisateur connecté introuvable"));
+        .orElseThrow(() -> {
+            System.out.println("ERREUR : utilisateur introuvable en base");
+            return new AccessDeniedException(
+                "Utilisateur connecté introuvable"
+            );
+        });
 }
+
 
     // public UtilisateurDto updatePhotoProfil(@RequestParam("photoProfil")
     // MultipartFile file) {
     public UtilisateurDto updatePhotoProfil(MultipartFile file) {
 
         Utilisateur utilisateur = getCurrentUser();
-        if (file == null || file.isEmpty())
+
+        if (file == null || file.isEmpty()) {
             throw new RuntimeException("Fichier vide");
+        }
 
         try {
-            // Chemin absolu sur le serveur
-            String uploadDir = "/workspaces/Choral-Riff-Backend/uploads/profil/";
-            Path uploadPath = Paths.get(uploadDir);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
+            String fileName = documentUploadService.saveFile(file, "profil");
 
-            String fileName = utilisateur.getId() + "_" + file.getOriginalFilename();
-            Path filePath = uploadPath.resolve(fileName);
-            file.transferTo(filePath.toFile()); // fichier enregistré physiquement
-
-            // Mettre à jour la base
             utilisateur.setPhotoProfil("/uploads/profil/" + fileName);
             utilisateur = utilisateurRepository.save(utilisateur);
 
             return utilisateurMapper.toDto(utilisateur);
 
         } catch (IOException e) {
-            throw new RuntimeException("Erreur lors de l'enregistrement de la photo", e);
+            throw new RuntimeException(
+                    "Erreur lors de l'enregistrement de la photo", e);
         }
     }
 
+    private void verifierProprietaire(Long id) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    
-private void verifierProprietaire(Long id) {
-    var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            throw new AccessDeniedException("Authentification requise");
+        }
 
-    if (authentication == null
-            || !authentication.isAuthenticated()
-            || "anonymousUser".equals(authentication.getPrincipal())) {
-        throw new AccessDeniedException("Authentification requise");
+        Utilisateur utilisateurConnecte = utilisateurRepository
+                .findByEmail(authentication.getName())
+                .orElseThrow(() -> new AccessDeniedException("Utilisateur connecté introuvable"));
+
+        if (!utilisateurConnecte.getId().equals(id)) {
+            throw new AccessDeniedException("Accès interdit à cet utilisateur");
+        }
     }
-
-    Utilisateur utilisateurConnecte = utilisateurRepository
-            .findByEmail(authentication.getName())
-            .orElseThrow(() ->
-                    new AccessDeniedException("Utilisateur connecté introuvable"));
-
-    if (!utilisateurConnecte.getId().equals(id)) {
-        throw new AccessDeniedException("Accès interdit à cet utilisateur");
-    }
-}
-
 
 }
