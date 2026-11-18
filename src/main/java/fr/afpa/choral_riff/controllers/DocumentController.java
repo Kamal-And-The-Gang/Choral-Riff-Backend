@@ -4,26 +4,26 @@ package fr.afpa.choral_riff.controllers;
 import fr.afpa.choral_riff.dto.DocumentDto;
 import fr.afpa.choral_riff.dto.InstrumentDto;
 import fr.afpa.choral_riff.entity.Document;
-import fr.afpa.choral_riff.repositories.DocumentRepository;
+
 import fr.afpa.choral_riff.security.SecurityService;
 import fr.afpa.choral_riff.services.DocumentService;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
+
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import org.springframework.core.io.UrlResource;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
 
-import java.nio.file.Paths;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
+
+
+
+
+
+
+
+
+
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,12 +31,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+
+
 @RestController
 @RequestMapping("/api/documents")
 public class DocumentController {
 
     private final DocumentService documentService;
-    private final DocumentRepository documentRepository;
+    // private final DocumentRepository documentRepository;
 
     /**
      * Injection du service DocumentService via le constructeur.
@@ -47,10 +49,10 @@ public class DocumentController {
     // }
 
    public DocumentController(DocumentService documentService,
-                          DocumentRepository documentRepository,
+                         
                           SecurityService securityService) {
     this.documentService = documentService;
-    this.documentRepository = documentRepository;
+    // this.documentRepository = documentRepository;
 }
 
     /*
@@ -207,23 +209,41 @@ public class DocumentController {
         return ResponseEntity.ok(instruments);
     }
 
+    // @GetMapping("/file/{documentId}")
+    // public ResponseEntity<Resource> getFile(@PathVariable Long documentId) throws Exception {
+
+    //     Document document = documentRepository.findById(documentId)
+    //             .orElseThrow(() -> new RuntimeException("Document non trouvé avec l'ID : " + documentId));
+
+    //     // Récupère juste le nom du fichier
+    //     String fileName = document.getUrlFichier().replaceFirst("^/+", ""); // retire le / devant si présent
+
+    //     Path path = Paths.get(fileName.startsWith("uploads") ? fileName : "uploads/" + fileName);
+    //     Resource resource = new UrlResource(path.toUri());
+
+    //     return ResponseEntity.ok()
+    //             .header(HttpHeaders.CONTENT_DISPOSITION,
+    //                     "inline; filename=\"" + document.getUrlFichier() + "\"")
+    //             .body(resource);
+    // }
+
+
+
+
+
     @GetMapping("/file/{documentId}")
-    public ResponseEntity<Resource> getFile(@PathVariable Long documentId) throws Exception {
+public ResponseEntity<Resource> getFile(
+        @PathVariable Long documentId) throws IOException {
 
-        Document document = documentRepository.findById(documentId)
-                .orElseThrow(() -> new RuntimeException("Document non trouvé avec l'ID : " + documentId));
+    Resource resource = documentService.getFile(documentId);
 
-        // Récupère juste le nom du fichier
-        String fileName = document.getUrlFichier().replaceFirst("^/+", ""); // retire le / devant si présent
-
-        Path path = Paths.get(fileName.startsWith("uploads") ? fileName : "uploads/" + fileName);
-        Resource resource = new UrlResource(path.toUri());
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=\"" + document.getUrlFichier() + "\"")
-                .body(resource);
-    }
+    return ResponseEntity.ok()
+        .header(
+            HttpHeaders.CONTENT_DISPOSITION,
+            "inline; filename=\"" + resource.getFilename() + "\""
+        )
+        .body(resource);
+}
 
 }
 

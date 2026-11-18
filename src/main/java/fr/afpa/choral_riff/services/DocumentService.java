@@ -22,6 +22,10 @@ import java.util.stream.Collectors;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 
 /**
  * Service pour gérer les documents liés aux morceaux et utilisateurs.
@@ -41,229 +45,255 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class DocumentService {
 
-  private final DocumentRepository documentRepository;
-  private final MorceauRepository morceauRepository;
-  private final UtilisateurRepository utilisateurRepository;
-  private final DocumentMapper documentMapper;
-  private final InstrumentRepository instrumentRepository;
-  private final UtilisateurEnsembleService utilisateurEnsembleService;
-  private static final String UPLOAD_DIR = "uploads/documents/";
-  private final DocumentUploadService documentUploadService;
+    private final DocumentRepository documentRepository;
+    private final MorceauRepository morceauRepository;
+    private final UtilisateurRepository utilisateurRepository;
+    private final DocumentMapper documentMapper;
+    private final InstrumentRepository instrumentRepository;
+    private final UtilisateurEnsembleService utilisateurEnsembleService;
+    private static final String UPLOAD_DIR = "uploads/documents/";
+    private final DocumentUploadService documentUploadService;
 
-  public DocumentService(
-      DocumentRepository documentRepository,
-      MorceauRepository morceauRepository,
-      UtilisateurRepository utilisateurRepository,
-      DocumentMapper documentMapper,
-      InstrumentRepository instrumentRepository,
-      UtilisateurEnsembleService utilisateurEnsembleService,
-      DocumentUploadService documentUploadService) {
-    this.documentRepository = documentRepository;
-    this.morceauRepository = morceauRepository;
-    this.utilisateurRepository = utilisateurRepository;
-    this.documentMapper = documentMapper;
-    this.instrumentRepository = instrumentRepository;
-    this.utilisateurEnsembleService = utilisateurEnsembleService;
-    this.documentUploadService = documentUploadService;
-  }
-
-  /**
-   * Upload un fichier et l'associe à un morceau et un utilisateur.
-   *
-   * @param file          Le fichier à uploader
-   * @param type          Le type de document
-   * @param format        Le format du document
-   * @param morceauId     L'ID du morceau
-   * @param utilisateurId L'ID de l'utilisateur
-   * @return Le DTO du document enregistré
-   * @throws IOException Si une erreur survient lors de l'écriture du fichier
-   */
-
-  public DocumentDto upload(
-      MultipartFile file,
-      String type,
-      String format,
-      Long morceauId,
-      Long utilisateurId) throws IOException {
-    // 1) Validation du fichier
-    if (file.isEmpty()) {
-      throw new RuntimeException("Fichier vide");
-    }
-    if (file.getSize() > 50 * 1024 * 1024) {
-      throw new RuntimeException("Fichier trop volumineux");
+    public DocumentService(
+            DocumentRepository documentRepository,
+            MorceauRepository morceauRepository,
+            UtilisateurRepository utilisateurRepository,
+            DocumentMapper documentMapper,
+            InstrumentRepository instrumentRepository,
+            UtilisateurEnsembleService utilisateurEnsembleService,
+            DocumentUploadService documentUploadService) {
+        this.documentRepository = documentRepository;
+        this.morceauRepository = morceauRepository;
+        this.utilisateurRepository = utilisateurRepository;
+        this.documentMapper = documentMapper;
+        this.instrumentRepository = instrumentRepository;
+        this.utilisateurEnsembleService = utilisateurEnsembleService;
+        this.documentUploadService = documentUploadService;
     }
 
-    // 2) Calcul du type réel
-    String realType = file.getContentType(); // ex: image/png
-    String realFormat = Optional.ofNullable(file.getOriginalFilename())
-        .filter(n -> n.contains("."))
-        .map(n -> n.substring(n.lastIndexOf(".") + 1))
-        .orElse("unknown");
+    /**
+     * Upload un fichier et l'associe à un morceau et un utilisateur.
+     *
+     * @param file          Le fichier à uploader
+     * @param type          Le type de document
+     * @param format        Le format du document
+     * @param morceauId     L'ID du morceau
+     * @param utilisateurId L'ID de l'utilisateur
+     * @return Le DTO du document enregistré
+     * @throws IOException Si une erreur survient lors de l'écriture du fichier
+     */
 
-    // 3) Tu peux quand même ignorer les valeurs passées
-    type = realType;
-    format = realFormat;
+    public DocumentDto upload(
+            MultipartFile file,
+            String type,
+            String format,
+            Long morceauId,
+            Long utilisateurId) throws IOException {
+        // 1) Validation du fichier
+        if (file.isEmpty()) {
+            throw new RuntimeException("Fichier vide");
+        }
 
-    String fileName = documentUploadService.saveFile(file, "documents");
+        // 2) Calcul du type réel
+        String realType = file.getContentType(); // ex: image/png
+        String realFormat = Optional.ofNullable(file.getOriginalFilename())
+                .filter(n -> n.contains("."))
+                .map(n -> n.substring(n.lastIndexOf(".") + 1))
+                .orElse("unknown");
 
-    Morceau morceau = morceauRepository
-        .findById(morceauId)
-        .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID : " + morceauId));
+        // 3) Tu peux quand même ignorer les valeurs passées
+        type = realType;
+        format = realFormat;
 
-    Utilisateur utilisateur = utilisateurRepository
-        .findById(utilisateurId)
-        .orElseThrow(() -> new RuntimeException(
-            "Utilisateur non trouvé avec l'ID : " + utilisateurId));
+        String fileName = documentUploadService.saveFile(file, "documents");
 
-    Document document = new Document();
-    document.setType(type);
-    document.setFormat(format);
-    document.setDateAjout(LocalDate.now());
-    document.setUrlFichier("/" + UPLOAD_DIR + fileName);
-    document.setNomOriginal(file.getOriginalFilename()); // <-- ici le vrai nom
-    document.setMorceau(morceau);
-    document.setUtilisateur(utilisateur);
+        Morceau morceau = morceauRepository
+                .findById(morceauId)
+                .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID : " + morceauId));
 
-    // <-- ICI on met le nom original
-    document.setNomOriginal(file.getOriginalFilename());
+        Utilisateur utilisateur = utilisateurRepository
+                .findById(utilisateurId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Utilisateur non trouvé avec l'ID : " + utilisateurId));
 
-    Document saved = documentRepository.save(document);
-    return documentMapper.toDto(saved);
-  }
+        Document document = new Document();
+        document.setType(type);
+        document.setFormat(format);
+        document.setDateAjout(LocalDate.now());
+        document.setUrlFichier("/" + UPLOAD_DIR + fileName);
+        document.setNomOriginal(file.getOriginalFilename()); // <-- ici le vrai nom
+        document.setMorceau(morceau);
+        document.setUtilisateur(utilisateur);
 
-  public List<DocumentDto> getAll() {
-    return documentRepository
-        .findAll()
-        .stream()
-        .map(documentMapper::toDto)
-        .collect(Collectors.toList());
-  }
+        // <-- ICI on met le nom original
+        document.setNomOriginal(file.getOriginalFilename());
 
-  public DocumentDto getById(Long id) {
-    Document document = documentRepository
-        .findById(id)
-        .orElseThrow(() -> new RuntimeException("Document non trouvé avec l'ID : " + id));
-    return documentMapper.toDto(document);
-  }
-
-  public DocumentDto create(DocumentDto documentDto) {
-    Morceau morceau = morceauRepository
-        .findById(documentDto.morceauId())
-        .orElseThrow(() -> new RuntimeException(
-            "Morceau non trouvé avec l'ID : " + documentDto.morceauId()));
-
-    Long ensembleId = morceau.getEnsemble().getId();
-
-    boolean adminOuModerateur = utilisateurEnsembleService.utilisateurAutorise(
-        documentDto.utilisateurId(),
-        ensembleId,
-        List.of("OWNER", "MODERATEUR"));
-
-    if (!adminOuModerateur) {
-      throw new AccessDeniedException(
-          "Vous n'avez pas le droit d'ajouter un document");
+        Document saved = documentRepository.save(document);
+        return documentMapper.toDto(saved);
     }
 
-    Document document = documentMapper.toEntity(documentDto);
-
-    document.setMorceau(morceau);
-
-    Utilisateur utilisateur = utilisateurRepository
-        .findById(documentDto.utilisateurId())
-        .orElseThrow(() -> new RuntimeException(
-            "Utilisateur non trouvé avec l'ID : " + documentDto.utilisateurId()));
-
-    document.setUtilisateur(utilisateur);
-
-    Document savedDocument = documentRepository.save(document);
-
-    return documentMapper.toDto(savedDocument);
-  }
-
-  public List<DocumentDto> getDocumentsByMorceauId(Long morceauId) {
-    Morceau morceau = morceauRepository
-        .findById(morceauId)
-        .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID : " + morceauId));
-
-    List<Document> documents = documentRepository.findByMorceau(morceau);
-
-    return documents
-        .stream()
-        .map(documentMapper::toDto)
-        .collect(Collectors.toList());
-  }
-
-  public List<DocumentDto> getDocumentsByUtilisateurId(Long utilisateurId) {
-    Utilisateur utilisateur = utilisateurRepository
-        .findById(utilisateurId)
-        .orElseThrow(() -> new RuntimeException(
-            "Utilisateur non trouvé avec l'ID : " + utilisateurId));
-
-    List<Document> documents = documentRepository.findByUtilisateur(
-        utilisateur);
-
-    return documents
-        .stream()
-        .map(documentMapper::toDto)
-        .collect(Collectors.toList());
-  }
-
-  public List<DocumentDto> getDocumentsByEnsembleId(Long ensembleId) {
-    List<Morceau> morceaux = morceauRepository.findByEnsembleId(ensembleId);
-
-    List<Document> documents = morceaux
-        .stream()
-        .flatMap(morceau -> documentRepository.findByMorceau(morceau).stream())
-        .collect(Collectors.toList());
-
-    return documents
-        .stream()
-        .map(documentMapper::toDto)
-        .collect(Collectors.toList());
-  }
-
-  public void delete(Long documentId, Long userId) {
-    Document document = documentRepository
-        .findById(documentId)
-        .orElseThrow(() -> new EntityNotFoundException("Document not found with id: " + documentId));
-
-    Morceau morceau = document.getMorceau();
-    Long ensembleId = morceau.getEnsemble().getId();
-
-    boolean adminOuModerateur = utilisateurEnsembleService.utilisateurAutorise(
-        userId,
-        ensembleId,
-        List.of("OWNER", "MODERATEUR"));
-
-    boolean createur = document.getUtilisateur().getId().equals(userId);
-
-    if (!adminOuModerateur && !createur) {
-      throw new AccessDeniedException(
-          "Vous n'avez pas le droit de supprimer ce document");
+    public List<DocumentDto> getAll() {
+        return documentRepository
+                .findAll()
+                .stream()
+                .map(documentMapper::toDto)
+                .collect(Collectors.toList());
     }
 
-    documentRepository.delete(document);
-  }
+    public DocumentDto getById(Long id) {
+        Document document = documentRepository
+                .findById(id)
+                .orElseThrow(() -> new RuntimeException("Document non trouvé avec l'ID : " + id));
+        return documentMapper.toDto(document);
+    }
 
-  public List<InstrumentDto> getInstrumentsByDocument(Long documentId) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException(
-        "Unimplemented method 'getInstrumentsByDocument'");
-  }
+    public DocumentDto create(DocumentDto documentDto) {
+        Morceau morceau = morceauRepository
+                .findById(documentDto.morceauId())
+                .orElseThrow(() -> new RuntimeException(
+                        "Morceau non trouvé avec l'ID : " + documentDto.morceauId()));
 
-  public DocumentDto addInstrument(Long documentId, Long instrumentId) {
-    Document document = documentRepository
-        .findById(documentId)
-        .orElseThrow(() -> new RuntimeException("Document non trouvé avec l'ID : " + documentId));
+        Long ensembleId = morceau.getEnsemble().getId();
 
-    Instrument instrument = instrumentRepository
-        .findById(instrumentId)
-        .orElseThrow(() -> new RuntimeException(
-            "Instrument non trouvé avec l'ID : " + instrumentId));
+        boolean adminOuModerateur = utilisateurEnsembleService.utilisateurAutorise(
+                documentDto.utilisateurId(),
+                ensembleId,
+                List.of("OWNER", "MODERATEUR"));
 
-    document.addInstrument(instrument);
-    Document savedDocument = documentRepository.save(document);
+        if (!adminOuModerateur) {
+            throw new AccessDeniedException(
+                    "Vous n'avez pas le droit d'ajouter un document");
+        }
 
-    return documentMapper.toDto(savedDocument);
-  }
+        Document document = documentMapper.toEntity(documentDto);
+
+        document.setMorceau(morceau);
+
+        Utilisateur utilisateur = utilisateurRepository
+                .findById(documentDto.utilisateurId())
+                .orElseThrow(() -> new RuntimeException(
+                        "Utilisateur non trouvé avec l'ID : " + documentDto.utilisateurId()));
+
+        document.setUtilisateur(utilisateur);
+
+        Document savedDocument = documentRepository.save(document);
+
+        return documentMapper.toDto(savedDocument);
+    }
+
+    public List<DocumentDto> getDocumentsByMorceauId(Long morceauId) {
+        Morceau morceau = morceauRepository
+                .findById(morceauId)
+                .orElseThrow(() -> new RuntimeException("Morceau non trouvé avec l'ID : " + morceauId));
+
+        List<Document> documents = documentRepository.findByMorceau(morceau);
+
+        return documents
+                .stream()
+                .map(documentMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<DocumentDto> getDocumentsByUtilisateurId(Long utilisateurId) {
+        Utilisateur utilisateur = utilisateurRepository
+                .findById(utilisateurId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Utilisateur non trouvé avec l'ID : " + utilisateurId));
+
+        List<Document> documents = documentRepository.findByUtilisateur(
+                utilisateur);
+
+        return documents
+                .stream()
+                .map(documentMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<DocumentDto> getDocumentsByEnsembleId(Long ensembleId) {
+        List<Morceau> morceaux = morceauRepository.findByEnsembleId(ensembleId);
+
+        List<Document> documents = morceaux
+                .stream()
+                .flatMap(morceau -> documentRepository.findByMorceau(morceau).stream())
+                .collect(Collectors.toList());
+
+        return documents
+                .stream()
+                .map(documentMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public void delete(Long documentId, Long userId) {
+        Document document = documentRepository
+                .findById(documentId)
+                .orElseThrow(() -> new EntityNotFoundException("Document not found with id: " + documentId));
+
+        Morceau morceau = document.getMorceau();
+        Long ensembleId = morceau.getEnsemble().getId();
+
+        boolean adminOuModerateur = utilisateurEnsembleService.utilisateurAutorise(
+                userId,
+                ensembleId,
+                List.of("OWNER", "MODERATEUR"));
+
+        boolean createur = document.getUtilisateur().getId().equals(userId);
+
+        if (!adminOuModerateur && !createur) {
+            throw new AccessDeniedException(
+                    "Vous n'avez pas le droit de supprimer ce document");
+        }
+
+        documentRepository.delete(document);
+    }
+
+    public List<InstrumentDto> getInstrumentsByDocument(Long documentId) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException(
+                "Unimplemented method 'getInstrumentsByDocument'");
+    }
+
+    public DocumentDto addInstrument(Long documentId, Long instrumentId) {
+        Document document = documentRepository
+                .findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document non trouvé avec l'ID : " + documentId));
+
+        Instrument instrument = instrumentRepository
+                .findById(instrumentId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Instrument non trouvé avec l'ID : " + instrumentId));
+
+        document.addInstrument(instrument);
+        Document savedDocument = documentRepository.save(document);
+
+        return documentMapper.toDto(savedDocument);
+    }
+
+    public Resource getFile(Long documentId) throws IOException {
+
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Document non trouvé avec l'ID : " + documentId));
+
+        String fileName = document.getUrlFichier()
+                .replaceFirst("^/+", "");
+
+        Path path = Paths.get(fileName).normalize();
+
+        Path uploadDirectory = Paths.get("uploads").toAbsolutePath().normalize();
+        Path absolutePath = path.isAbsolute()
+                ? path
+                : Paths.get("").toAbsolutePath().resolve(path).normalize();
+
+        if (!absolutePath.startsWith(uploadDirectory)) {
+            throw new AccessDeniedException("Chemin de fichier non autorisé");
+        }
+
+        Resource resource = new UrlResource(absolutePath.toUri());
+
+        if (!resource.exists() || !resource.isReadable()) {
+            throw new EntityNotFoundException("Fichier introuvable");
+        }
+
+        return resource;
+    }
 }

@@ -16,10 +16,10 @@ import fr.afpa.choral_riff.services.NotificationService;
 import fr.afpa.choral_riff.services.UtilisateurEnsembleService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
-import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -250,51 +250,71 @@ public class InvitationController {
    * 3) Crée une notification finale pour informer l'utilisateur.
    */
 
+  // @PostMapping("/rattacher")
+  // public ResponseEntity<?> rattacherUtilisateurAvecNotif(
+  //   @RequestParam Long ensembleId,
+  //   @RequestParam Long utilisateurId,
+  //   @RequestParam(required = false) Long notificationId
+  // ) {
+  //   // <-- ajout
+
+  //   try {
+  //     // 1) rattacher
+  //     utilisateurEnsembleService.rattacherUtilisateurAEnsemble(
+  //       utilisateurId,
+  //       ensembleId
+  //     );
+
+  //     // 2) supprimer la notification DEMANDE (si fournie)
+  //     if (notificationId != null) {
+  //       notificationService.deleteNotification(notificationId);
+  //     }
+
+  //     // 3) créer la notification finale
+  //     Utilisateur utilisateur = utilisateurRepository
+  //       .findById(utilisateurId)
+  //       .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+  //     Ensemble ensemble = ensembleRepository
+  //       .findById(ensembleId)
+  //       .orElseThrow(() -> new RuntimeException("Ensemble introuvable"));
+
+  //     notificationService.notifyRattachement(utilisateur, ensemble);
+
+  //     // return ResponseEntity.ok(Map.of("message", "Vous êtes maintenant rattaché à
+  //     // l'ensemble."));
+  //     return ResponseEntity.ok(
+  //       Map.of(
+  //         "message",
+  //         "Vous êtes maintenant rattaché à l'ensemble \"" +
+  //           ensemble.getNom() +
+  //           "\"."
+  //       )
+  //     );
+  //   } catch (RuntimeException e) {
+  //     return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+  //   }
+  // }
+
+
+
   @PostMapping("/rattacher")
-  public ResponseEntity<?> rattacherUtilisateurAvecNotif(
+public ResponseEntity<?> rattacherUtilisateurAvecNotif(
     @RequestParam Long ensembleId,
     @RequestParam Long utilisateurId,
     @RequestParam(required = false) Long notificationId
-  ) {
-    // <-- ajout
-
+) {
     try {
-      // 1) rattacher
-      utilisateurEnsembleService.rattacherUtilisateurAEnsemble(
-        utilisateurId,
-        ensembleId
-      );
+        String message = invitationService.rattacherUtilisateurAvecNotif(
+            ensembleId, utilisateurId, notificationId
+        );
 
-      // 2) supprimer la notification DEMANDE (si fournie)
-      if (notificationId != null) {
-        notificationService.deleteNotification(notificationId);
-      }
+        return ResponseEntity.ok(Map.of("message", message));
 
-      // 3) créer la notification finale
-      Utilisateur utilisateur = utilisateurRepository
-        .findById(utilisateurId)
-        .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-
-      Ensemble ensemble = ensembleRepository
-        .findById(ensembleId)
-        .orElseThrow(() -> new RuntimeException("Ensemble introuvable"));
-
-      notificationService.notifyRattachement(utilisateur, ensemble);
-
-      // return ResponseEntity.ok(Map.of("message", "Vous êtes maintenant rattaché à
-      // l'ensemble."));
-      return ResponseEntity.ok(
-        Map.of(
-          "message",
-          "Vous êtes maintenant rattaché à l'ensemble \"" +
-            ensemble.getNom() +
-            "\"."
-        )
-      );
     } catch (RuntimeException e) {
-      return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
     }
-  }
+}
 
   /**
    * Demande le rattachement d'un utilisateur à un ensemble.
@@ -302,45 +322,67 @@ public class InvitationController {
    * Crée ensuite une notification de demande de rattachement.
    */
 
+  // @PostMapping("/demanderRattachement")
+  // public ResponseEntity<?> demanderRattachement(
+  //   @RequestParam Long ensembleId,
+  //   @RequestParam Long utilisateurId
+  // ) {
+  //   try {
+  //     boolean dejaMembre = utilisateurEnsembleService.estMembreDeLensemble(
+  //       utilisateurId,
+  //       ensembleId
+  //     );
+
+  //     if (dejaMembre) {
+  //       return ResponseEntity.badRequest().body(
+  //         Map.of("error", "L'utilisateur fait déjà partie de cet ensemble.")
+  //       );
+  //     }
+
+  //     // Récupère l'ensemble pour inclure son nom dans la notification
+  //     Ensemble ensemble = ensembleRepository
+  //       .findById(ensembleId)
+  //       .orElseThrow(() -> new RuntimeException("Ensemble introuvable"));
+
+  //     // Crée la notification de demande de rattachement
+  //     notificationService.createNotification(
+  //       utilisateurId,
+  //       "DEMANDE_RATTACHEMENT",
+  //       "L'administrateur souhaite vous rattacher à l’ensemble \"" +
+  //         ensemble.getNom() +
+  //         "\".",
+  //       ensembleId // <-- passer ensembleId ici
+  //     );
+
+  //     return ResponseEntity.ok(
+  //       Map.of("message", "Demande de rattachement envoyée à l'utilisateur.")
+  //     );
+  //   } catch (RuntimeException e) {
+  //     return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+  //   }
+  // }
+
+
+
+
+
+
   @PostMapping("/demanderRattachement")
-  public ResponseEntity<?> demanderRattachement(
+public ResponseEntity<?> demanderRattachement(
     @RequestParam Long ensembleId,
     @RequestParam Long utilisateurId
-  ) {
+) {
     try {
-      boolean dejaMembre = utilisateurEnsembleService.estMembreDeLensemble(
-        utilisateurId,
-        ensembleId
-      );
-
-      if (dejaMembre) {
-        return ResponseEntity.badRequest().body(
-          Map.of("error", "L'utilisateur fait déjà partie de cet ensemble.")
+        String message = invitationService.demanderRattachement(
+            ensembleId, utilisateurId
         );
-      }
 
-      // Récupère l'ensemble pour inclure son nom dans la notification
-      Ensemble ensemble = ensembleRepository
-        .findById(ensembleId)
-        .orElseThrow(() -> new RuntimeException("Ensemble introuvable"));
+        return ResponseEntity.ok(Map.of("message", message));
 
-      // Crée la notification de demande de rattachement
-      notificationService.createNotification(
-        utilisateurId,
-        "DEMANDE_RATTACHEMENT",
-        "L'administrateur souhaite vous rattacher à l’ensemble \"" +
-          ensemble.getNom() +
-          "\".",
-        ensembleId // <-- passer ensembleId ici
-      );
-
-      return ResponseEntity.ok(
-        Map.of("message", "Demande de rattachement envoyée à l'utilisateur.")
-      );
     } catch (RuntimeException e) {
-      return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
     }
-  }
+}
 
   /**
    * Refuse une demande de rattachement.

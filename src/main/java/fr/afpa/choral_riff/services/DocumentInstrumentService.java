@@ -7,7 +7,7 @@ import fr.afpa.choral_riff.entity.Utilisateur;
 import fr.afpa.choral_riff.mapper.InstrumentMapper;
 import fr.afpa.choral_riff.repositories.DocumentRepository;
 import fr.afpa.choral_riff.repositories.InstrumentRepository;
-import fr.afpa.choral_riff.services.NotificationService;
+import fr.afpa.choral_riff.repositories.UtilisateurRepository;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,68 +21,128 @@ public class DocumentInstrumentService {
   private final InstrumentRepository instrumentRepository;
   private final UtilisateurEnsembleService utilisateurEnsembleService;
   private final NotificationService notificationService;
+  private final UtilisateurRepository utilisateurRepository;
 
-  public DocumentInstrumentService(
+ public DocumentInstrumentService(
     DocumentRepository documentRepository,
     InstrumentRepository instrumentRepository,
+    UtilisateurRepository utilisateurRepository,
     NotificationService notificationService,
-    UtilisateurEnsembleService utilisateurEnsembleService // 👈 ajouté
-  ) {
+    UtilisateurEnsembleService utilisateurEnsembleService
+) {
     this.documentRepository = documentRepository;
     this.instrumentRepository = instrumentRepository;
+    this.utilisateurRepository = utilisateurRepository;
     this.notificationService = notificationService;
-    this.utilisateurEnsembleService = utilisateurEnsembleService; // 👈 initialisation
-  }
+    this.utilisateurEnsembleService = utilisateurEnsembleService;
+}
 
   /**
    * Ajoute un instrument à un document
    */
 
+  // public void addInstrumentToDocument(
+  //   Long documentId,
+  //   Long instrumentId,
+  //   Utilisateur utilisateur
+  // ) {
+  //   Document document = documentRepository
+  //     .findById(documentId)
+  //     .orElseThrow(() ->
+  //       new RuntimeException("Document non trouvé : " + documentId)
+  //     );
+
+  //   // Vérification : l'utilisateur est le créateur du document OU a un rôle élevé
+  //   boolean isCreateur = document
+  //     .getUtilisateur()
+  //     .getId()
+  //     .equals(utilisateur.getId());
+
+  //   // Si tu as besoin d’admins/modérateurs dans l’ensemble du morceau
+  //   Long ensembleId = document.getMorceau().getEnsemble().getId();
+  //   boolean adminOuModerateur = utilisateurEnsembleService.utilisateurAutorise(
+  //     utilisateur.getId(),
+  //     ensembleId,
+  //     List.of("OWNER", "MODERATEUR")
+  //   );
+
+  //   if (!isCreateur && !adminOuModerateur) {
+  //     throw new AccessDeniedException(
+  //       "Vous n'avez pas le droit d'ajouter un instrument à ce document"
+  //     );
+  //   }
+
+  //   Instrument instrument = instrumentRepository
+  //     .findById(instrumentId)
+  //     .orElseThrow(() -> new RuntimeException("Instrument non trouvé"));
+
+  //   document.addInstrument(instrument);
+  //   documentRepository.save(document);
+
+  //   // Notification (optionnel)
+  //   notificationService.notifierInstrumentAjoute(
+  //     utilisateur,
+  //     instrument.getNom(),
+  //     documentId
+  //   );
+  // }
+
+
+
   public void addInstrumentToDocument(
     Long documentId,
     Long instrumentId,
-    Utilisateur utilisateur
-  ) {
+    Long userId
+) {
+    // On récupère l'utilisateur à partir de son ID
+    Utilisateur utilisateur = utilisateurRepository
+        .findById(userId)
+        .orElseThrow(() ->
+            new RuntimeException("Utilisateur non trouvé : " + userId)
+        );
+
     Document document = documentRepository
-      .findById(documentId)
-      .orElseThrow(() ->
-        new RuntimeException("Document non trouvé : " + documentId)
-      );
+        .findById(documentId)
+        .orElseThrow(() ->
+            new RuntimeException("Document non trouvé : " + documentId)
+        );
 
     // Vérification : l'utilisateur est le créateur du document OU a un rôle élevé
     boolean isCreateur = document
-      .getUtilisateur()
-      .getId()
-      .equals(utilisateur.getId());
+        .getUtilisateur()
+        .getId()
+        .equals(utilisateur.getId());
 
-    // Si tu as besoin d’admins/modérateurs dans l’ensemble du morceau
     Long ensembleId = document.getMorceau().getEnsemble().getId();
+
     boolean adminOuModerateur = utilisateurEnsembleService.utilisateurAutorise(
-      utilisateur.getId(),
-      ensembleId,
-      List.of("OWNER", "MODERATEUR")
+        utilisateur.getId(),
+        ensembleId,
+        List.of("OWNER", "MODERATEUR")
     );
 
     if (!isCreateur && !adminOuModerateur) {
-      throw new AccessDeniedException(
-        "Vous n'avez pas le droit d'ajouter un instrument à ce document"
-      );
+        throw new AccessDeniedException(
+            "Vous n'avez pas le droit d'ajouter un instrument à ce document"
+        );
     }
 
     Instrument instrument = instrumentRepository
-      .findById(instrumentId)
-      .orElseThrow(() -> new RuntimeException("Instrument non trouvé"));
+        .findById(instrumentId)
+        .orElseThrow(() ->
+            new RuntimeException("Instrument non trouvé : " + instrumentId)
+        );
 
     document.addInstrument(instrument);
     documentRepository.save(document);
 
-    // Notification (optionnel)
+    // Notification
     notificationService.notifierInstrumentAjoute(
-      utilisateur,
-      instrument.getNom(),
-      documentId
+        utilisateur,
+        instrument.getNom(),
+        documentId
     );
-  }
+}
 
   /**
    * Récupère les instruments liés à un document sous forme de DTO

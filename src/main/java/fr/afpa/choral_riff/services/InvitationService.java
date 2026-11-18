@@ -38,25 +38,26 @@ public class InvitationService {
   private final CreateInvitationMapper createInvitationMapper;
   private final UtilisateurEnsembleRepository utilisateurEnsembleRepository;
   private final UtilisateurRepository utilisateurRepository;
+  private final UtilisateurEnsembleService utilisateurEnsembleService;
+ 
 
   private static final Logger logger = LoggerFactory.getLogger(
-    InvitationService.class
-  );
+      InvitationService.class);
   private NotificationRepository notificationRepository; // <-- ajoute cette ligne !
 
   private final NotificationService notificationService;
 
   public InvitationService(
-    InvitationRepository invitationRepository,
-    InvitationMapper invitationMapper,
-    EnsembleRepository ensembleRepository,
-    UtilisateurRepository utilisateurRepository,
-    MailService mailService,
-    CreateInvitationMapper createInvitationMapper,
-    UtilisateurEnsembleRepository utilisateurEnsembleRepository,
-    NotificationRepository notificationRepository, // <-- ajouter ici
-    NotificationService notificationService
-  ) {
+      InvitationRepository invitationRepository,
+      InvitationMapper invitationMapper,
+      EnsembleRepository ensembleRepository,
+      UtilisateurRepository utilisateurRepository,
+      MailService mailService,
+      CreateInvitationMapper createInvitationMapper,
+      UtilisateurEnsembleRepository utilisateurEnsembleRepository,
+      NotificationRepository notificationRepository, 
+      UtilisateurEnsembleService utilisateurEnsembleService,// <-- ajouter ici
+      NotificationService notificationService) {
     this.invitationRepository = invitationRepository;
     this.invitationMapper = invitationMapper;
     this.ensembleRepository = ensembleRepository;
@@ -66,30 +67,28 @@ public class InvitationService {
     this.utilisateurRepository = utilisateurRepository;
     this.notificationRepository = notificationRepository; // <-- affecter ici
     this.notificationService = notificationService;
+    this.utilisateurEnsembleService = utilisateurEnsembleService;
   }
 
   // === Récupérer toutes les invitations pour un ensemble ===
   public List<InvitationDTO> getAllByEnsembleId(Long ensembleId) {
     return invitationRepository
-      .findByEnsembleId(ensembleId)
-      .stream()
-      .map(invitationMapper::toDto)
-      .collect(Collectors.toList());
+        .findByEnsembleId(ensembleId)
+        .stream()
+        .map(invitationMapper::toDto)
+        .collect(Collectors.toList());
   }
 
   public InvitationDTO creerInvitation(CreateInvitationDTO dto) {
     Optional<Utilisateur> optUser = utilisateurRepository.findByEmail(
-      dto.getEmailInvite()
-    );
+        dto.getEmailInvite());
     Utilisateur utilisateur = optUser.orElse(null);
 
     if (utilisateur != null) {
       // Vérifier si déjà membre de cet ensemble
-      boolean dejaMembre =
-        utilisateurEnsembleRepository.existsByUtilisateurIdAndEnsembleId(
+      boolean dejaMembre = utilisateurEnsembleRepository.existsByUtilisateurIdAndEnsembleId(
           utilisateur.getId(),
-          dto.getEnsembleId()
-        );
+          dto.getEnsembleId());
 
       InvitationDTO dtoResult = new InvitationDTO();
       dtoResult.setExistant(true);
@@ -100,8 +99,8 @@ public class InvitationService {
 
     // Sinon, créer l’invitation pour un nouvel utilisateur
     Ensemble ensemble = ensembleRepository
-      .findById(dto.getEnsembleId())
-      .orElseThrow(() -> new EntityNotFoundException("Ensemble introuvable"));
+        .findById(dto.getEnsembleId())
+        .orElseThrow(() -> new EntityNotFoundException("Ensemble introuvable"));
 
     Invitation invitation = new Invitation();
     invitation.setEmailInvite(dto.getEmailInvite());
@@ -113,9 +112,8 @@ public class InvitationService {
 
     invitationRepository.save(invitation);
     mailService.sendInvitationEmail(
-      invitation.getEmailInvite(),
-      invitation.getToken()
-    );
+        invitation.getEmailInvite(),
+        invitation.getToken());
 
     return invitationMapper.toDto(invitation);
   }
@@ -123,10 +121,8 @@ public class InvitationService {
   // === Accepter une invitation via token ===
   public InvitationDTO accept(String token) {
     Invitation invitation = invitationRepository
-      .findByToken(token)
-      .orElseThrow(() ->
-        new RuntimeException("Invitation non trouvée avec ce token.")
-      );
+        .findByToken(token)
+        .orElseThrow(() -> new RuntimeException("Invitation non trouvée avec ce token."));
 
     invitation.setEtat(StatusInvitation.ACCEPTEE);
     return invitationMapper.toDto(invitationRepository.save(invitation));
@@ -135,10 +131,8 @@ public class InvitationService {
   // === Refuser une invitation via token ===
   public InvitationDTO refuse(String token) {
     Invitation invitation = invitationRepository
-      .findByToken(token)
-      .orElseThrow(() ->
-        new RuntimeException("Invitation non trouvée avec ce token.")
-      );
+        .findByToken(token)
+        .orElseThrow(() -> new RuntimeException("Invitation non trouvée avec ce token."));
 
     invitation.setEtat(StatusInvitation.REFUSEE);
     return invitationMapper.toDto(invitationRepository.save(invitation));
@@ -155,10 +149,8 @@ public class InvitationService {
   // === Récupérer une invitation par token (utile pour lien dans l'email) ===
   public InvitationDTO getByToken(String token) {
     Invitation invitation = invitationRepository
-      .findByToken(token)
-      .orElseThrow(() ->
-        new RuntimeException("Invitation non trouvée avec ce token.")
-      );
+        .findByToken(token)
+        .orElseThrow(() -> new RuntimeException("Invitation non trouvée avec ce token."));
     return invitationMapper.toDto(invitation);
   }
 
@@ -233,47 +225,39 @@ public class InvitationService {
 
   @Transactional
   public InvitationDTO rattacherUtilisateurApresInscription(
-    Utilisateur nouvelUtilisateur,
-    Invitation invitation
-  ) {
+      Utilisateur nouvelUtilisateur,
+      Invitation invitation) {
     // --- Étape 1 : vérifier si le token a déjà été utilisé ---
     if (invitation.getDateUtilisation() != null) {
       throw new RuntimeException("Cette invitation a déjà été utilisée.");
     }
     // Vérifier que l'e-mail correspond à l'invitation 23/10
-    if (
-      nouvelUtilisateur == null ||
-      nouvelUtilisateur.getEmail() == null ||
-      invitation.getEmailInvite() == null ||
-      !nouvelUtilisateur
-        .getEmail()
-        .trim()
-        .equalsIgnoreCase(invitation.getEmailInvite().trim())
-    ) {
+    if (nouvelUtilisateur == null ||
+        nouvelUtilisateur.getEmail() == null ||
+        invitation.getEmailInvite() == null ||
+        !nouvelUtilisateur
+            .getEmail()
+            .trim()
+            .equalsIgnoreCase(invitation.getEmailInvite().trim())) {
       throw new IllegalArgumentException(
-        "L'adresse e-mail ne correspond pas à l'invitation."
-      );
+          "L'adresse e-mail ne correspond pas à l'invitation.");
     }
 
     // --- Étape 2 : vérifier si le token est expiré ---
-    if (
-      invitation.getDateExpiration() != null &&
-      invitation.getDateExpiration().isBefore(LocalDateTime.now())
-    ) {
+    if (invitation.getDateExpiration() != null &&
+        invitation.getDateExpiration().isBefore(LocalDateTime.now())) {
       throw new RuntimeException("Le lien d'invitation a expiré.");
     }
 
     // Vérifier si l'utilisateur existe déjà
     Utilisateur utilisateurFinal = utilisateurRepository
-      .findByEmail(invitation.getEmailInvite())
-      .orElse(nouvelUtilisateur);
+        .findByEmail(invitation.getEmailInvite())
+        .orElse(nouvelUtilisateur);
 
     // Vérifier si l'utilisateur est déjà membre de cet ensemble
-    boolean dejaMembre =
-      utilisateurEnsembleRepository.existsByUtilisateurIdAndEnsembleId(
+    boolean dejaMembre = utilisateurEnsembleRepository.existsByUtilisateurIdAndEnsembleId(
         utilisateurFinal.getId(),
-        invitation.getEnsemble().getId()
-      );
+        invitation.getEnsemble().getId());
 
     InvitationDTO dto = invitationMapper.toDto(invitation);
 
@@ -299,11 +283,10 @@ public class InvitationService {
 
     // --- Étape 4 : créer la notification ---
     notificationService.createNotification(
-      utilisateurFinal.getId(),
-      "INVITATION",
-      "Vous avez été ajouté à l'ensemble " + invitation.getEnsemble().getNom(),
-      invitation.getId()
-    );
+        utilisateurFinal.getId(),
+        "INVITATION",
+        "Vous avez été ajouté à l'ensemble " + invitation.getEnsemble().getNom(),
+        invitation.getId());
 
     // --- Étape 5 : ajouter l'utilisateur à l'ensemble ---
     UtilisateurEnsemble ue = new UtilisateurEnsemble();
@@ -319,16 +302,12 @@ public class InvitationService {
 
   public Invitation getByTokenEntity(String token) {
     Invitation invitation = invitationRepository
-      .findByToken(token)
-      .orElseThrow(() ->
-        new RuntimeException("Invitation non trouvée avec ce token.")
-      );
+        .findByToken(token)
+        .orElseThrow(() -> new RuntimeException("Invitation non trouvée avec ce token."));
 
     // Vérifier expiration
-    if (
-      invitation.getDateExpiration() != null &&
-      invitation.getDateExpiration().isBefore(LocalDateTime.now())
-    ) {
+    if (invitation.getDateExpiration() != null &&
+        invitation.getDateExpiration().isBefore(LocalDateTime.now())) {
       throw new RuntimeException("Le lien d'invitation a expiré.");
     }
 
@@ -338,32 +317,86 @@ public class InvitationService {
   // --- NOUVELLE METHODE POUR RECUPERER PAR ID ---
   public InvitationDTO getById(Long id) {
     Invitation invitation = invitationRepository
-      .findById(id)
-      .orElseThrow(() -> new EntityNotFoundException("Invitation non trouvée"));
+        .findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("Invitation non trouvée"));
 
     InvitationDTO dto = new InvitationDTO();
     dto.setId(invitation.getId());
     dto.setEmailInvite(invitation.getEmailInvite());
     dto.setToken(invitation.getToken());
     dto.setUtilisateurId(
-      invitation.getUtilisateur() != null
-        ? invitation.getUtilisateur().getId()
-        : null
-    );
+        invitation.getUtilisateur() != null
+            ? invitation.getUtilisateur().getId()
+            : null);
     dto.setUtilisateurNom(
-      invitation.getUtilisateur() != null
-        ? invitation.getUtilisateur().getNom()
-        : null
-    );
+        invitation.getUtilisateur() != null
+            ? invitation.getUtilisateur().getNom()
+            : null);
     dto.setEnsembleId(invitation.getEnsemble().getId());
     dto.setEnsembleNom(invitation.getEnsemble().getNom());
     dto.setEtat(
-      invitation.getEtat() != null ? invitation.getEtat().name() : null
-    );
+        invitation.getEtat() != null ? invitation.getEtat().name() : null);
     dto.setDateEnvoi(invitation.getDateEnvoi());
     dto.setExistant(invitation.getUtilisateur() != null);
     dto.setDejaMembre(invitation.getEtat() == StatusInvitation.ACCEPTEE);
 
     return dto;
   }
+
+  @Transactional
+public String rattacherUtilisateurAvecNotif(
+    Long ensembleId,
+    Long utilisateurId,
+    Long notificationId
+) {
+    utilisateurEnsembleService.rattacherUtilisateurAEnsemble(
+        utilisateurId, ensembleId
+    );
+
+    if (notificationId != null) {
+        notificationService.deleteNotification(notificationId);
+    }
+
+    Utilisateur utilisateur = utilisateurRepository.findById(utilisateurId)
+        .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+    Ensemble ensemble = ensembleRepository.findById(ensembleId)
+        .orElseThrow(() -> new RuntimeException("Ensemble introuvable"));
+
+    notificationService.notifyRattachement(utilisateur, ensemble);
+
+    return "Vous êtes maintenant rattaché à l'ensemble \"" + ensemble.getNom() + "\".";
+}
+
+
+
+
+
+
+
+
+public String demanderRattachement(Long ensembleId, Long utilisateurId) {
+    boolean dejaMembre = utilisateurEnsembleService.estMembreDeLensemble(
+        utilisateurId, ensembleId
+    );
+
+    if (dejaMembre) {
+        throw new RuntimeException(
+            "L'utilisateur fait déjà partie de cet ensemble."
+        );
+    }
+
+    Ensemble ensemble = ensembleRepository.findById(ensembleId)
+        .orElseThrow(() -> new RuntimeException("Ensemble introuvable"));
+
+    notificationService.createNotification(
+        utilisateurId,
+        "DEMANDE_RATTACHEMENT",
+        "L'administrateur souhaite vous rattacher à l’ensemble \"" + ensemble.getNom() + "\".",
+        ensembleId
+    );
+
+    return "Demande de rattachement envoyée à l'utilisateur.";
+}
+
 }

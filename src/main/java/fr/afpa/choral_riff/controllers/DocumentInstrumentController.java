@@ -1,9 +1,9 @@
 package fr.afpa.choral_riff.controllers;
 
 import fr.afpa.choral_riff.dto.InstrumentDto;
-import fr.afpa.choral_riff.entity.Utilisateur;
+
 import fr.afpa.choral_riff.mapper.InstrumentMapper;
-import fr.afpa.choral_riff.repositories.UtilisateurRepository;
+
 import fr.afpa.choral_riff.services.DocumentInstrumentService;
 import java.util.Set;
 import org.springframework.http.ResponseEntity;
@@ -15,16 +15,16 @@ public class DocumentInstrumentController {
 
   private final DocumentInstrumentService documentInstrumentService;
   private final InstrumentMapper instrumentMapper;
-  private final UtilisateurRepository utilisateurRepository;
+
 
   public DocumentInstrumentController(
     DocumentInstrumentService documentInstrumentService,
-    InstrumentMapper instrumentMapper,
-    UtilisateurRepository utilisateurRepository
+    InstrumentMapper instrumentMapper
+  
   ) {
     this.documentInstrumentService = documentInstrumentService;
     this.instrumentMapper = instrumentMapper;
-    this.utilisateurRepository = utilisateurRepository;
+
   }
 
   /**
@@ -54,27 +54,43 @@ public class DocumentInstrumentController {
 
   //     return ResponseEntity.ok().build();
   // }
+  // @PostMapping("/add")
+  // public ResponseEntity<Void> addInstrumentToDocument(
+  //   @RequestParam Long documentId,
+  //   @RequestParam Long instrumentId,
+  //   @RequestParam Long userId // <-- ID de l'utilisateur connecté
+  // ) {
+  //   Utilisateur utilisateur = utilisateurRepository
+  //     .findById(userId)
+  //     .orElseThrow(() ->
+  //       new RuntimeException("Utilisateur non trouvé avec l'ID : " + userId)
+  //     );
+
+  //   // Appel du service qui va vérifier si l'utilisateur peut ajouter l'instrument
+  //   documentInstrumentService.addInstrumentToDocument(
+  //     documentId,
+  //     instrumentId,
+  //     utilisateur
+  //   );
+
+  //   return ResponseEntity.ok().build();
+  // }
+
+
   @PostMapping("/add")
-  public ResponseEntity<Void> addInstrumentToDocument(
+public ResponseEntity<Void> addInstrumentToDocument(
     @RequestParam Long documentId,
     @RequestParam Long instrumentId,
-    @RequestParam Long userId // <-- ID de l'utilisateur connecté
-  ) {
-    Utilisateur utilisateur = utilisateurRepository
-      .findById(userId)
-      .orElseThrow(() ->
-        new RuntimeException("Utilisateur non trouvé avec l'ID : " + userId)
-      );
-
-    // Appel du service qui va vérifier si l'utilisateur peut ajouter l'instrument
+    @RequestParam Long userId
+) {
     documentInstrumentService.addInstrumentToDocument(
-      documentId,
-      instrumentId,
-      utilisateur
+        documentId,
+        instrumentId,
+        userId
     );
 
     return ResponseEntity.ok().build();
-  }
+}
 
   /**
    * Supprimer un instrument d’un document
